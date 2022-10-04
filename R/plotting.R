@@ -34,6 +34,8 @@
 #' regulated genes is displayed.
 #' @param cust_theme custom ggplot theme.
 #' @param point_alpha plot point alpha.
+#' @param point_hjitter height jittering of the points, defaults to 0.
+#' @param point_wjitter width jittering of the points, defaults to 0.
 #' @return a ggplot object.
 #' @export
 
@@ -58,7 +60,9 @@
                            plot_subtitle = NULL,
                            plot_tag = NULL,
                            cust_theme = microViz::theme_micro(),
-                           point_alpha = 0.8) {
+                           point_alpha = 0.8,
+                           point_hjitter = 0,
+                           point_wjitter = 0) {
 
     ## entry control
 
@@ -116,7 +120,7 @@
 
     if(is.null(plot_tag)) {
 
-      n_genes <- dplyr::count(plot_tbl, regulation)
+      n_genes <- dplyr::count(plot_tbl, regulation, .drop = FALSE)
 
       plot_tag <- paste0('upregulated: n = ', n_genes$n[1],
                          ', downregulated: n = ', n_genes$n[2])
@@ -131,7 +135,9 @@
                                          fill = regulation)) +
       ggplot2::geom_point(size = 2,
                           shape = 21,
-                          alpha = point_alpha) +
+                          alpha = point_alpha,
+                          position = ggplot2::position_jitter(width = point_wjitter,
+                                                              height = point_hjitter)) +
       ggplot2::geom_hline(yintercept = -log10(signif_level), lty = 2) +
       ggplot2::scale_fill_manual(values = fill_scale,
                                  name = fill_title) +
@@ -332,12 +338,12 @@
 
   }
 
-# Top regulated Forest plot ------
+# General Forest plot ------
 
-#' Draws regulation statistics for top regulated genes.
+#' Draw regulation statistics for selected genes.
 #'
 #' @description Draws a Forest plot with the regulation estimates and,
-#' optionally confidence intervals for the n most strongly regulated items.
+#' optionally confidence intervals for all items presente in a data frame.
 #' @param data a data frame.
 #' @param regulation_variable name of the variable storing the regulation/effect
 #' size data.
@@ -348,8 +354,6 @@
 #' significant effects, 0 difference versus control by default.
 #' @param lower_ci_variable variable storing the lower CI values.
 #' @param upper_ci_variable variable storing the upper CI values.
-#' @param top_regulated top n regulated genes/objects to be presented in
-#' the plot.
 #' @param fill_scale regulation colors, a vector of three elements: for
 #' upregulated, downregulated and non-significant items, respectively.
 #' @param x_lab x axis title.
@@ -358,6 +362,8 @@
 #' @param plot_subtitle plot subtitle.
 #' @param plot_tag plot tag text.
 #' @param cust_theme custom ggplot theme.
+#' @param signif_digits significant digits used for rounding of the
+#' displayed numeric variables.
 #' @param show_txt logical, label the points with the estimate value?
 #' @param show_ci_txt logical, should the CI be included in the text label?
 #' @param txt_size text size.
@@ -366,30 +372,29 @@
 #' @return a ggplot object.
 #' @export
 
-  plot_top <- function(data,
-                       regulation_variable,
-                       label_variable,
-                       p_variable,
-                       signif_level = 0.05,
-                       regulation_level = 0,
-                       lower_ci_variable = NULL,
-                       upper_ci_variable = NULL,
-                       top_regulated = 10,
-                       fill_scale = c(upregulated = 'firebrick',
-                                      downregulated = 'steelblue',
-                                      ns = 'gray60'),
-                       fill_title = '',
-                       plot_title = NULL,
-                       plot_subtitle = NULL,
-                       plot_tag = NULL,
-                       x_lab = 'Regulation',
-                       cust_theme = microViz::theme_micro(),
-                       show_txt = FALSE,
-                       show_ci_txt = FALSE,
-                       txt_size = 2.75,
-                       txt_hjust = 0.5,
-                       txt_vjust = -0.8) {
-
+  plot_forest <- function(data,
+                          regulation_variable,
+                          label_variable,
+                          p_variable,
+                          signif_level = 0.05,
+                          regulation_level = 0,
+                          lower_ci_variable = NULL,
+                          upper_ci_variable = NULL,
+                          fill_scale = c(upregulated = 'firebrick',
+                                         downregulated = 'steelblue',
+                                         ns = 'gray60'),
+                          fill_title = '',
+                          plot_title = NULL,
+                          plot_subtitle = NULL,
+                          plot_tag = NULL,
+                          x_lab = 'Regulation',
+                          cust_theme = microViz::theme_micro(),
+                          signif_digits = 2,
+                          show_txt = FALSE,
+                          show_ci_txt = FALSE,
+                          txt_size = 2.75,
+                          txt_hjust = 0.5,
+                          txt_vjust = -0.8) {
 
     ## entry control
 
@@ -414,44 +419,68 @@
 
     }
 
-    top_regulated <- as.integer(top_regulated)
-
     stopifnot(is.logical(show_txt))
     stopifnot(is.logical(show_ci_txt))
+    stopifnot(is.numeric(signif_level))
+    stopifnot(is.numeric(regulation_level))
+    stopifnot(is.numeric(txt_size))
+    stopifnot(is.numeric(txt_hjust))
+    stopifnot(is.numeric(txt_vjust))
+
+    if(!is.null(lower_ci_variable)) {
+
+      if(!lower_ci_variable %in% names(data)) {
+
+        stop('Lower and upper CI variables absent from the data.',
+             call. = FALSE)
+
+      }
+
+      stopifnot(is.numeric(data[[lower_ci_variable]]))
+
+    }
+
+    if(!is.null(upper_ci_variable)) {
+
+      if(!upper_ci_variable %in% names(data)) {
+
+        stop('Lower and upper CI variables absent from the data.',
+             call. = FALSE)
+
+      }
+
+      stopifnot(is.numeric(data[[upper_ci_variable]]))
+
+    }
+
+    stopifnot(is.numeric(data[[regulation_variable]]))
+    stopifnot(is.numeric(data[[p_variable]]))
 
     ## plotting table
 
-    plot_tbl <- dplyr::mutate(data,
-                              significant = ifelse(.data[[p_variable]] < signif_level,
-                                                   'yes', 'no'),
-                              regulation = ifelse(significant == 'no',
-                                                  'ns',
-                                                  ifelse(.data[[regulation_variable]] > regulation_level,
-                                                         'upregulated',
-                                                         ifelse(.data[[regulation_variable]] < -regulation_level,
-                                                                'downregulated', 'ns'))),
-                              regulation = factor(regulation, c('upregulated',
-                                                                'downregulated',
-                                                                'ns')),
-                              reg_sign = ifelse(.data[[regulation_variable]] > 0,
-                                                'up', 'down'))
-
-    plot_tbl <- purrr::map(c('up', 'down'),
-                           ~dplyr::filter(plot_tbl, reg_sign == .x))
-
-    plot_tbl <- purrr::map_dfr(plot_tbl,
-                               ~dplyr::top_n(.x,
-                                             n = top_regulated,
-                                             abs(.data[[regulation_variable]])))
+    plot_tbl <-
+      dplyr::mutate(data,
+                    significant = ifelse(.data[[p_variable]] < signif_level,
+                                         'yes', 'no'),
+                    regulation = ifelse(significant == 'no',
+                                        'ns',
+                                        ifelse(.data[[regulation_variable]] > regulation_level,
+                                               'upregulated',
+                                               ifelse(.data[[regulation_variable]] < -regulation_level,
+                                                      'downregulated', 'ns'))),
+                    regulation = factor(regulation, c('upregulated',
+                                                      'downregulated',
+                                                      'ns')))
 
     ## plotting
 
-    forest <- ggplot2::ggplot(plot_tbl,
-                              ggplot2::aes(x = .data[[regulation_variable]],
-                                           y = reorder(.data[[label_variable]],
-                                                       .data[[regulation_variable]]),
-                                           color = regulation,
-                                           fill = regulation)) +
+    forest <-
+      ggplot2::ggplot(plot_tbl,
+                      ggplot2::aes(x = .data[[regulation_variable]],
+                                   y = reorder(.data[[label_variable]],
+                                               .data[[regulation_variable]]),
+                                   color = regulation,
+                                   fill = regulation)) +
       ggplot2::scale_fill_manual(values = fill_scale,
                                  name = fill_title) +
       ggplot2::scale_color_manual(values = fill_scale,
@@ -487,14 +516,18 @@
     }
 
     desc_tbl <- dplyr::mutate(plot_tbl,
-                              plot_lab = signif(.data[[regulation_variable]], 2))
+                              plot_lab = signif(.data[[regulation_variable]],
+                                                signif_digits))
 
     if(show_ci_txt & all(!is.null(c(lower_ci_variable, upper_ci_variable)))) {
 
-      desc_tbl <- dplyr::mutate(desc_tbl,
-                                plot_lab = paste0(plot_lab,
-                                                  ' [', signif(.data[[lower_ci_variable]], 2),
-                                                  ' - ', signif(.data[[upper_ci_variable]], 2), ']'))
+      desc_tbl <-
+        dplyr::mutate(desc_tbl,
+                      plot_lab = paste0(plot_lab,
+                                        ' [', signif(.data[[lower_ci_variable]],
+                                                     signif_digits),
+                                        ' - ', signif(.data[[upper_ci_variable]],
+                                                      signif_digits), ']'))
 
     }
 
@@ -505,6 +538,89 @@
                          hjust = txt_hjust,
                          vjust = txt_vjust)
 
+    return(forest)
+
+  }
+
+# Top regulated Forest plot ------
+
+#' Draw regulation statistics for top regulated genes.
+#'
+#' @description Draws a Forest plot with the regulation estimates and,
+#' optionally confidence intervals for the n most strongly regulated items.
+#' @inheritParams plot_forest
+#' @param top_regulated top n regulated genes/objects to be presented in
+#' the plot.
+#' @return a ggplot object.
+#' @export
+
+  plot_top <- function(data,
+                       regulation_variable,
+                       label_variable,
+                       p_variable,
+                       signif_level = 0.05,
+                       regulation_level = 0,
+                       lower_ci_variable = NULL,
+                       upper_ci_variable = NULL,
+                       top_regulated = 10,
+                       fill_scale = c(upregulated = 'firebrick',
+                                      downregulated = 'steelblue',
+                                      ns = 'gray60'),
+                       fill_title = '',
+                       plot_title = NULL,
+                       plot_subtitle = NULL,
+                       plot_tag = NULL,
+                       x_lab = 'Regulation',
+                       cust_theme = microViz::theme_micro(),
+                       signif_digits = 2,
+                       show_txt = FALSE,
+                       show_ci_txt = FALSE,
+                       txt_size = 2.75,
+                       txt_hjust = 0.5,
+                       txt_vjust = -0.8) {
+
+
+    ## plotting data
+
+    top_regulated <- as.integer(top_regulated)
+
+    plot_tbl <-
+      dplyr::mutate(data,
+                    reg_sign = ifelse(.data[[regulation_variable]] > 0,
+                                      'up', 'down'),
+                    reg_sign = factor(reg_sign, c('up', 'down')))
+
+    plot_tbl <- dplyr::group_by(plot_tbl, reg_sign)
+
+    plot_tbl <- dplyr::top_n(plot_tbl,
+                             n = top_regulated,
+                             abs(.data[[regulation_variable]]))
+
+    plot_tbl <- dplyr::ungroup(plot_tbl)
+
+    ## plotting
+
+    plot_forest(data = plot_tbl,
+                regulation_variable = regulation_variable,
+                label_variable = label_variable,
+                p_variable = p_variable,
+                signif_level = signif_level,
+                regulation_level = regulation_level,
+                lower_ci_variable = lower_ci_variable,
+                upper_ci_variable = upper_ci_variable,
+                fill_scale = fill_scale,
+                fill_title = fill_title,
+                plot_title = plot_title,
+                plot_subtitle = plot_subtitle,
+                plot_tag = plot_tag,
+                x_lab = x_lab,
+                cust_theme = cust_theme,
+                signif_digits = signif_digits,
+                show_txt = show_txt,
+                show_ci_txt = show_ci_txt,
+                txt_size = txt_size,
+                txt_hjust = txt_hjust,
+                txt_vjust = txt_vjust)
 
   }
 

@@ -24,7 +24,9 @@ plot_volcano(
   plot_subtitle = NULL,
   plot_tag = NULL,
   cust_theme = microViz::theme_micro(),
-  point_alpha = 0.8
+  point_alpha = 0.8,
+  point_hjitter = 0,
+  point_wjitter = 0
 )
 }
 \arguments{
@@ -73,6 +75,10 @@ regulated genes is displayed.}
 \item{cust_theme}{custom ggplot theme.}
 
 \item{point_alpha}{plot point alpha.}
+
+\item{point_hjitter}{height jittering of the points, defaults to 0.}
+
+\item{point_wjitter}{width jittering of the points, defaults to 0.}
 }
 \value{
 a ggplot object.
