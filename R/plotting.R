@@ -1,13 +1,19 @@
 # Plotting functions.
 
+#' @include imports.R
+
+  NULL
+
 # Volcano plot -----
 
 #' Draw a volcano plot.
 #'
-#' @description Generates a Volcano plot with the effect size/regulation
+#' @description
+#' Generates a Volcano plot with the effect size/regulation
 #' statistic value on the X axis and -log10 p value on the y axis. Regulation
 #' and significance is coded by the point fill color. Top n significant
 #' genes/objects may be labeled with their names.
+#'
 #' @param data a data frame.
 #' @param regulation_variable name of the variable storing the regulation/effect
 #' size data.
@@ -21,6 +27,8 @@
 #' @param y_lab y axis title.
 #' @param top_significant top n significant genes/objects to be labeled in
 #' the plot with their names.
+#' @param top_regulated top n most regulated genes/objects to be labeled in
+#' the plot with their names. Ignored if `top_significant` is provided.
 #' @param label_variable variable storing the gene/object names.
 #' @param label_type type of the gene/object label: 'label' (default)
 #' or plain 'text'.
@@ -36,7 +44,13 @@
 #' @param point_alpha plot point alpha.
 #' @param point_hjitter height jittering of the points, defaults to 0.
 #' @param point_wjitter width jittering of the points, defaults to 0.
-#' @return a ggplot object.
+#' @param show_hline logical, should the horizontal line representing the
+#' significance cutoff be presented in the plot?
+#' @param show_vlines specifies which vertical lines representing the regulation
+#' cutoffs will be plotted.
+#'
+#' @return a `ggplot` object.
+#'
 #' @export
 
   plot_volcano <- function(data,
@@ -50,6 +64,7 @@
                            x_lab = regulation_variable,
                            y_lab = expression('-log'[10]*' p'),
                            top_significant = 0,
+                           top_regulated = 0,
                            label_variable = NULL,
                            label_type = c('label', 'text'),
                            txt_size = 2.75,
@@ -62,9 +77,11 @@
                            cust_theme = microViz::theme_micro(),
                            point_alpha = 0.8,
                            point_hjitter = 0,
-                           point_wjitter = 0) {
+                           point_wjitter = 0,
+                           show_hline = TRUE,
+                           show_vlines = c('both', 'right', 'left')) {
 
-    ## entry control
+    ## entry control ------
 
     if(!is.data.frame(data)) {
 
@@ -80,6 +97,7 @@
     }
 
     top_significant <- as.integer(top_significant)
+    top_regulated <- as.integer(top_regulated)
 
     if(!is.null(label_variable)) {
 
@@ -93,30 +111,42 @@
 
     label_type <- match.arg(label_type[1], c('label', 'text'))
 
-    if(!any(class(cust_theme) != 'theme')) {
+    if(!inherits(cust_theme, 'theme')) {
 
       stop('Please provide a valid ggplot theme object.', call. = FALSE)
 
     }
 
-    ## plotting data
+    significant <- NULL
+    regulation <- NULL
 
-    plot_tbl <- dplyr::filter(data, complete.cases(data))
+    stopifnot(is.logical(show_hline))
 
-    plot_tbl <- dplyr::mutate(plot_tbl,
-                              significant = ifelse(.data[[p_variable]] < signif_level,
-                                                   'yes', 'no'),
-                              regulation = ifelse(significant == 'no',
-                                                  'ns',
-                                                  ifelse(.data[[regulation_variable]] > regulation_level,
-                                                         'upregulated',
-                                                         ifelse(.data[[regulation_variable]] < -regulation_level,
-                                                                'downregulated', 'ns'))),
-                              regulation = factor(regulation, c('upregulated',
-                                                                'downregulated',
-                                                                'ns')))
+    show_vlines <- match.arg(show_vlines[1],
+                             c('both', 'right', 'left'))
 
-    ## numbers of regulated genes
+    ## plotting data ------
+
+    plot_tbl <-
+      dplyr::filter(data,
+                    stats::complete.cases(data[c(regulation_variable,
+                                                 p_variable)]))
+
+    plot_tbl <-
+      dplyr::mutate(plot_tbl,
+                    significant = ifelse(.data[[p_variable]] < signif_level,
+                                         'yes', 'no'),
+                    regulation = ifelse(significant == 'no',
+                                        'ns',
+                                        ifelse(.data[[regulation_variable]] > regulation_level,
+                                               'upregulated',
+                                               ifelse(.data[[regulation_variable]] < -regulation_level,
+                                                      'downregulated', 'ns'))),
+                    regulation = factor(regulation, c('upregulated',
+                                                      'downregulated',
+                                                      'ns')))
+
+    ## numbers of regulated genes -------
 
     if(is.null(plot_tag)) {
 
@@ -127,56 +157,94 @@
 
     }
 
-    ## plotting
+    ## plotting ------
 
-    volc <- ggplot2::ggplot(plot_tbl,
-                            ggplot2::aes(x = .data[[regulation_variable]],
-                                         y = -log10(.data[[p_variable]]),
-                                         fill = regulation)) +
-      ggplot2::geom_point(size = 2,
-                          shape = 21,
-                          alpha = point_alpha,
-                          position = ggplot2::position_jitter(width = point_wjitter,
-                                                              height = point_hjitter)) +
-      ggplot2::geom_hline(yintercept = -log10(signif_level), lty = 2) +
-      ggplot2::scale_fill_manual(values = fill_scale,
-                                 name = fill_title) +
+    volc <- ggplot(plot_tbl,
+                   aes(x = .data[[regulation_variable]],
+                       y = -log10(.data[[p_variable]]),
+                       fill = regulation)) +
+      geom_point(size = 2,
+                 shape = 21,
+                 alpha = point_alpha,
+                 position = ggplot2::position_jitter(width = point_wjitter,
+                                                     height = point_hjitter)) +
+      scale_fill_manual(values = fill_scale,
+                        name = fill_title) +
       cust_theme +
-      ggplot2::labs(x = x_lab,
-                    y = y_lab,
-                    title = plot_title,
-                    subtitle = plot_subtitle,
-                    tag = plot_tag)
+      labs(x = x_lab,
+           y = y_lab,
+           title = plot_title,
+           subtitle = plot_subtitle,
+           tag = plot_tag)
 
-    if(regulation_level > 0) {
+    if(show_hline) {
 
-      volc <- volc  +
-        ggplot2::geom_vline(xintercept = -regulation_level, lty = 2) +
-        ggplot2::geom_vline(xintercept = regulation_level, lty = 2)
+      volc <- volc +
+        geom_hline(yintercept = -log10(signif_level), lty = 2)
 
     }
 
-    if(top_significant > 0 & !is.null(label_variable)) {
+    if(regulation_level > 0) {
+
+      if(show_vlines == 'both') {
+
+        volc <- volc  +
+          geom_vline(xintercept = -regulation_level, lty = 2) +
+          geom_vline(xintercept = regulation_level, lty = 2)
+
+      } else if(show_vlines == 'left') {
+
+        volc <- volc  +
+          geom_vline(xintercept = -regulation_level, lty = 2)
+
+      } else {
+
+        volc <- volc  +
+          geom_vline(xintercept = regulation_level, lty = 2)
+
+      }
+
+    } else if(regulation_level == 0) {
+
+      volc <- volc +
+        geom_vline(xintercept = 0, lty = 2)
+
+    }
+
+    if(!is.null(label_variable)) {
 
       desc_tbl <- purrr::map(c('upregulated', 'downregulated'),
                              ~dplyr::filter(plot_tbl, regulation == .x))
 
-      desc_tbl <- purrr::map_dfr(desc_tbl,
-                                 ~dplyr::top_n(.x,
-                                               n = top_significant,
-                                               -.data[[p_variable]]))
+      if(top_significant > 0) {
 
-      if(nrow(desc_tbl) == 0) {
+        desc_tbl <-
+          purrr::map_dfr(desc_tbl,
+                         ~dplyr::top_n(.x,
+                                       n = top_significant,
+                                       -.data[[p_variable]]))
+
+      } else if(top_regulated > 0) {
+
+        desc_tbl <-
+          purrr::map_dfr(desc_tbl,
+                         ~dplyr::top_n(.x,
+                                       n = top_regulated,
+                                       abs(.data[[regulation_variable]])))
+
+      } else {
 
         return(volc)
 
       }
 
+      if(nrow(desc_tbl) == 0) return(volc)
+
       if(label_type == 'label') {
 
         volc <- volc +
           ggrepel::geom_label_repel(data = desc_tbl,
-                                    ggplot2::aes(label = .data[[label_variable]]),
+                                    aes(label = .data[[label_variable]]),
                                     size = txt_size,
                                     color = txt_color,
                                     label.padding = 0.1,
@@ -188,7 +256,7 @@
 
         volc <- volc +
           ggrepel::geom_text_repel(data = desc_tbl,
-                                   ggplot2::aes(label = .data[[label_variable]]),
+                                   aes(label = .data[[label_variable]]),
                                    size = txt_size,
                                    color = txt_color,
                                    box.padding = 0.1,
@@ -203,7 +271,7 @@
 
   }
 
-# GSEA plot -----
+# Cascade plot -----
 
 #' Regulation bar plot.
 #'
@@ -251,9 +319,7 @@
                         show_trend = TRUE,
                         cust_theme = microViz::theme_micro(), ...) {
 
-    ## entry control
-
-    ## entry control
+    ## entry control --------
 
     if(!is.data.frame(data)) {
 
@@ -276,22 +342,30 @@
 
     stopifnot(is.logical(show_trend))
 
-    ## plotting data
+    significant <- NULL
+    regulation <- NULL
+    plot_order <- NULL
 
-    plot_tbl <- dplyr::filter(data, complete.cases(data))
+    ## plotting data ---------
 
-    plot_tbl <- dplyr::mutate(plot_tbl,
-                              significant = ifelse(.data[[p_variable]] < signif_level,
-                                                   'yes', 'no'),
-                              regulation = ifelse(significant == 'no',
-                                                  'ns',
-                                                  ifelse(.data[[regulation_variable]] > regulation_level,
-                                                         'upregulated',
-                                                         ifelse(.data[[regulation_variable]] < -regulation_level,
-                                                                'downregulated', 'ns'))),
-                              regulation = factor(regulation, c('upregulated',
-                                                                'downregulated',
-                                                                'ns')))
+    plot_tbl <-
+      dplyr::filter(data,
+                    stats::complete.cases(data[c(p_variable,
+                                                 regulation_variable)]))
+
+    plot_tbl <-
+      dplyr::mutate(plot_tbl,
+                    significant = ifelse(.data[[p_variable]] < signif_level,
+                                         'yes', 'no'),
+                    regulation = ifelse(significant == 'no',
+                                        'ns',
+                                        ifelse(.data[[regulation_variable]] > regulation_level,
+                                               'upregulated',
+                                               ifelse(.data[[regulation_variable]] < -regulation_level,
+                                                      'downregulated', 'ns'))),
+                    regulation = factor(regulation, c('upregulated',
+                                                      'downregulated',
+                                                      'ns')))
 
     plot_tbl <- dplyr::arrange(plot_tbl, -.data[[regulation_variable]])
 
@@ -308,24 +382,24 @@
 
     }
 
-    ## plot
+    ## plot --------
 
-    bar <- ggplot2::ggplot(plot_tbl,
-                           ggplot2::aes(x = plot_order,
-                                        y = .data[[regulation_variable]])) +
-      ggplot2::geom_bar(stat = 'identity',
+    bar <- ggplot(plot_tbl,
+                  aes(x = plot_order,
+                      y = .data[[regulation_variable]])) +
+      geom_bar(stat = 'identity',
                         alpha = bar_alpha,
-                        ggplot2::aes(fill = regulation)) +
-      ggplot2::scale_fill_manual(values = fill_scale,
-                                 name = fill_title) +
+                        aes(fill = regulation)) +
+      scale_fill_manual(values = fill_scale,
+                        name = fill_title) +
       cust_theme +
-      ggplot2::theme(axis.text.x = ggplot2::element_blank(),
-                     axis.ticks.x = ggplot2::element_blank()) +
-      ggplot2::labs(title = plot_title,
-                    subtitle = plot_subtitle,
-                    tag = plot_tag,
-                    x = x_lab,
-                    y = y_lab)
+      theme(axis.text.x = element_blank(),
+            axis.ticks.x = element_blank()) +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           tag = plot_tag,
+           x = x_lab,
+           y = y_lab)
 
     if(show_trend) {
 
@@ -342,8 +416,11 @@
 
 #' Draw regulation statistics for selected genes.
 #'
-#' @description Draws a Forest plot with the regulation estimates and,
-#' optionally confidence intervals for all items presente in a data frame.
+#' @description
+#' Draws a Forest plot with the regulation estimates and,
+#' optionally confidence intervals for all items presented in a data frame
+#' (`plot_forest`) or top up- and downregulated fratures (`plot_top`).
+#'
 #' @param data a data frame.
 #' @param regulation_variable name of the variable storing the regulation/effect
 #' size data.
@@ -354,6 +431,7 @@
 #' significant effects, 0 difference versus control by default.
 #' @param lower_ci_variable variable storing the lower CI values.
 #' @param upper_ci_variable variable storing the upper CI values.
+#' @param top_regulated top n regulated genes/objects to be presented in the plot.
 #' @param fill_scale regulation colors, a vector of three elements: for
 #' upregulated, downregulated and non-significant items, respectively.
 #' @param x_lab x axis title.
@@ -369,7 +447,9 @@
 #' @param txt_size text size.
 #' @param txt_hjust horizontal justification of the text label.
 #' @param txt_vjust vertical justification of the text label.
+#'
 #' @return a ggplot object.
+#'
 #' @export
 
   plot_forest <- function(data,
@@ -396,7 +476,7 @@
                           txt_hjust = 0.5,
                           txt_vjust = -0.8) {
 
-    ## entry control
+    ## entry control -------
 
     if(!is.data.frame(data)) {
 
@@ -456,7 +536,11 @@
     stopifnot(is.numeric(data[[regulation_variable]]))
     stopifnot(is.numeric(data[[p_variable]]))
 
-    ## plotting table
+    significant <- NULL
+    regulation <- NULL
+    plot_lab <- NULL
+
+    ## plotting table --------
 
     plot_tbl <-
       dplyr::mutate(data,
@@ -472,39 +556,39 @@
                                                       'downregulated',
                                                       'ns')))
 
-    ## plotting
+    ## plotting -------
 
     forest <-
-      ggplot2::ggplot(plot_tbl,
-                      ggplot2::aes(x = .data[[regulation_variable]],
-                                   y = reorder(.data[[label_variable]],
-                                               .data[[regulation_variable]]),
-                                   color = regulation,
-                                   fill = regulation)) +
-      ggplot2::scale_fill_manual(values = fill_scale,
-                                 name = fill_title) +
-      ggplot2::scale_color_manual(values = fill_scale,
-                                  name = fill_title) +
+      ggplot(plot_tbl,
+             aes(x = .data[[regulation_variable]],
+                 y = stats::reorder(.data[[label_variable]],
+                                    .data[[regulation_variable]]),
+                 color = regulation,
+                 fill = regulation)) +
+      scale_fill_manual(values = fill_scale,
+                        name = fill_title) +
+      scale_color_manual(values = fill_scale,
+                         name = fill_title) +
       cust_theme +
-      ggplot2::theme(axis.title.y = ggplot2::element_blank()) +
-      ggplot2::labs(title = plot_title,
-                    subtitle = plot_subtitle,
-                    tag = plot_tag,
-                    x = x_lab) +
-      ggplot2::geom_vline(xintercept = 0,
-                          linetype = 'dashed')
+      theme(axis.title.y = element_blank()) +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           tag = plot_tag,
+           x = x_lab) +
+      geom_vline(xintercept = 0,
+                 linetype = 'dashed')
 
     if(!is.null(lower_ci_variable) & !is.null(upper_ci_variable)) {
 
       forest <- forest +
-        ggplot2::geom_errorbarh(ggplot2::aes(xmin = .data[[lower_ci_variable]],
+        ggplot2::geom_errorbarh(aes(xmin = .data[[lower_ci_variable]],
                                              xmax = .data[[upper_ci_variable]]),
                                 height = 0)
 
     }
 
     forest <- forest +
-      ggplot2::geom_point(size = 2,
+      geom_point(size = 2,
                           shape = 16)
 
     ## optional labeling
@@ -533,7 +617,7 @@
 
     forest <- forest +
       ggplot2::geom_text(data = desc_tbl,
-                         ggplot2::aes(label = plot_lab),
+                         aes(label = plot_lab),
                          size = txt_size,
                          hjust = txt_hjust,
                          vjust = txt_vjust)
@@ -542,16 +626,7 @@
 
   }
 
-# Top regulated Forest plot ------
-
-#' Draw regulation statistics for top regulated genes.
-#'
-#' @description Draws a Forest plot with the regulation estimates and,
-#' optionally confidence intervals for the n most strongly regulated items.
-#' @inheritParams plot_forest
-#' @param top_regulated top n regulated genes/objects to be presented in
-#' the plot.
-#' @return a ggplot object.
+#' @rdname plot_forest
 #' @export
 
   plot_top <- function(data,
@@ -579,8 +654,69 @@
                        txt_hjust = 0.5,
                        txt_vjust = -0.8) {
 
+    ## entry control -------
 
-    ## plotting data
+    if(!is.data.frame(data)) {
+
+      stop('Please provide a data frame as data.', call. = FALSE)
+
+    }
+
+    if(any(!c(regulation_variable,
+              label_variable,
+              p_variable) %in% names(data))) {
+
+      stop('Regulation, label or p variable absent from the data.',
+           call. = FALSE)
+
+    }
+
+    if(!any(class(cust_theme) != 'theme')) {
+
+      stop('Please provide a valid ggplot theme object.', call. = FALSE)
+
+    }
+
+    stopifnot(is.logical(show_txt))
+    stopifnot(is.logical(show_ci_txt))
+    stopifnot(is.numeric(signif_level))
+    stopifnot(is.numeric(regulation_level))
+    stopifnot(is.numeric(txt_size))
+    stopifnot(is.numeric(txt_hjust))
+    stopifnot(is.numeric(txt_vjust))
+
+    if(!is.null(lower_ci_variable)) {
+
+      if(!lower_ci_variable %in% names(data)) {
+
+        stop('Lower and upper CI variables absent from the data.',
+             call. = FALSE)
+
+      }
+
+      stopifnot(is.numeric(data[[lower_ci_variable]]))
+
+    }
+
+    if(!is.null(upper_ci_variable)) {
+
+      if(!upper_ci_variable %in% names(data)) {
+
+        stop('Lower and upper CI variables absent from the data.',
+             call. = FALSE)
+
+      }
+
+      stopifnot(is.numeric(data[[upper_ci_variable]]))
+
+    }
+
+    stopifnot(is.numeric(data[[regulation_variable]]))
+    stopifnot(is.numeric(data[[p_variable]]))
+
+    reg_sign <- NULL
+
+    ## plotting data ---------
 
     top_regulated <- as.integer(top_regulated)
 
@@ -598,7 +734,7 @@
 
     plot_tbl <- dplyr::ungroup(plot_tbl)
 
-    ## plotting
+    ## plotting ------
 
     plot_forest(data = plot_tbl,
                 regulation_variable = regulation_variable,
@@ -624,43 +760,60 @@
 
   }
 
-# P value plotting -------
+# P value and regulation plotting -------
 
-#' Plot top p values as a bar plot.
+#' Plot top p values or regulation estimates as bar plots.
 #'
-#' @description Plots top n p values as a bar plot.
+#' @description
+#' Plots top n p values or regulation estimates as a bar plot.
+#'
 #' @param data a data frame.
 #' @param p_variable variable storing the p values.
+#' @param regulation_variable variable storing the regulation estimates.
 #' @param label_variable variable storing the gene/object names.
 #' @param signif_level significance threshold, p = 0.05 be default.
+#' @param regulation_level regulation cutoff.
 #' @param top_significant top n significant genes/objects to be presented in
 #' the plot.
-#' @param fill_scale regulation colors, a vector of two elements: for
-#' significant and non-significant items.
+#' @param top_regulated top n strongest regulated genes/objects to be presented
+#' in the plot.
+#' @param fill_scale significance or regulation colors, a vector of two or
+#' three elements.
 #' @param x_lab x axis title.
 #' @param fill_title title of the point fill legend.
 #' @param plot_title plot title.
 #' @param plot_subtitle plot subtitle.
 #' @param plot_tag plot tag text.
 #' @param cust_theme custom ggplot theme.
-#' @return a ggplot object.
+#' @param show_txt logical, should values of the regulation estimates be
+#' presented in the plot?
+#' @param signif_digits significant digits for regulation estimates presented
+#' in the plot.
+#' @param txt_color text color.
+#' @param txt_size text size.
+#' @param txt_offset horizontal offsetting of the text relative to the
+#' regulation variable values.
+#' @param txt_vjust vertical justification of the text.
+#'
+#' @return a `ggplot` object.
+#'
 #' @export
 
-  plot_signifcant <- function(data,
-                              p_variable,
-                              label_variable,
-                              signif_level = 0.05,
-                              top_significant = 10,
-                              fill_scale = c(significant = 'coral3',
-                                             ns = 'gray60'),
-                              x_lab = expression('-log'[10]*' p'),
-                              fill_title = '',
-                              plot_title = NULL,
-                              plot_subtitle = NULL,
-                              plot_tag = NULL,
-                              cust_theme = microViz::theme_micro()) {
+  plot_significant <- function(data,
+                               p_variable,
+                               label_variable,
+                               signif_level = 0.05,
+                               top_significant = 10,
+                               fill_scale = c(significant = 'coral3',
+                                              ns = 'gray60'),
+                               x_lab = expression('-log'[10]*' p'),
+                               fill_title = '',
+                               plot_title = NULL,
+                               plot_subtitle = NULL,
+                               plot_tag = NULL,
+                               cust_theme = microViz::theme_micro()) {
 
-    ## entry control
+    ## entry control -------
 
     if(!is.data.frame(data)) {
 
@@ -676,7 +829,7 @@
 
     }
 
-    if(!any(class(cust_theme) != 'theme')) {
+    if(inherits(cust_theme, 'theme')) {
 
       stop('Please provide a valid ggplot theme object.', call. = FALSE)
 
@@ -684,7 +837,9 @@
 
     top_significant <- as.integer(top_significant)
 
-    ## plotting table
+    significant <- NULL
+
+    ## plotting table -------
 
     plot_tbl <- dplyr::top_n(data, n = top_significant, -.data[[p_variable]])
 
@@ -695,25 +850,878 @@
                               significant = factor(significant,
                                                    c('significant', 'ns')))
 
-    ## plotting
+    ## plotting ------
 
-    ggplot2::ggplot(plot_tbl,
-                    ggplot2::aes(x = -log10(.data[[p_variable]]),
-                                 y = reorder(.data[[label_variable]],
-                                             -.data[[p_variable]]),
-                                 fill = significant)) +
-      ggplot2::geom_bar(stat = 'identity',
-                        color = 'black') +
-      ggplot2::geom_vline(xintercept = -log10(signif_level),
-                          linetype = 'dashed') +
-      ggplot2::scale_fill_manual(values = fill_scale,
-                                 name = fill_title) +
+    ggplot(plot_tbl,
+           aes(x = -log10(.data[[p_variable]]),
+               y = stats::reorder(.data[[label_variable]],
+                                  -.data[[p_variable]]),
+               fill = significant)) +
+      geom_bar(stat = 'identity',
+               color = 'black') +
+      geom_vline(xintercept = -log10(signif_level),
+                 linetype = 'dashed') +
+      scale_fill_manual(values = fill_scale,
+                        name = fill_title) +
       cust_theme +
-      ggplot2::theme(axis.title.y = ggplot2::element_blank()) +
-      ggplot2::labs(title = plot_title,
-                    subtitle = plot_subtitle,
-                    tag = plot_tag,
-                    x = x_lab)
+      theme(axis.title.y = element_blank()) +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           tag = plot_tag,
+           x = x_lab)
+
+  }
+
+#' @rdname plot_significant
+#' @export
+
+  plot_regulated <- function(data,
+                             regulation_variable,
+                             label_variable,
+                             p_variable,
+                             signif_level = 0.05,
+                             regulation_level = 0,
+                             top_regulated = 10,
+                             fill_scale = c(upregulated = 'firebrick',
+                                            downregulated = 'steelblue',
+                                            ns = 'gray60'),
+                             fill_title = '',
+                             plot_title = NULL,
+                             plot_subtitle = NULL,
+                             plot_tag = NULL,
+                             x_lab = 'Regulation',
+                             cust_theme = microViz::theme_micro(),
+                             show_txt = FALSE,
+                             signif_digits = 2,
+                             txt_color = 'black',
+                             txt_size = 2.75,
+                             txt_offset = 0.05,
+                             txt_vjust = 0.5) {
+
+    ## entry control -------
+
+    if(!is.data.frame(data)) {
+
+      stop('Please provide a data frame as data.', call. = FALSE)
+
+    }
+
+    if(any(!c(label_variable,
+              p_variable,
+              regulation_variable) %in% names(data))) {
+
+      stop(paste("'p_variable', 'label_variable' or 'regulation_variable'",
+                 "absent from the data.'"),
+           call. = FALSE)
+
+    }
+
+    if(!inherits(cust_theme, 'theme')) {
+
+      stop('Please provide a valid ggplot theme object.', call. = FALSE)
+
+    }
+
+    stopifnot(is.numeric(signif_level))
+    stopifnot(is.numeric(regulation_level))
+    stopifnot(is.numeric(top_regulated))
+
+    top_regulated <- as.integer(top_regulated)
+
+    stopifnot(is.logical(show_txt))
+    stopifnot(is.numeric(signif_digits))
+
+    signif_digits <- as.integer(signif_digits)
+
+    stopifnot(is.character(txt_color))
+    stopifnot(is.numeric(txt_size))
+    stopifnot(is.numeric(txt_offset))
+    stopifnot(is.numeric(txt_vjust))
+
+    ## plotting data --------
+
+    significant <- NULL
+    regulation <- NULL
+    regulation_raw <- NULL
+
+    plot_data <-
+      dplyr::mutate(data,
+                    significant = ifelse(.data[[p_variable]] < signif_level,
+                                         'yes', 'no'),
+                    regulation = ifelse(significant == 'no',
+                                        'ns',
+                                        ifelse(.data[[regulation_variable]] > regulation_level,
+                                               'upregulated',
+                                               ifelse(.data[[regulation_variable]] < -regulation_level,
+                                                      'downregulated', 'ns'))),
+                    regulation = factor(regulation,
+                                        c('upregulated',
+                                          'downregulated',
+                                          'ns')),
+                    regulation_raw = ifelse(.data[[regulation_variable]] > 0,
+                                            'upregulated', 'downregulated'),
+                    regulation_raw = factor(regulation_raw,
+                                            c('upregulated', 'downregulated')))
+
+    plot_data <-
+      dplyr::group_by(plot_data, regulation_raw)
+
+    plot_data <-
+      dplyr::top_n(plot_data,
+                   n = top_regulated,
+                   wt = abs(.data[[regulation_variable]]))
+
+    plot_data <- dplyr::ungroup(plot_data)
+
+    ## label position
+
+    txt_pos <- NULL
+
+    plot_data <-
+      dplyr::mutate(plot_data,
+                    txt_pos = (1 - txt_offset) * .data[[regulation_variable]])
+
+    ## plotting --------
+
+    bar_plot <- ggplot(plot_data,
+                       aes(x = .data[[regulation_variable]],
+                           y = stats::reorder(.data[[label_variable]],
+                                              .data[[regulation_variable]]),
+                           fill = regulation)) +
+      geom_bar(color = 'black',
+               stat = 'identity') +
+      scale_fill_manual(values = fill_scale,
+                        name = fill_title) +
+      cust_theme +
+      theme(axis.title.y = element_blank()) +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           tag = plot_tag,
+           x = x_lab)
+
+    if(show_txt) {
+
+      bar_plot <- bar_plot +
+        ggplot2::geom_text(aes(label = signif(.data[[regulation_variable]],
+                                              signif_digits),
+                               x = txt_pos),
+                           vjust = txt_vjust,
+                           size = txt_size,
+                           color = txt_color)
+
+    }
+
+    bar_plot
+
+  }
+
+# Heat map -------
+
+#' Heat map of levels of variables of interest.
+#'
+#' @description
+#' The function draws a heat map of levels of the variables of interest in
+#' data set subsets defined by a splitting factor.
+#'
+#' @return a `ggplot` graphics.
+#'
+#' @param data a data frame.
+#' @param variables a vector with names of the variables of interest.
+#' @param split_fct name of the splitting factor.
+#' @param normalize logical, should the data frame variables be normalized prior
+#' to plotting?
+#' @param norm_center defines centering of the variable during scaling: mean
+#' (default) or median. Ignored if `normalize = FALSE`.
+#' @param variable_classification a optional two column data frame, which
+#' defines the classification scheme of the variables, e.g. cluster assignment.
+#' The first variable stores the variable name and the second indicated the
+#' variable subset. If not provided, the variables are classified with by their
+#' specificity for the data set subsets defined by `split_fct` with
+#' \code{\link{classify}}.
+#' @param direction determines direction of the comparison between the data set
+#' subsets, see: \code{\link{classify}}. Ignored if `variable_classification`
+#' is provided.
+#' @param facet logical, should the variable classification scheme be presented
+#' by horizontal facets of the plot?
+#' @param plot_title plot title.
+#' @param plot_subtitle plot_subtitle. If not provided, numbers of observations
+#' in the data set subsets will be displayed here.
+#' @param x_lab X axis label.
+#' @param y_lab Y axis label.
+#' @param fill_lab title of the fill scale.
+#' @param hide_x_axis_text logical, hide the X axis text?
+#' @param cust_theme a custom `ggplot` theme.
+#' @param color_scale a character vector of length 3, which defines the lower,
+#' middle and upper point of the color scale.
+#' @param midpoint optional, the middle point of the fill scale.
+#' @param ... additional arguments passed to
+#' \code{\link[ggplot2]{scale_fill_gradient2}}.
+#'
+#' @export
+
+  heat_map <- function(data,
+                       variables,
+                       split_fct,
+                       normalize = TRUE,
+                       norm_center = c('mean', 'median'),
+                       variable_classification = NULL,
+                       direction = '<',
+                       facet = TRUE,
+                       plot_title = NULL,
+                       plot_subtitle = NULL,
+                       x_lab = 'observation',
+                       y_lab = 'variable',
+                       fill_lab = 'Z-score',
+                       hide_x_axis_text = FALSE,
+                       cust_theme = theme_micro(),
+                       color_scale = c('steelblue', 'black', 'firebrick'),
+                       midpoint = NULL, ...) {
+
+    ## input control ---------
+
+    stopifnot(is.data.frame(data))
+
+    if(any(!variables %in% names(data))) {
+
+      stop('At least one variable is missing from the data.',
+           call. = FALSE)
+
+    }
+
+    if(!split_fct %in% names(data)) {
+
+      stop('The splitting factor is missing from the data.',
+           call. = FALSE)
+
+    }
+
+    if(!is.factor(data[[split_fct]])) {
+
+      stop('The splitting factor has to abe a vector.',
+           call. = FALSE)
+
+    }
+
+    stopifnot(is.logical(normalize))
+
+    norm_center <- match.arg(norm_center[1],
+                             c('mean', 'median'))
+
+    if(!is.null(variable_classification)) {
+
+      stopifnot(is.data.frame(variable_classification))
+
+      if(ncol(variable_classification) == 1) {
+
+        stop("'variable_classification' must have at least two columns.",
+             call. = FALSE)
+
+      }
+
+    } else {
+
+      variable_classification <-
+        classify(data = data,
+                 variables = variables,
+                 split_fct = split_fct,
+                 direction = direction)$classification
+
+    }
+
+    variable_classification <-
+      rlang::set_names(variable_classification[, 1:2],
+                       c('variable', 'variable_subset'))
+
+    stopifnot(is.logical(facet))
+    stopifnot(inherits(cust_theme, 'theme'))
+
+    if(length(color_scale) < 3) {
+
+      stop('Not enough colors.', call. = FALSE)
+
+    }
+
+    ## plotting data ------
+
+    observation <- NULL
+
+    data <- dplyr::mutate(data[c(split_fct, variables)],
+                          observation = paste0('obs_', 1:nrow(data)))
+
+    if(is.null(plot_subtitle)) {
+
+      n_numbers <- dplyr::count(data, .data[[split_fct]])
+
+      plot_subtitle <-
+        purrr::map2_chr(n_numbers[[1]], n_numbers[[2]],
+                        paste, sep = ': n = ')
+
+      plot_subtitle <- paste(plot_subtitle, collapse = ', ')
+
+    }
+
+    if(normalize) {
+
+      center_fun <- switch(norm_center,
+                           mean = function(x) mean(x, na.rm = TRUE),
+                           median = function(x) stats::median(x, na.rm = TRUE))
+
+      data[variables] <-
+        purrr::map_dfc(data[variables],
+                       ~scale(.x, center = center_fun(.x))[, 1])
+
+    }
+
+    variable <- NULL
+    value <- NULL
+
+    data <-
+      tidyr::pivot_longer(data,
+                          cols = dplyr::all_of(variables),
+                          names_to = 'variable',
+                          values_to = 'value')
+
+    data <- dplyr::left_join(data,
+                             variable_classification,
+                             by = 'variable')
+
+    plot_order <- unique(variable_classification$variable)
+
+    data <-
+      dplyr::mutate(data,
+                    variable = factor(variable, plot_order))
+
+    ## plotting -------
+
+    if(is.null(midpoint)) {
+
+      midpoint <- mean(range(data[['value']], na.rm = TRUE))
+
+    }
+
+    if(facet) {
+
+      facet_formula <-
+        stats::as.formula(paste('variable_subset ~', split_fct))
+
+    } else {
+
+      facet_formula <-
+        stats::as.formula(paste('. ~', split_fct))
+
+    }
+
+    hm_plot <-
+      ggplot(data,
+             aes(x = observation,
+                 y = variable,
+                 fill = value)) +
+      geom_tile() +
+      facet_grid(facet_formula,
+                 scales = 'free',
+                 space = 'free') +
+      scale_fill_gradient2(low = color_scale[[1]],
+                           mid = color_scale[[2]],
+                           high = color_scale[[3]],
+                           midpoint = midpoint,
+                           name = fill_lab, ...) +
+      cust_theme +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           x = x_lab,
+           y = y_lab)
+
+    if(hide_x_axis_text) {
+
+      hm_plot <- hm_plot +
+        theme(axis.text.x = element_blank(),
+              axis.ticks.x = element_blank(),
+              axis.line = element_blank())
+
+    }
+
+    hm_plot
+
+  }
+
+# Word cloud ------
+
+#' Plot a word cloud.
+#'
+#' @description
+#' Plots a word cloud e.g. of gene or GO term names. Font color and size may
+#' code for additional parameters such as p value or fold regulation.
+#'
+#' @details
+#' The function internally employs
+#' \code{\link[ggwordcloud]{geom_text_wordcloud}} and
+#' \code{\link[ggwordcloud]{geom_text_wordcloud_area}} from the `wordcloud`
+#' package.
+#'
+#' @return a `ggplot` object.
+#'
+#' @param data a data frame.
+#' @param label_variable name of the variable storing the text to be plotted.
+#' @param split_fct optional, name of a variable that defines dataset subsets.
+#' Each subset will be presented as a separate facet of the plot.
+#' @param size_variable optional, name of a variable numeric whose value will be
+#' size coded.
+#' @param color_variable optional, name of a variable numeric whose value will be
+#' color coded.
+#' @param size_type type of size scaling: `size` makes font size correspond to
+#' the `size_variable`, `area` makes font text related to the `size_variable`.
+#' @param size_range a numeric vector of size 2, which defines the minimum and
+#' maximum of the size scale.
+#' @param color_scale a character vector of length 3, which defines the lower,
+#' middle and upper point color of the color scale.
+#' @param midpoint optional, the middle point of the color scale.
+#' @param size_lab title of the size scale.
+#' @param color_lab title of the color scale.
+#' @param cust_theme a custom `ggplot` theme.
+#' @param wrap logical, should each text be split into multiple lines? May
+#' be useful in case of long labels, e.g. descriptions of biological processes.
+#' @param len number of words per line. Relevant only if `wrap_text = TRUE`.
+#' @param fraction_rotated fraction of words to be rotated with a 90 degree
+#' angle. May improve visibility.
+#' @param nrow number of rows in a faceted plot. Ignored if `split_fct = NULL`.
+#' @param ... extra arguments passed to
+#' \code{\link[ggwordcloud]{geom_text_wordcloud}} or
+#' \code{\link[ggwordcloud]{geom_text_wordcloud_area}}
+#'
+#'@export
+
+  plot_wordcloud <- function(data,
+                             label_variable,
+                             split_fct = NULL,
+                             size_variable = NULL,
+                             color_variable = NULL,
+                             size_type = c('size', 'area'),
+                             size_range = c(2, 6),
+                             color_scale = c('steelblue', 'black', 'firebrick'),
+                             midpoint = NULL,
+                             size_lab = size_variable,
+                             color_lab = color_variable,
+                             cust_theme = ggplot2::theme_void(),
+                             wrap = FALSE,
+                             len = 3,
+                             fraction_rotated = 0,
+                             nrow = NULL, ...) {
+
+
+    ## input control -----
+
+    stopifnot(is.data.frame(data))
+
+    if(!label_variable %in% names(data)) {
+
+      stop("'label_variable' is missing from the data.",
+           call. = FALSE)
+
+    }
+
+    if(!is.null(split_fct)) {
+
+      if(!split_fct %in% names(data)) {
+
+        stop("'split_fct' missing from the data.",
+             call. = FALSE)
+
+      }
+
+      if(!is.factor(data[[split_fct]])) {
+
+        stop("'split_fct' has to define a factor variable.",
+             call. = FALSE)
+
+      }
+
+    }
+
+    if(!is.null(size_variable)) {
+
+      if(!size_variable %in% names(data)) {
+
+        stop("'size_variable' is missing from the data.",
+             call. = FALSE)
+
+      }
+
+    }
+
+    if(!is.null(color_variable)) {
+
+      if(!color_variable %in% names(data)) {
+
+        stop("'size_variable' is missing from the data.",
+             call. = FALSE)
+
+      }
+
+    }
+
+    size_type <- match.arg(size_type[1],
+                           c('size', 'area'))
+
+    stopifnot(is.numeric(size_range))
+
+    if(length(size_range) < 2) {
+
+      stop("Improper length of 'size_range'",
+           call. = FALSE)
+
+    }
+
+    size_range <- size_range[1:2]
+
+    stopifnot(is.character(color_scale))
+
+    if(length(color_scale) < 3) {
+
+      stop("Improper length of 'color_scale'",
+           call. = FALSE)
+
+    }
+
+    if(!inherits(cust_theme, 'theme')) {
+
+      stop("'cust_theme' has to be a ggplot theme object.",
+           call. = FALSE)
+
+    }
+
+    stopifnot(is.logical(wrap))
+
+    len <- as.integer(len)
+
+    stopifnot(is.numeric(fraction_rotated))
+
+    if(fraction_rotated < 0 | fraction_rotated > 1) {
+
+      stop("Improper value of 'fraction_rotated'.", call. = FALSE)
+
+    }
+
+    ## plotting data ------
+
+    if(wrap) {
+
+      data[[label_variable]] <-
+        purrr::map_chr(data[[label_variable]],
+                       wrap_text,
+                       len = len)
+
+    }
+
+    if(fraction_rotated > 0) {
+
+      rot_angle <- NULL
+
+      angles <- sample(c(0, 90),
+                       size = nrow(data),
+                       replace = TRUE,
+                       prob = c(1 - fraction_rotated,
+                                fraction_rotated))
+
+      data <- dplyr::mutate(data,
+                            rot_angle = angles)
+
+    } else {
+
+      data <- dplyr::mutate(data,
+                            rot_angle = 0)
+
+    }
+
+    ## geoms and metadata -------
+
+    text_geom <-
+      switch(size_type,
+             size = ggwordcloud::geom_text_wordcloud(...),
+             ares = ggwordcloud::geom_text_wordcloud_area(...))
+
+    size_scale <-
+      switch(size_type,
+             size = ggplot2::scale_size_continuous(range = size_range),
+             area = ggplot2::scale_size_area(max_size = size_range[2]))
+
+    if(!is.null(color_variable)) {
+
+      if(is.null(midpoint)) {
+
+        midpoint <- mean(range(data[[color_variable]], na.rm = TRUE))
+
+      }
+
+    } else {
+
+      midpoint <- 0
+
+    }
+
+    ## plotting -------
+
+    if(is.null(size_variable) & is.null(color_variable)) {
+
+      word_plot <-
+        ggplot(data,
+               aes(label = .data[[label_variable]],
+                   angle = rot_angle))
+
+    } else if(!is.null(size_variable) & is.null(color_variable)) {
+
+      word_plot <-
+        ggplot(data,
+               aes(label = .data[[label_variable]],
+                   size = .data[[size_variable]],
+                   angle = rot_angle))
+
+    } else if(is.null(size_variable) & !is.null(color_variable)) {
+
+      word_plot <-
+        ggplot(data,
+               aes(label = .data[[label_variable]],
+                   color = .data[[color_variable]],
+                   angle = rot_angle))
+
+    } else {
+
+      word_plot <-
+        ggplot(data,
+               aes(label = .data[[label_variable]],
+                   size = .data[[size_variable]],
+                   color = .data[[color_variable]],
+                   angle = rot_angle))
+
+    }
+
+    if(!is.null(split_fct)) {
+
+      wrap_formula <-
+        stats::as.formula(paste('~', split_fct))
+
+      word_plot <- word_plot +
+        ggplot2::facet_wrap(wrap_formula, nrow = nrow)
+
+    }
+
+    word_plot +
+      text_geom +
+      size_scale +
+      ggplot2::scale_color_gradient2(low = color_scale[[1]],
+                                     mid = color_scale[[2]],
+                                     high = color_scale[[3]],
+                                     midpoint = midpoint) +
+      cust_theme +
+      theme(legend.position = 'right') +
+      labs(color = color_lab,
+           size = size_lab)
+
+  }
+
+# Bubble plot -----
+
+#' Draw a bubble plot.
+#'
+#' @description
+#' A general form of a bubble plot: variables are presented in the Y axis,
+#' splitting factor levels are shown in the x axis, size and fill of the bubbles
+#' code for additional variables and, as an option, can be labeled with a text.
+#'
+#' @return a `ggplot` object.
+#'
+#' @param data a data frame.
+#' @param x_variable variable to be presented in the X axis of the plot.
+#' @param y_variable variable to be presented in the Y axis of the plot.
+#' @param size_variable name of the variable defining the bubble size.
+#' @param color_variable name of the variable defining the bubble color.
+#' @param label_variable variable to be presented as text next to the data
+#' points.
+#' @param point_color color of the points, relevant only if color variable is
+#' not provided.
+#' @param color_scale a character vector of length 3, which defines the lower,
+#' middle and upper point color of the fill scale.
+#' @param midpoint the middle point of the color scale, optional.
+#' @param size_type type of size scaling: `size` makes bubble radius correspond
+#' to the `size_variable`, `area` makes bubble area relates to the
+#' `size_variable`.
+#' @param size_range a numeric vector of size 2, which defines the minimum and
+#' maximum of the size scale.
+#' @param plot_title plot_title.
+#' @param plot_subtitle plot_subtitle.
+#' @param x_lab X axis title.
+#' @param y_lab Y axis title.
+#' @param size_lab title of the size scale.
+#' @param color_lab title of the color scale.
+#' @param cust_theme a custom `ggplot` theme.
+#' @param txt_hjust horizontal justification of the text.
+#' @param txt_vjust vertical justification of the text.
+#' @param txt_size text size.
+#' @param ... extra arguments passed to the size and color scales, e.g.
+#' \code{\link[ggplot2]{scale_fill_gradient2}}.
+#'
+#' @export
+
+  plot_bubble <- function(data,
+                          x_variable,
+                          y_variable,
+                          size_variable,
+                          color_variable = size_variable,
+                          label_variable = NULL,
+                          point_color = 'steelblue',
+                          color_scale = c(low = 'steelblue',
+                                          mid = 'white',
+                                          high = 'firebrick'),
+                          midpoint = NULL,
+                          size_type = c('size', 'area'),
+                          size_range = c(0.2, 4),
+                          plot_title = NULL,
+                          plot_subtitle = NULL,
+                          x_lab = x_variable,
+                          y_lab = y_variable,
+                          size_lab = NULL,
+                          color_lab = NULL,
+                          cust_theme = microViz::theme_micro(),
+                          txt_hjust = -1.4,
+                          txt_vjust = 0.5,
+                          txt_size = 2.75, ...) {
+
+    ## input check -------
+
+    stopifnot(is.data.frame(data))
+
+    if(any(!c(x_variable, y_variable, size_variable) %in% names(data))) {
+
+      stop(paste("Data has to contain 'x_variable', 'y_variable' and",
+                 "'size_variable' variables."),
+           call. = FALSE)
+
+    }
+
+    if(!is.null(color_variable)) {
+
+      if(!color_variable %in% names(data)) {
+
+        stop("'color_variable' missing from the data.", call. = FALSE)
+
+      }
+
+    } else {
+
+      color_var <- NULL
+
+      data <- dplyr::mutate(data, color_var = point_color)
+
+      color_variable <- 'color_var'
+
+    }
+
+    if(!is.null(label_variable)) {
+
+      if(!label_variable %in% names(data)) {
+
+        stop("'label_variable' is missing from the data.",
+             call. = FALSE)
+
+      }
+
+    }
+
+    if(length(color_scale) < 3) {
+
+      stop("'color_scale' needs to have at least 3 values.",
+           call. = FALSE)
+
+    }
+
+    if(!is.null(midpoint)) stopifnot(is.numeric(midpoint))
+
+    size_type <- match.arg(size_type[1],
+                           c('size', 'area'))
+
+    stopifnot(is.numeric(size_range))
+
+    if(length(size_range) < 2) {
+
+      stop("'size_range' has to have at least 2 values.",
+           call. = FALSE)
+
+    }
+
+    if(!inherits(cust_theme, 'theme')) {
+
+      stop("'cust_theme' has to be a valid ggplot theme.",
+           call. = FALSE)
+
+    }
+
+    stopifnot(is.numeric(txt_size))
+    stopifnot(is.numeric(txt_hjust))
+    stopifnot(is.numeric(txt_vjust))
+
+    ## geoms and scales -------
+
+    size_scale <-
+      switch(size_type,
+             size = ggplot2::scale_radius(range = size_range, ...),
+             area = ggplot2::scale_size_area(max_size = size_range[2], ...))
+
+    if(!is.na(color_variable)) {
+
+      if(is.null(midpoint)) {
+
+        midpoint <- mean(range(data[[color_variable]], na.rm = TRUE))
+
+      }
+
+    }
+
+    ## plotting -------
+
+    if(is.null(color_variable)) {
+
+      bubble_plot <-
+        ggplot(data,
+               aes(x = .data[[x_variable]],
+                   y = .data[[y_variable]],
+                   size = .data[[size_variable]]))
+
+    } else {
+
+      bubble_plot <-
+        ggplot(data,
+               aes(x = .data[[x_variable]],
+                   y = .data[[y_variable]],
+                   size = .data[[size_variable]],
+                   fill = .data[[color_variable]]))
+
+    }
+
+    bubble_plot <- bubble_plot +
+      geom_point(shape = 21) +
+      size_scale +
+      scale_fill_gradient2(low = color_scale[1],
+                           mid = color_scale[2],
+                           high = color_scale[3],
+                           midpoint = midpoint, ...) +
+      cust_theme +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           x = x_lab,
+           y = y_lab,
+           fill = color_lab,
+           size = size_lab)
+
+    if(!is.null(label_variable)) {
+
+      bubble_plot <- bubble_plot +
+        geom_text(aes(label = .data[[label_variable]]),
+                  size = txt_size,
+                  hjust = txt_hjust,
+                  vjust = txt_vjust)
+
+    }
+
+    bubble_plot
 
   }
 

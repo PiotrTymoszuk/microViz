@@ -2,6 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plot_forest}
 \alias{plot_forest}
+\alias{plot_top}
 \title{Draw regulation statistics for selected genes.}
 \usage{
 plot_forest(
@@ -13,6 +14,31 @@ plot_forest(
   regulation_level = 0,
   lower_ci_variable = NULL,
   upper_ci_variable = NULL,
+  fill_scale = c(upregulated = "firebrick", downregulated = "steelblue", ns = "gray60"),
+  fill_title = "",
+  plot_title = NULL,
+  plot_subtitle = NULL,
+  plot_tag = NULL,
+  x_lab = "Regulation",
+  cust_theme = microViz::theme_micro(),
+  signif_digits = 2,
+  show_txt = FALSE,
+  show_ci_txt = FALSE,
+  txt_size = 2.75,
+  txt_hjust = 0.5,
+  txt_vjust = -0.8
+)
+
+plot_top(
+  data,
+  regulation_variable,
+  label_variable,
+  p_variable,
+  signif_level = 0.05,
+  regulation_level = 0,
+  lower_ci_variable = NULL,
+  upper_ci_variable = NULL,
+  top_regulated = 10,
   fill_scale = c(upregulated = "firebrick", downregulated = "steelblue", ns = "gray60"),
   fill_title = "",
   plot_title = NULL,
@@ -74,11 +100,14 @@ displayed numeric variables.}
 \item{txt_hjust}{horizontal justification of the text label.}
 
 \item{txt_vjust}{vertical justification of the text label.}
+
+\item{top_regulated}{top n regulated genes/objects to be presented in the plot.}
 }
 \value{
 a ggplot object.
 }
 \description{
 Draws a Forest plot with the regulation estimates and,
-optionally confidence intervals for all items presente in a data frame.
+optionally confidence intervals for all items presented in a data frame
+(\code{plot_forest}) or top up- and downregulated fratures (\code{plot_top}).
 }

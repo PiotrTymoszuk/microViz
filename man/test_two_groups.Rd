@@ -34,9 +34,14 @@ see: \code{\link[stats]{p.adjust}}.}
 }
 \value{
 a data frame with the regulation statistic, confidence intervals,
-t and p values (raw and corrected).
+t and p values (raw and corrected) as well as effect size measures.
 }
 \description{
 Compares gene expression differences between two groups with
-the T test.
+T tests or Wilcoxon tests.
+}
+\details{
+The function returns Cohen's d as an effect size metric for T tests and
+r as an effect size statistic for Wilcoxon tests. The later is computed
+with \code{\link[rcompanion]{wilcoxonR}}.
 }

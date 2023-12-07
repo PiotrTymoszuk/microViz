@@ -1,0 +1,405 @@
+# Basic usage of the package with the breast cancer expression dataset
+
+# tools -------
+
+  library(tidyverse)
+  library(rlang)
+  library(microViz)
+  library(trafo)
+
+  library(org.Hs.eg.db)
+  library(AnnotationDbi)
+
+  ## for parallelization
+
+  library(furrr)
+
+  select <- dplyr::select
+  reduce <- purrr::reduce
+
+# data -------
+
+  data("brca")
+
+  counts <- brca
+
+  ## listing all available genes
+
+  genes <- names(brca)
+
+  genes <- genes[!genes %in% c('sample_id',
+                               'patient_id',
+                               'timepoint',
+                               'metastasis',
+                               'histology',
+                               'er_status')]
+
+
+  ## a data frame with log2-transformed variables
+  ## increasing by 1 to avoid potential log2(zero)
+
+  log_expression <- counts
+
+  log_expression[genes] <- log_expression[genes] %>%
+    map_dfc(~log2(.x + 1))
+
+# Column stats ---------
+
+  counts[genes] %>%
+    colMedians(.parallel = TRUE)
+
+  counts[genes] %>%
+    colVars(.parallel = TRUE)
+
+  counts[genes] %>%
+    colSDs(.parallel = TRUE)
+
+  counts[genes] %>%
+    colGini(.parallel = TRUE)
+
+  counts[genes] %>%
+    distr_stats(.parallel = TRUE)
+
+  counts[genes] %>%
+    colGmeans()
+
+  counts[genes] %>%
+    colHmeans()
+
+# Two-sample test -------
+
+  ## comparing gene expression between ER-positive and ER-negative cancers
+  ## two-tailed T test, FDR correction for multiple testing ('BH' stands for
+  ## Benjamini-Hochberg)
+
+  er_dge <- log_expression %>%
+    filter(!is.na(er_status)) %>%
+    test_two_groups(split_fct = 'er_status',
+                    type = 't',
+                    variables = genes,
+                    adj_method = 'BH',
+                    .parallel = TRUE)
+
+  ## identification of significantly regulate genes: pFDR < 0.05
+  ## and large effect size (d >= 0.08)
+
+  er_significant <- er_dge %>%
+    filter(p_adjusted < 0.05,
+           abs(effect_size) >= 0.5)
+
+  ## volcano plot: effect size and significance
+
+  plot_volcano(data = er_dge,
+               regulation_variable = 'effect_size',
+               p_variable = 'p_adjusted',
+               signif_level = 0.05,
+               regulation_level = 0.5,
+               top_regulated = 10,
+               label_variable = 'response',
+               x_lab = "Effect size of regulation, Cohen's d, ER- vs ER+",
+               plot_title = "Differential gene expression, ER status")
+
+  ## volcano plot: regulation and significance
+
+  plot_volcano(data = er_dge,
+               regulation_variable = 'estimate',
+               p_variable = 'p_adjusted',
+               signif_level = 0.05,
+               regulation_level = log2(1.5),
+               x_lab = expression("log"[2] * "regulation,  ER- vs ER+"),
+               plot_title = "Differential gene expression, ER status")
+
+  ## forest plot for the top-regulated genes
+
+  plot_top(data = er_significant,
+           regulation_variable = 'estimate',
+           label_variable = 'response',
+           p_variable = 'p_adjusted',
+           signif_level = 0.05,
+           regulation_level = 0,
+           lower_ci_variable = 'lower_ci',
+           upper_ci_variable = 'upper_ci',
+           top_regulated = 30,
+           plot_title = 'Top regulated genes',
+           x_lab = expression("log"[2] * "regulation,  ER- vs ER+")) +
+    theme(axis.text.y = element_text(face = 'italic'))
+
+  plot_regulated(data = er_dge,
+                 regulation_variable = 'estimate',
+                 label_variable = 'response',
+                 p_variable = 'p_value',
+                 regulation_level = 1,
+                 top_regulated = 20,
+                 plot_title = 'Top regulated genes, ER status',
+                 x_lab = expression("log"[2] * "regulation,  ER- vs ER+"),
+                 show_txt = TRUE,
+                 txt_size = 2.5,
+                 txt_color = 'white') +
+    theme(axis.text.y = element_text(face = 'italic'))
+
+# ANOVA -------
+
+  ## comparing tumors of different histologies: ductal, lobular and mixed one
+
+  histo_data <- log_expression %>%
+    filter(histology %in% c('IDC', 'MIXED_IDLC', 'ILC')) %>%
+    mutate(histology = droplevels(histology))
+
+  histo_dge <- histo_data %>%
+    test_anova(split_fct = 'histology',
+               variables = genes, adj_method = 'BH',
+               .parallel = TRUE)
+
+  ## identification of significantly regulated genes: pFDR < 0.05 and
+  ## eta-squared >= 0.06 in ANOVA
+
+  histo_significant <- histo_dge$anova %>%
+    filter(p_adjusted < 0.05,
+           effect_size >= 0.06)
+
+  ## volcano plots
+
+  histo_dge$lm %>%
+    filter(level == 'MIXED_IDLC') %>%
+    plot_volcano( regulation_variable = 'estimate',
+                  p_variable = 'p_adjusted',
+                  signif_level = 0.05,
+                  regulation_level = log2(1.5),
+                  x_lab = expression("log"[2] * "regulation, mixed vs ductal carcinoma"),
+                  plot_title = "Differential gene expression, mixed-histology cancers")
+
+  histo_dge$lm %>%
+    filter(level == 'ILC') %>%
+    plot_volcano( regulation_variable = 'estimate',
+                  p_variable = 'p_adjusted',
+                  signif_level = 0.05,
+                  regulation_level = log2(1.5),
+                  x_lab = expression("log"[2] * "regulation, luminal vs ductal carcinoma"),
+                  plot_title = "Differential gene expression, luminal cancers")
+
+# Classification of the histology-regulated genes -------
+
+  histo_class <-
+    classify(data = histo_data,
+             variables = histo_significant$response,
+             split_fct = 'histology')
+
+  histo_class$classification %>%
+    group_by(histology) %>%
+    top_n(n = 10,
+          delta_auc) %>%
+    ungroup %>%
+    plot_wordcloud(label_variable = 'variable',
+                   split_fct = 'histology',
+                   size_variable = 'auc',
+                   color_variable = 'auc',
+                   show.legend = TRUE,
+                   shape = 'square',
+                   fontface = 'italic',
+                   fraction_rotated = 0,
+                   nrow = 2)
+
+  heat_map(data = histo_data,
+           variables = histo_significant$response,
+           split_fct = 'histology',
+           midpoint = 0,
+           limits = c(-3, 3),
+           oob = scales::squish,
+           hide_x_axis_text = TRUE,
+           facet = FALSE,
+           plot_title = 'Histology-specific genes')
+
+  histo_data <- histo_data %>%
+    column_to_rownames('sample_id')
+
+  library(clustTools)
+
+  histo_distances <-
+    subset_distance(histo_data,
+                    variables = histo_significant$response,
+                    split_fct = 'histology',
+                    dist_FUN = calculate_dist,
+                    method = 'cosine')
+
+# Modeling with a confounder -------
+
+  ## comparing the T1 and T2 time points
+  ## choosing patients with both time points present
+
+  time_data <- log_expression %>%
+    select(sample_id,
+           patient_id,
+           timepoint,
+           all_of(genes)) %>%
+    filter(timepoint %in% c('T1', 'T2')) %>%
+    filter(complete.cases(.)) %>%
+    blast(patient_id) %>%
+    map_dfr(function(df) if(all(c('T1', 'T2') %in% df$timepoint)) df else NULL)
+
+  time_data <- time_data %>%
+    mutate(timepoint = droplevels(timepoint))
+
+  time_dge <- time_data %>%
+    test_anova(split_fct = 'timepoint',
+               variables = genes,
+               confounder = 'patient_id',
+               adj_method = 'BH',
+               .parallel = TRUE)
+
+  time_signifcant <- time_dge$anova %>%
+    filter(p_value < 0.05,
+           effect_size >= 0.06)
+
+  heat_map(data = time_data,
+           variables = time_signifcant$response,
+           split_fct = 'timepoint')
+
+# GO enrichment --------
+
+  ## A list of Entrez ID vectors
+
+  go_universe <-
+    mapIds(org.Hs.eg.db,
+           keys = genes,
+           keytype = 'SYMBOL',
+           column = 'ENTREZID')
+
+  go_universe <- go_universe[!is.na(go_universe)]
+
+  go_input <- list(er = er_dge,
+                        histo = histo_dge$anova,
+                        time = time_dge$anova) %>%
+    map(filter, p_value < 0.05) %>%
+    map(~.x$response) %>%
+    map(mapIds,
+        x = org.Hs.eg.db,
+        keytype = 'SYMBOL',
+        column = 'ENTREZID') %>%
+    map(~.x[!is.na(.x)])
+
+  plan('multisession')
+
+  go_enrichment <- go_input %>%
+    future_map(GOana,
+               universe = go_universe,
+               ontology = 'BP',
+               .options = furrr_options(seed = TRUE))
+
+  plan('sequential')
+
+  ## significant and top 10 most enriched GOs
+
+  go_enrichment <- go_enrichment %>%
+    map(filter, p_adjusted < 0.05)
+
+  top_go <- go_enrichment %>%
+    map(top_n,
+        n = 10,
+        or) %>%
+    map(mutate,
+        log_inv_p = -log10(p_adjusted))
+
+  go_volcanos <-
+    list(data = go_enrichment,
+         plot_title = paste('GO enrichment,',
+                            c('ER status', 'histology', 'time point'))) %>%
+    pmap(plot_volcano,
+         regulation_variable = 'or',
+         p_variable = 'p_adjusted',
+         show_vlines = 'right',
+         label_variable = 'term',
+         top_regulated = 10,
+         label_type = 'text') %>%
+    map(~.x +
+          scale_x_continuous(trans = 'log2'))
+
+  go_enrichment_bars <-
+    plot_regulated(data = go_enrichment$histo,
+                   regulation_variable = 'or',
+                   p_variable = 'p_adjusted',
+                   label_variable = 'term',
+                   top_regulated = 20,
+                   plot_title = 'Top enriched GOs, histology',
+                   x_lab = 'OR, enrichment over the genome',
+                   show_txt = TRUE)  +
+    scale_y_discrete(labels = function(x) map_chr(x, wrap_text, len = 4))
+
+# Word cloud plots -------
+
+  top_go_words <-
+    map2_dfr(top_go, c('ER status', 'histology', 'time point'),
+             ~mutate(.x, condition = .y)) %>%
+    mutate(condition = factor(condition,
+                              c('ER status', 'histology', 'time point')))
+
+  plot_wordcloud(data = top_go_words,
+                 split_fct = 'condition',
+                 label_variable = 'go_id',
+                 color_variable = 'log_inv_p',
+                 size_variable = 'or',
+                 size_type = 'size',
+                 size_range = c(0, 4),
+                 wrap = TRUE,
+                 cust_theme = theme_minimal(),
+                 show.legend = TRUE,
+                 color_lab = 'Significance',
+                 size_lab = 'Enrichment',
+                 shape = 'square',
+                 nrow = 2,
+                 fraction_rotated = 0.5)
+
+
+
+
+# Bubble plots, top regulated genes -------
+
+  ## top regulated genes in ER- vs ER+ tumor
+
+  top_er_genes <- er_dge %>%
+    top_n(n = 30,
+          wt = abs(estimate)) %>%
+    arrange(estimate) %>%
+    .$response
+
+  ## average expression values
+
+  top_er_expression <- log_expression %>%
+    select(er_status, all_of(top_er_genes)) %>%
+    filter(complete.cases(.)) %>%
+    pivot_longer(cols = all_of(top_er_genes),
+                 names_to = 'gene',
+                 values_to = 'log2_expression') %>%
+    mutate(gene = factor(gene, top_er_genes)) %>%
+    group_by(er_status, gene) %>%
+    summarise(log2_expression = mean(log2_expression)) %>%
+    ungroup
+
+  top_er_bubble <- plot_bubble(data = top_er_expression,
+                               x_variable = 'er_status',
+                               y_variable = 'gene',
+                               size_variable = 'log2_expression',
+                               color_variable = 'log2_expression',
+                               plot_title = 'Top regulated genes, ER status',
+                               x_lab = 'ER status',
+                               y_lab = 'Gene',
+                               color_lab = 'expression',
+                               size_lab = 'expression',
+                               size_type = 'area') +
+    guides(fill = 'legend',
+           size = 'legend') +
+    theme(axis.text.y = element_text(face = 'italic'))
+
+# Deviations from center --------
+
+  histo_deviations <-
+    avg_deviation(data = log_expression,
+                  variables = genes,
+                  split_fct = 'histology',
+                  grand_center = 'median',
+                  split_center = 'median',
+                  ci = 'distr',
+                  .parallel = TRUE)
+
+
+
+# END ------

@@ -14,6 +14,7 @@ plot_volcano(
   x_lab = regulation_variable,
   y_lab = expression("-log"[10] * " p"),
   top_significant = 0,
+  top_regulated = 0,
   label_variable = NULL,
   label_type = c("label", "text"),
   txt_size = 2.75,
@@ -26,7 +27,9 @@ plot_volcano(
   cust_theme = microViz::theme_micro(),
   point_alpha = 0.8,
   point_hjitter = 0,
-  point_wjitter = 0
+  point_wjitter = 0,
+  show_hline = TRUE,
+  show_vlines = c("both", "right", "left")
 )
 }
 \arguments{
@@ -51,6 +54,9 @@ Three colors required: for upregulation, downregulation and non-significance.}
 
 \item{top_significant}{top n significant genes/objects to be labeled in
 the plot with their names.}
+
+\item{top_regulated}{top n most regulated genes/objects to be labeled in
+the plot with their names. Ignored if \code{top_significant} is provided.}
 
 \item{label_variable}{variable storing the gene/object names.}
 
@@ -79,9 +85,15 @@ regulated genes is displayed.}
 \item{point_hjitter}{height jittering of the points, defaults to 0.}
 
 \item{point_wjitter}{width jittering of the points, defaults to 0.}
+
+\item{show_hline}{logical, should the horizontal line representing the
+significance cutoff be presented in the plot?}
+
+\item{show_vlines}{specifies which vertical lines representing the regulation
+cutoffs will be plotted.}
 }
 \value{
-a ggplot object.
+a \code{ggplot} object.
 }
 \description{
 Generates a Volcano plot with the effect size/regulation

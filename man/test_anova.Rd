@@ -8,6 +8,7 @@ test_anova(
   data,
   split_fct,
   variables,
+  confounder = NULL,
   adj_method = "BH",
   .parallel = FALSE,
   ...
@@ -20,6 +21,9 @@ test_anova(
 
 \item{variables}{a vector with dependent variable names.}
 
+\item{confounder}{name of the confounding variable. Defaults to NULL, which
+means that no confounder is include in the model.}
+
 \item{adj_method}{p value adjustment method,
 see: \code{\link[stats]{p.adjust}}.}
 
@@ -29,9 +33,22 @@ see: \code{\link[stats]{p.adjust}}.}
 }
 \value{
 a list of data frames containing the ANOVA and linear model
-estimates, respectively.
+estimates.
 }
 \description{
 Compares expression differences between multiple groups with
 one-way ANOVA and linear modeling.
+}
+\details{
+If a confounding variable is specified it will be included in the
+model as a leading fixed term. Statistics for the confounding term are
+not shown in the output. Note: effect size statistic, Cohen's d, returned for
+the betas of linear modeling is computed as the ratio of beta to square root
+of variance means (baseline and the i-th variable level of interest):
+
+\deqn{d_i = \frac{\beta_{i}}{\sqrt{0.5 \times (Var_{i} + Var_{baseline})}}}
+
+As such, the Cohen's d values are only very coarse estimates of effect size,
+when a confounder is included in the model. The effect size of ANOVA is
+eta-squared.
 }

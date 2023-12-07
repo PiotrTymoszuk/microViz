@@ -2,9 +2,12 @@
 % Please edit documentation in R/testing.R
 \name{t_tester}
 \alias{t_tester}
-\title{T test.}
+\alias{wilcox_tester}
+\title{T and Wilcoxon test.}
 \usage{
 t_tester(data, split_fct, variable, ...)
+
+wilcox_tester(data, split_fct, variable, conf.int = FALSE, ...)
 }
 \arguments{
 \item{data}{a data frame.}
@@ -13,11 +16,15 @@ t_tester(data, split_fct, variable, ...)
 
 \item{variable}{dependent variable name.}
 
-\item{...}{additional arguments passed to \code{\link[stats]{t.test}}.}
+\item{...}{additional arguments passed to \code{\link[stats]{t.test}} or
+\code{\link[stats]{wilcox.test}}.}
+
+\item{conf.int}{logical, should confidence intervals be calculated?}
 }
 \value{
 a data frame with the regulation statistic, confidence intervals,
-t and p values
+t and p values as well as effect size (Cohen's d for T tests and r for
+Wilcoxon tests).
 }
 \description{
 Test for the difference with a T test.
