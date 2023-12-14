@@ -123,7 +123,7 @@ Let's start with some example whole genome data provided with the `microViz` pac
 ```
 </details>
 
-## Column and row statistics and variable selection
+### Column and row statistics and variable selection
 
 <details>
   
@@ -265,3 +265,5 @@ The process of variable selection based e.g. on Gini coefficient, frequency rati
 
 ```
 </details>
+
+
