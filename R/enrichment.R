@@ -86,12 +86,11 @@
 
     if(ontology != 'all') {
 
-      res <- dplyr::filter(res,
-                           .data[['Ont']] == ontology)
+      res <- filter(res, .data[['Ont']] == ontology)
 
     }
 
-    res <- tibble::rownames_to_column(res, 'go_id')
+    res <- rownames_to_column(res, 'go_id')
 
     go_id <- NULL
     term <- NULL
@@ -104,21 +103,21 @@
     p_adjusted <- NULL
 
     res <-
-      dplyr::transmute(res,
-                       go_id = go_id,
-                       term = Term,
-                       ontology = Ont,
-                       n_go_dge = DE,
-                       n_go_total = N,
-                       n_dge = length(de),
-                       n_total = length(universe),
-                       or = (n_go_dge/n_go_total)/(n_dge/n_total),
-                       p_value = P.DE,
-                       p_adjusted = stats::p.adjust(P.DE, method = adj_method))
+      transmute(res,
+                go_id = go_id,
+                term = Term,
+                ontology = Ont,
+                n_go_dge = DE,
+                n_go_total = N,
+                n_dge = length(de),
+                n_total = length(universe),
+                or = (n_go_dge/n_go_total)/(n_dge/n_total),
+                p_value = P.DE,
+                p_adjusted = p.adjust(P.DE, method = adj_method))
 
-    res <- dplyr::arrange(res, -or)
+    res <- arrange(res, -or)
 
-    tibble::as_tibble(res)
+    as_tibble(res)
 
   }
 

@@ -2,50 +2,180 @@
 % Please edit documentation in R/numeric_functions.R
 \name{colMedians}
 \alias{colMedians}
+\alias{colMedians.matrix}
+\alias{colMedians.data.frame}
+\alias{colMins}
+\alias{colMins.matrix}
+\alias{colMins.data.frame}
+\alias{colMax}
+\alias{colMax.matrix}
+\alias{colMax.data.frame}
 \alias{colGmeans}
+\alias{colGmeans.matrix}
+\alias{colGmeans.data.frame}
 \alias{colHmeans}
+\alias{colHmeans.matrix}
+\alias{colHmeans.data.frame}
 \alias{colVars}
+\alias{colVars.matrix}
+\alias{colVars.data.frame}
 \alias{colSDs}
+\alias{colSDs.matrix}
+\alias{colSDs.data.frame}
 \alias{colGini}
+\alias{colGini.matrix}
+\alias{colGini.data.frame}
+\alias{colFreqRatios}
+\alias{colFreqRatios.matrix}
+\alias{colFreqRatios.data.frame}
+\alias{colPercUniques}
+\alias{colPercUniques.matrix}
+\alias{colPercUniques.data.frame}
+\alias{colQuantiles}
+\alias{colQuantiles.matrix}
+\alias{colQuantiles.data.frame}
+\alias{colCI}
+\alias{colCI.matrix}
+\alias{colCI.data.frame}
 \alias{distr_stats}
-\title{Compute statistics for numeric columns of a data frame.}
+\title{Compute statistics for numeric columns of a data frame or a matrix.}
 \usage{
-colMedians(x, na.rm = TRUE, .parallel = FALSE)
+colMedians(x, ...)
 
-colGmeans(x, na.rm = TRUE, .parallel = FALSE)
+\method{colMedians}{matrix}(x, na.rm = TRUE, ...)
 
-colHmeans(x, na.rm = TRUE, .parallel = FALSE)
+\method{colMedians}{data.frame}(x, na.rm = TRUE, ...)
 
-colVars(x, na.rm = TRUE, .parallel = FALSE)
+colMins(x, ...)
 
-colSDs(x, na.rm = TRUE, .parallel = FALSE)
+\method{colMins}{matrix}(x, na.rm = TRUE, ...)
 
-colGini(x, na.rm = TRUE, .parallel = FALSE)
+\method{colMins}{data.frame}(x, na.rm = TRUE, ...)
 
-distr_stats(x, na.rm = TRUE, ..., .parallel = FALSE)
+colMax(x, ...)
+
+\method{colMax}{matrix}(x, na.rm = TRUE, ...)
+
+\method{colMax}{data.frame}(x, na.rm = TRUE, ...)
+
+colGmeans(x, ...)
+
+\method{colGmeans}{matrix}(x, na.rm = TRUE, ...)
+
+\method{colGmeans}{data.frame}(x, na.rm = TRUE, ...)
+
+colHmeans(x, ...)
+
+\method{colHmeans}{matrix}(x, na.rm = TRUE, ...)
+
+\method{colHmeans}{data.frame}(x, na.rm = TRUE, ...)
+
+colVars(x, ...)
+
+\method{colVars}{matrix}(x, na.rm = TRUE, ...)
+
+\method{colVars}{data.frame}(x, na.rm = TRUE, ...)
+
+colSDs(x, ...)
+
+\method{colSDs}{matrix}(x, na.rm = TRUE, ...)
+
+\method{colSDs}{data.frame}(x, na.rm = TRUE, ...)
+
+colGini(x, unbiased, ...)
+
+\method{colGini}{matrix}(x, unbiased = TRUE, na.rm = TRUE, ...)
+
+\method{colGini}{data.frame}(x, unbiased = TRUE, na.rm = TRUE, ...)
+
+colFreqRatios(x, ...)
+
+\method{colFreqRatios}{matrix}(x, ...)
+
+\method{colFreqRatios}{data.frame}(x, ...)
+
+colPercUniques(x, ...)
+
+\method{colPercUniques}{matrix}(x, ...)
+
+\method{colPercUniques}{data.frame}(x, ...)
+
+colQuantiles(x, probs, ...)
+
+\method{colQuantiles}{matrix}(x, probs, na.rm = TRUE, ...)
+
+\method{colQuantiles}{data.frame}(x, probs, na.rm = TRUE, ...)
+
+colCI(x, conf_level, ...)
+
+\method{colCI}{matrix}(x, conf_level = 0.95, method = c("percentile", "bca"), na.rm = TRUE, ...)
+
+\method{colCI}{data.frame}(x, conf_level = 0.95, method = c("percentile", "bca"), na.rm = TRUE, ...)
+
+distr_stats(x, unbiased = TRUE, freqCut = 95/5, uniqueCut = 10, ...)
 }
 \arguments{
-\item{x}{a numeric data frame.}
+\item{x}{a numeric data frame or matrix.}
+
+\item{...}{extra arguments passed to methods, currently none.}
 
 \item{na.rm}{logical: should NAs be removed?}
 
-\item{.parallel}{logical, should the computation be done in parallel? Makes
-sense for large datasets.}
+\item{unbiased}{logical, should estimated of the population Gini coefficient
+be returned (multiplied by \code{n/(n - 1)})?}
 
-\item{...}{extra arguments passed to \code{\link[caret]{nearZeroVar}}.}
+\item{probs}{a numeric vector of quantiles.}
+
+\item{conf_level}{a single numeric with the width of the confidence interval.}
+
+\item{method}{method of confidence interval calculation: percentile (default)
+or BCA.}
+
+\item{freqCut}{the cutoff of ratio of the most frequent element to the
+second most frequent element. Used for identification of near-zero
+variance variables.}
+
+\item{uniqueCut}{the cutoff of percentage of unique observations. Used for
+identification of near-zero variance variables.}
 }
 \value{
 \code{colMedians()}, \code{colGmeans()}, \code{colHmeans()}, \code{colVars()},
 \code{colSDs()}, \code{colGini()} return numeric vectors with, respectively,
 column medians, geometric means, harmonic means, variances, standard
 deviations and Gini coefficients.
-\code{distr_stats()} returns a data frame with variable names, their means,
-variances, Gini coefficients, variance to mean ratios and the output of the
-\code{caret} function \code{\link[caret]{nearZeroVar}}.
+\code{colQuantiles()}, and \code{colCI()} return numeric matrices with variables
+listed in rows.
+\code{colFreqRatios()} returns ratios of frequencies of the first most common
+element to the second one for each column; the function silently skips any
+\code{NAs}.
+\code{colPercUniques()} returns percentages of unique observations in each column;
+\code{NAs} are silently removed.
+
+\code{distr_stats()} returns a data frame with the following columns:
+\itemize{
+\item \code{variable}: variable names
+\item \code{mean}: variable means
+\item \code{var}: variances
+\item \code{gini_coef}: Gini coefficients
+\item \code{var_mean_ratio}: variance to mean ratios
+\item \code{freqRatio}: ratios of frequencies of the first most common element to the
+second most common element.
+\item \code{percentUnique}: percentage of unique observations
+\item \code{zeroVar}: logical, indicates if the variable has only one unique value.
+\item \code{nzv}: logical, indicates if the variable passes the variability criteria
+defined by the \code{freqCut} and \code{uniqueCut} arguments.
+}
 }
 \description{
-The functions compute column medians, variances, standard deviations and
-Gini coefficients. \code{distr_stats} computes a bunch of distribution stats that
+The functions compute column medians, variances, standard deviations,
+Gini coefficients, quantiles and confidence intervals as well as metrics of
+unique values.
+\code{distr_stats} computes a bunch of distribution stats that
 are helpful at selection of variant features for the further analysis, e.g.
 differential gene expression.
+}
+\references{
+DiCiccio TJ, Efron B. Bootstrap confidence intervals.
+https://doi.org/101214/ss/1032280214 (1996) 11:189–228.
+doi:10.1214/SS/1032280214
 }

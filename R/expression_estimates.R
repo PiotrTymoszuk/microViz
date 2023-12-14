@@ -49,9 +49,9 @@
 #' @param split_center statistic of the central tendency in subsets defined
 #' by `split_fct`.
 #' @param ci type of 95% confidence intervals, as specified in Details.
+#' @param conf_level width of the confidence interval.
 #' @param adj_method method of multiple testing adjustment.
 #' See: \code{\link[stats]{p.adjust}}.
-#' @param .parallel logical: should the function be run in parallel?
 #'
 #' @export
 
@@ -61,8 +61,8 @@
                             grand_center = c('mean', 'median', 'gmean', 'hmean'),
                             split_center = c('mean', 'median', 'gmean', 'hmean'),
                             ci = c('distr', 'percentile', 'bca'),
-                            adj_method = 'BH',
-                            .parallel = FALSE) {
+                            conf_level = 0.95,
+                            adj_method = 'BH') {
 
     ## input control --------
 
@@ -104,76 +104,51 @@
 
     ci <- match.arg(ci[1], c('distr', 'percentile', 'bca'))
 
-    stopifnot(is.logical(.parallel))
-
     ## data, central tendency function and CI function-----
 
     grand_data <- data[variables]
 
-    data_check <- purrr::map_lgl(grand_data, is.numeric)
-
-    if(any(!data_check)) {
-
-      stop('Numeric data is required.', call. = FALSE)
-
-    }
+    check_df(grand_data)
 
     grand_fun <-
       switch(grand_center,
              mean = function(x) colMeans(x, na.rm = TRUE),
-             median = function(x) colMedians(x, na.rm = TRUE, .parallel = .parallel),
-             gmean = function(x) colHmeans(x, na.rm = TRUE, .parallel = .parallel),
-             hmean = function(x) colHmeans(x, na.rm = TRUE, .parallel = .parallel))
+             median = function(x) colMedians(x, na.rm = TRUE),
+             gmean = function(x) colHmeans(x, na.rm = TRUE),
+             hmean = function(x) colHmeans(x, na.rm = TRUE))
 
     split_fun <-
       switch(split_center,
              mean = function(x) colMeans(x, na.rm = TRUE),
-             median = function(x) colMedians(x, na.rm = TRUE, .parallel = .parallel),
-             gmean = function(x) colHmeans(x, na.rm = TRUE, .parallel = .parallel),
-             hmean = function(x) colHmeans(x, na.rm = TRUE, .parallel = .parallel))
-
-    ci_fun <-
-      switch(ci,
-             percentile = function(x) stats::quantile(x,
-                                                      c(0.025, 0.975),
-                                                      na.rm = TRUE),
-             bca = function(x) coxed::bca(x[!is.na(x)]))
+             median = function(x) colMedians(x, na.rm = TRUE),
+             gmean = function(x) colHmeans(x, na.rm = TRUE),
+             hmean = function(x) colHmeans(x, na.rm = TRUE))
 
     ## grand stats and single deviations from the grand stat -------
 
     grand_centers <- grand_fun(grand_data)
 
-    diffs <- purrr::map2(grand_data, grand_centers, `-`)
+    diffs <- Delta(as.matrix(grand_data), grand_centers)
 
-    split_diffs <- purrr::map(diffs, split, f = data[[split_fct]])
+    split_diffs <- split(as.data.frame(diffs), f = data[[split_fct]])
 
-    split_diffs <- purrr::transpose(split_diffs)
-
-    split_diffs <- purrr::map(split_diffs, as.data.frame)
+    split_diffs <- map(split_diffs, as.data.frame)
 
     ## average, SD and confidence intervals for the deviations ------
 
-    split_centers <- purrr::map(split_diffs, split_fun)
+    split_centers <- map(split_diffs, split_fun)
 
-    split_variance <- list()
+    split_variance <- map(split_diffs, colVars)
 
-    split_ci <- list()
+    if(ci != 'distr') {
 
-    for(i in names(split_centers)) {
+      split_ci <- map(split_diffs,
+                      colCI,
+                      conf_level = conf_level,
+                      method = ci,
+                      na.rm = TRUE)
 
-      split_variance[[i]] <-
-        purrr::map2_dbl(split_diffs[[i]], split_centers[[i]],
-                        ~sum((.x - .y)^2, na.rm = TRUE)/(length(.x) - 1))
-
-      if(ci != 'distr') {
-
-        split_ci[[i]] <- purrr::map(split_diffs[[i]], ci_fun)
-
-        split_ci[[i]] <- do.call('rbind', split_ci[[i]])
-
-        colnames(split_ci[[i]]) <- c('lower_ci', 'upper_ci')
-
-      }
+      split_ci <- do.call('rbind', split_ci)
 
     }
 
@@ -185,57 +160,62 @@
 
     for(i in names(split_centers)) {
 
-     output[[i]] <-
-       tibble::tibble(!!split_fct := i,
-                      n = split_counts[i],
-                      variable = names(grand_centers),
-                      grand_center = grand_centers,
-                      deviation_center = split_centers[[i]],
-                      deviation_sd = sqrt(split_variance[[i]]),
-                      deviation_sem = sqrt(split_variance[[i]])/sqrt(split_counts[i]))
-
-     ## t statistic, its degrees of freedom and one sample t test
-
-     output[[i]][['t']] <-
-       output[[i]][['deviation_center']]/output[[i]][['deviation_sem']]
-
-     output[[i]][['df']] <- split_counts[i] - 1
-
-     output[[i]][['p_value']] <-
-       stats::pt(abs(output[[i]][['t']]),
-                 df = output[[i]][['df']],
-                 lower.tail = FALSE)
-
-     if(ci != 'distr') {
-
-       output[[i]] <- cbind(output[[i]],
-                            tibble::as_tibble(split_ci[[i]]))
-
-     } else {
-
-      output[[i]][['lower_ci']] <- output[[i]][['deviation_center']] +
-        stats::qt(0.025, df = output[[i]][['df']]) *
-        output[[i]][['deviation_sem']]
-
-      output[[i]][['upper_ci']] <- output[[i]][['deviation_center']] +
-        stats::qt(0.975, df = output[[i]][['df']]) *
-        output[[i]][['deviation_sem']]
-
-     }
-
-     output[[i]] <- tibble::as_tibble(output[[i]])
+      output[[i]] <-
+        tibble(!!split_fct := i,
+               n = split_counts[i],
+               variable = names(grand_centers),
+               grand_center = grand_centers,
+               deviation_center = split_centers[[i]],
+               deviation_sd = sqrt(split_variance[[i]]),
+               deviation_sem = sqrt(split_variance[[i]])/sqrt(split_counts[i]))
 
     }
 
     output <- do.call('rbind', output)
 
-    output[[split_fct]] <- factor(output[[split_fct]],
-                                  levels(data[[split_fct]]))
+    ## t statistic, its degrees of freedom and p values ------
 
-    output[['p_adjusted']] <-
-      stats::p.adjust(output[['p_value']], method = adj_method)
+   output[['t']] <-
+     output[['deviation_center']]/output[['deviation_sem']]
 
-    output
+   output[['df']] <- split_counts[i] - 1
+
+   output[['p_value']] <-
+     stats::pt(abs(output[['t']]),
+               df = output[['df']],
+               lower.tail = FALSE)
+
+   if(ci != 'distr') {
+
+     output <- cbind(output, as_tibble(split_ci))
+
+   } else {
+
+     output[['lower_ci']] <- output[['deviation_center']] +
+       stats::qt(0.025, df = output[['df']]) *
+       output[['deviation_sem']]
+
+     output[['upper_ci']] <- output[['deviation_center']] +
+       stats::qt(0.975, df = output[['df']]) *
+       output[['deviation_sem']]
+
+   }
+
+   output[[split_fct]] <- factor(output[[split_fct]],
+                                 levels(data[[split_fct]]))
+
+   output[['p_adjusted']] <-
+     p.adjust(output[['p_value']], method = adj_method)
+
+   as_tibble(output[c(split_fct,
+                      'n', 'variable',
+                      'grand_center',
+                      'deviation_center',
+                      'deviation_sd',
+                      'deviation_sem',
+                      't', 'df',
+                      'lower_ci', 'upper_ci',
+                      'p_value', 'p_adjusted')])
 
   }
 

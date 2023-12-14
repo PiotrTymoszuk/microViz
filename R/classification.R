@@ -83,75 +83,70 @@
 
     split_levs <- levels(data[[split_fct]])
 
-    split_levs <- rlang::set_names(split_levs, split_levs)
+    split_levs <- set_names(split_levs, split_levs)
 
     sub_class <- NULL
 
     split_data <-
-      purrr::map(split_levs,
-                 ~dplyr::mutate(data,
-                                sub_class = ifelse(.data[[split_fct]] == .x,
-                                                   'yes', 'no'),
-                                sub_class = factor(sub_class, c('no', 'yes'))))
+      map(split_levs,
+          ~mutate(data,
+                  sub_class = ifelse(.data[[split_fct]] == .x,
+                                     'yes', 'no'),
+                  sub_class = factor(sub_class, c('no', 'yes'))))
 
     ## ROC analysis, extraction of the AUC ------
 
     ## ROC AUC for detection of the particular subset versus the pooled rest
 
     roc_objects <-
-      purrr::map(split_data,
-                 function(df) purrr::map(variables,
-                                         ~pROC::roc(df[['sub_class']],
-                                                    df[[.x]],
-                                                    levels = c('no', 'yes'),
-                                                    direction = direction)))
+      map(split_data,
+          function(df) map(variables,
+                           ~pROC::roc(df[['sub_class']],
+                                      df[[.x]],
+                                      levels = c('no', 'yes'),
+                                      direction = direction)))
 
-    roc_objects <- purrr::transpose(roc_objects)
+    roc_objects <- transpose(roc_objects)
 
-    roc_objects <- rlang::set_names(roc_objects, variables)
+    roc_objects <- set_names(roc_objects, variables)
 
-    auc_tbl <-
-      purrr::map(roc_objects,
-                 purrr::map_dbl,
-                 ~.x$auc)
+    auc_tbl <- map(roc_objects, map_dbl, ~.x$auc)
 
     auc <- NULL
     delta_auc <- NULL
     variable <- NULL
 
     auc_tbl <-
-      purrr::map(auc_tbl,
-                 ~tibble::tibble(!!split_fct := names(.x),
-                                 auc = .x))
+      map(auc_tbl,
+          ~tibble(!!split_fct := names(.x),
+                  auc = .x))
 
     auc_tbl <-
-      purrr::map2_dfr(auc_tbl, names(auc_tbl),
-                      ~dplyr::mutate(.x, variable = .y))
+      map2_dfr(auc_tbl, names(auc_tbl),
+               ~mutate(.x, variable = .y))
 
     ## computing deviance from the mean AUC
 
-    auc_tbl <- dplyr::group_by(auc_tbl, variable)
+    auc_tbl <- group_by(auc_tbl, variable)
 
-    auc_tbl <- dplyr::mutate(auc_tbl,
-                             delta_auc = auc - mean(auc))
+    auc_tbl <- mutate(auc_tbl, delta_auc = auc - mean(auc))
 
-    auc_tbl <- dplyr::ungroup(auc_tbl)
+    auc_tbl <- ungroup(auc_tbl)
 
     auc_tbl <-
-      dplyr::mutate(auc_tbl,
-                    !!split_fct := factor(.data[[split_fct]],
-                                          split_levs))
+      mutate(auc_tbl,
+             !!split_fct := factor(.data[[split_fct]],
+                                   split_levs))
 
     ## selecting the cluster with the best detection accuracy ------
 
-    best_clusters <- dplyr::group_by(auc_tbl, variable)
+    best_clusters <- group_by(auc_tbl, variable)
 
-    best_clusters <- dplyr::filter(best_clusters, auc == max(auc))
+    best_clusters <- filter(best_clusters, auc == max(auc))
 
-    best_clusters <- dplyr::ungroup(best_clusters)
+    best_clusters <- ungroup(best_clusters)
 
-    best_clusters <-
-      dplyr::arrange(best_clusters, .data[[split_fct]], delta_auc)
+    best_clusters <- arrange(best_clusters, .data[[split_fct]], delta_auc)
 
     list(auc = auc_tbl[c('variable',
                          split_fct,
@@ -252,16 +247,15 @@
 
       center_fun <- switch(norm_center,
                            mean = function(x) mean(x, na.rm = TRUE),
-                           median = function(x) stats::median(x, na.rm = TRUE))
+                           median = function(x) median(x, na.rm = TRUE))
 
       data[variables] <-
-        purrr::map_dfc(data[variables],
-                       ~scale(.x, center = center_fun(.x))[, 1])
+        map_dfc(data[variables],
+                ~scale(.x, center = center_fun(.x))[, 1])
 
     }
 
-    data <- dplyr::filter(data,
-                          stats::complete.cases(data))
+    data <- filter(data, complete.cases(data))
 
     data_mtx <- as.matrix(data[variables])
 
@@ -277,8 +271,8 @@
 
     observation <- NULL
 
-    assignment <- tibble::tibble(observation = observations,
-                                 !!split_fct := data[[split_fct]])
+    assignment <- tibble(observation = observations,
+                         !!split_fct := data[[split_fct]])
 
     ## distance calculation --------
 
@@ -314,23 +308,23 @@
     observation_map <- split(assignment$observation,
                              assignment[[split_fct]])
 
-    subset_identities <- purrr::map(split_levs, ~c(.x, .x))
+    subset_identities <- map(split_levs, ~c(.x, .x))
 
     subset_pairs <- utils::combn(split_levs, m = 2, simplify = FALSE)
 
     subset_pairs <- c(subset_pairs, subset_identities)
 
     subset_pair_names <-
-      purrr::map(subset_pairs,
-                 paste,
-                 collapse = ' vs ')
+      map(subset_pairs,
+          paste,
+          collapse = ' vs ')
 
-    subset_pairs <- rlang::set_names(subset_pairs, subset_pair_names)
+    subset_pairs <- set_names(subset_pairs, subset_pair_names)
 
     subset_dists <-
-      purrr::map(subset_pairs,
-                 ~dist_mtx[observation_map[[.x[1]]],
-                           observation_map[[.x[2]]]])
+      map(subset_pairs,
+          ~dist_mtx[observation_map[[.x[1]]],
+                    observation_map[[.x[2]]]])
 
     ## cross-distance object -------
 

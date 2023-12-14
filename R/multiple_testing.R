@@ -1,0 +1,250 @@
+# Re-adjustment of testing results and identification of significant effects
+
+#' @include imports.R
+
+  NULL
+
+# Multiple testing adjustment ---------
+
+#' Adjust for multiple testing.
+#'
+#' @description
+#' Adjusts for multiple comparison. The input is a result of a statistic test
+#' in a data frame format.
+#'
+#' @details
+#' For available methods, please consult \code{\link[stats]{p.adjust}}.
+#'
+#' @param data a data frame with the testing results.
+#' @param p_variable name of the variable that stores raw p values to be
+#' adjusted.
+#' @param method adjustment method.
+#' @param simplify_p logical, should adjusted p values below 0.001 be presented
+#' in a p < 0.001 form?
+#'
+#' @return
+#' The genuine data frame appended with two columns:
+#' * `p_adjusted` with adjusted p values
+#' * `significance` with text indicating significance and p value, e.g.
+#' 'ns(p = 0.12).
+#'
+#' @export
+
+  re_adjust <- function(data,
+                        p_variable = 'p_value',
+                        method = 'BH',
+                        simplify_p = TRUE) {
+
+    ## input control -------
+
+    if(!is.data.frame(data)) {
+
+      stop("'x' has to be a dta frame.", call. = FALSE)
+
+    }
+
+    if(!p_variable %in% names(data)) {
+
+      stop("'p_variable' is missing from the data.", call. = FALSE)
+
+    }
+
+    stopifnot(is.logical(simplify_p))
+
+    ## adjustment ------
+
+    data[['p_adjusted']] <- p.adjust(data[[p_variable]], method = method)
+
+    significance <- NULL
+    p_adjusted <- NULL
+
+    if(simplify_p) {
+
+      data <-
+        mutate(data,
+               significance = ifelse(p_adjusted < 0.001,
+                                     'p < 0.001',
+                                     ifelse(p_adjusted >= 0.05,
+                                            paste0('ns (p = ', signif(p_adjusted, 2), ')'),
+                                            paste('p =', signif(p_adjusted, 2)))))
+
+    } else {
+
+      data <-
+        mutate(data,
+               significance = ifelse(p_adjusted >= 0.05,
+                                     paste0('ns (p = ', signif(p_adjusted, 2), ')'),
+                                     paste('p =', signif(p_adjusted, 2))))
+
+    }
+
+    data
+
+  }
+
+# Identification of significant effects ----------
+
+#' Identify significant effects.
+#'
+#' @description
+#' Identifies significant effects with a given significance and regulation
+#' or effect size threshold.
+#'
+#' @return
+#' A character vector or a list of character vectors with names of significant
+#' variables derived from `label_variable`.
+#'
+#' @param data a data frame with the testing results.
+#' @param label_variable name of the variable storing names of the tested
+#' variables.
+#' @param p_variable name of the variable storing p values.
+#' @param regulation_variable name of the variable storing regulation or
+#' effect size figures. If `NULL`, significance is determined solely by the
+#' p value threshold.
+#' @param signif_level p value threshold.
+#' @param regulation_level regulation or effect size threshold.
+#'
+#' @export
+
+  identify_significant <- function(data,
+                                   label_variable,
+                                   p_variable,
+                                   regulation_variable = NULL,
+                                   signif_level = 0.05,
+                                   regulation_level = 0) {
+
+    ## input control --------
+
+    if(!is.data.frame(data)) {
+
+      stop('A data frame is required.', call. = FALSE)
+
+    }
+
+    vars_to_check <- c(label_variable, p_variable)
+
+    if(!is.null(regulation_variable)) {
+
+      vars_to_check <- c(vars_to_check, regulation_variable)
+
+    }
+
+    err_txt <-
+      paste0('At least one of ',
+             paste(vars_to_check, collapse = ' or '),
+             ' is missing from the data.')
+
+    if(!any(vars_to_check %in% names(data))) stop(err_txt, call. = FALSE)
+
+    class_check <- map_lgl(data[vars_to_check[-1]], is.numeric)
+
+    err_txt <-
+      paste0('All of ',
+             paste(vars_to_check[-1], collapse = ' and '),
+             ' variables have to be numeric.')
+
+    if(any(!class_check)) stop(err_txt, call. = FALSE)
+
+    stopifnot(is.numeric(signif_level))
+    stopifnot(is.numeric(regulation_level))
+
+    if(is.null(regulation_variable)) {
+
+      reg_categories <- c('ns', 'significant')
+
+    } else {
+
+      reg_categories <- c('downregulated', 'ns', 'upregulated')
+
+    }
+
+    ## identification of significant effects -------
+
+    .significant <- NULL
+
+    data <- mutate(data,
+                   .significant = ifelse(.data[[p_variable]] < signif_level,
+                                        'yes', 'no'))
+
+    if(is.null(regulation_variable)) {
+
+      data <- filter(data, .significant == 'yes')
+
+      return(data[[label_variable]])
+
+    }
+
+    .regulation <- NULL
+
+    data <- mutate(data,
+                   .regulation = ifelse(.significant == 'no',
+                                        'ns',
+                                        ifelse(.data[[regulation_variable]] == 0,
+                                               'ns',
+                                               ifelse(.data[[regulation_variable]] >= regulation_level,
+                                                      'upregulated',
+                                                      ifelse(.data[[regulation_variable]] <= -regulation_level,
+                                                             'downregulated', 'ns')))))
+
+    data <- filter(data,
+                   .regulation %in% c('upregulated', 'downregulated'))
+
+    data <- mutate(data,
+                   .regulation = factor(.regulation,
+                                        c('upregulated', 'downregulated')))
+
+    signif_vars <- split(data[[label_variable]],
+                         data[['.regulation']])
+
+    signif_vars <-
+      map(signif_vars, function(x) if(length(x) == 0) NULL else x)
+
+    signif_vars <- compact(signif_vars)
+
+    if(length(signif_vars) == 1) {
+
+      return(signif_vars[[1]])
+
+    } else {
+
+      return(signif_vars)
+
+    }
+
+  }
+
+# Shared elements ----------
+
+#' Identify shared elements in sets.
+#'
+#' @description
+#' The function chooses elements shared by at least n elements of a list.
+#' As such it may be useful at identifying e.g. significantly regulated genes
+#' or pathways in several data sets.
+#'
+#' @return a vector with the features shared by the given number of
+#' elements.
+#'
+#' @param x a list of character or numeric vectors.
+#' @param m number of sets which share the common features.
+#'
+#' @export
+
+  shared_features <- function(x, m = 2) {
+
+    ## input control ------
+
+    stopifnot(is.list(x))
+
+    element_combos <- utils::combn(seq_along(x), m = m, simplify = FALSE)
+
+    intersects <- map(element_combos,
+                      ~x[.x])
+
+    intersects <- map(intersects, reduce, intersect)
+
+    unique(unlist(intersects))
+
+  }
+
+# END ------

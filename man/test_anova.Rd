@@ -22,7 +22,7 @@ test_anova(
 \item{variables}{a vector with dependent variable names.}
 
 \item{confounder}{name of the confounding variable. Defaults to NULL, which
-means that no confounder is include in the model.}
+means that no confounder is included in the model.}
 
 \item{adj_method}{p value adjustment method,
 see: \code{\link[stats]{p.adjust}}.}

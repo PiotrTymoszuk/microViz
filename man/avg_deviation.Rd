@@ -11,8 +11,8 @@ avg_deviation(
   grand_center = c("mean", "median", "gmean", "hmean"),
   split_center = c("mean", "median", "gmean", "hmean"),
   ci = c("distr", "percentile", "bca"),
-  adj_method = "BH",
-  .parallel = FALSE
+  conf_level = 0.95,
+  adj_method = "BH"
 )
 }
 \arguments{
@@ -30,10 +30,10 @@ by \code{split_fct}.}
 
 \item{ci}{type of 95\% confidence intervals, as specified in Details.}
 
+\item{conf_level}{width of the confidence interval.}
+
 \item{adj_method}{method of multiple testing adjustment.
 See: \code{\link[stats]{p.adjust}}.}
-
-\item{.parallel}{logical: should the function be run in parallel?}
 }
 \value{
 A data frame with the grand averages (\code{grand_center}), average deviations

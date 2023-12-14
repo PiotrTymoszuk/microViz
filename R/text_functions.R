@@ -59,7 +59,7 @@
 
     split_txt <- split_vec(x, len)
 
-    split_txt <- purrr::map_chr(split_txt, paste, collapse = word_sep)
+    split_txt <- map_chr(split_txt, paste, collapse = word_sep)
 
     paste(split_txt, collapse = line_sep)
 
@@ -75,7 +75,7 @@
 
     len <- as.integer(len)
 
-    txt_vector <- stringi::stri_split(x, regex = '\\s+')[[1]]
+    txt_vector <- stri_split(x, regex = '\\s+')[[1]]
 
     wrap_vector(txt_vector,
                 len = len,

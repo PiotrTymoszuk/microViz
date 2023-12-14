@@ -128,29 +128,29 @@
     ## plotting data ------
 
     plot_tbl <-
-      dplyr::filter(data,
-                    stats::complete.cases(data[c(regulation_variable,
-                                                 p_variable)]))
+      filter(data,
+             complete.cases(data[c(regulation_variable,
+                                   p_variable)]))
 
     plot_tbl <-
-      dplyr::mutate(plot_tbl,
-                    significant = ifelse(.data[[p_variable]] < signif_level,
-                                         'yes', 'no'),
-                    regulation = ifelse(significant == 'no',
-                                        'ns',
-                                        ifelse(.data[[regulation_variable]] > regulation_level,
-                                               'upregulated',
-                                               ifelse(.data[[regulation_variable]] < -regulation_level,
-                                                      'downregulated', 'ns'))),
-                    regulation = factor(regulation, c('upregulated',
-                                                      'downregulated',
-                                                      'ns')))
+      mutate(plot_tbl,
+             significant = ifelse(.data[[p_variable]] < signif_level,
+                                  'yes', 'no'),
+             regulation = ifelse(significant == 'no',
+                                 'ns',
+                                 ifelse(.data[[regulation_variable]] > regulation_level,
+                                        'upregulated',
+                                        ifelse(.data[[regulation_variable]] < -regulation_level,
+                                               'downregulated', 'ns'))),
+             regulation = factor(regulation, c('upregulated',
+                                               'downregulated',
+                                               'ns')))
 
     ## numbers of regulated genes -------
 
     if(is.null(plot_tag)) {
 
-      n_genes <- dplyr::count(plot_tbl, regulation, .drop = FALSE)
+      n_genes <- count(plot_tbl, regulation, .drop = FALSE)
 
       plot_tag <- paste0('upregulated: n = ', n_genes$n[1],
                          ', downregulated: n = ', n_genes$n[2])
@@ -213,24 +213,24 @@
 
     if(!is.null(label_variable)) {
 
-      desc_tbl <- purrr::map(c('upregulated', 'downregulated'),
-                             ~dplyr::filter(plot_tbl, regulation == .x))
+      desc_tbl <- map(c('upregulated', 'downregulated'),
+                      ~filter(plot_tbl, regulation == .x))
 
       if(top_significant > 0) {
 
         desc_tbl <-
-          purrr::map_dfr(desc_tbl,
-                         ~dplyr::top_n(.x,
-                                       n = top_significant,
-                                       -.data[[p_variable]]))
+          map_dfr(desc_tbl,
+                  ~top_n(.x,
+                         n = top_significant,
+                         -.data[[p_variable]]))
 
       } else if(top_regulated > 0) {
 
         desc_tbl <-
-          purrr::map_dfr(desc_tbl,
-                         ~dplyr::top_n(.x,
-                                       n = top_regulated,
-                                       abs(.data[[regulation_variable]])))
+          map_dfr(desc_tbl,
+                  ~top_n(.x,
+                         n = top_regulated,
+                         abs(.data[[regulation_variable]])))
 
       } else {
 
@@ -349,33 +349,33 @@
     ## plotting data ---------
 
     plot_tbl <-
-      dplyr::filter(data,
-                    stats::complete.cases(data[c(p_variable,
-                                                 regulation_variable)]))
+      filter(data,
+             complete.cases(data[c(p_variable,
+                                   regulation_variable)]))
 
     plot_tbl <-
-      dplyr::mutate(plot_tbl,
-                    significant = ifelse(.data[[p_variable]] < signif_level,
-                                         'yes', 'no'),
-                    regulation = ifelse(significant == 'no',
-                                        'ns',
-                                        ifelse(.data[[regulation_variable]] > regulation_level,
-                                               'upregulated',
-                                               ifelse(.data[[regulation_variable]] < -regulation_level,
-                                                      'downregulated', 'ns'))),
-                    regulation = factor(regulation, c('upregulated',
-                                                      'downregulated',
-                                                      'ns')))
+      mutate(plot_tbl,
+             significant = ifelse(.data[[p_variable]] < signif_level,
+                                  'yes', 'no'),
+             regulation = ifelse(significant == 'no',
+                                 'ns',
+                                 ifelse(.data[[regulation_variable]] > regulation_level,
+                                        'upregulated',
+                                        ifelse(.data[[regulation_variable]] < -regulation_level,
+                                               'downregulated', 'ns'))),
+             regulation = factor(regulation, c('upregulated',
+                                               'downregulated',
+                                               'ns')))
 
-    plot_tbl <- dplyr::arrange(plot_tbl, -.data[[regulation_variable]])
+    plot_tbl <- arrange(plot_tbl, -.data[[regulation_variable]])
 
-    plot_tbl <- dplyr::mutate(plot_tbl, plot_order = 1:nrow(plot_tbl))
+    plot_tbl <- mutate(plot_tbl, plot_order = 1:nrow(plot_tbl))
 
     ## numbers of regulated items
 
     if(is.null(plot_tag)) {
 
-      n_genes <- dplyr::count(plot_tbl, regulation)
+      n_genes <- count(plot_tbl, regulation)
 
       plot_tag <- paste0('upregulated: n = ', n_genes$n[1],
                          ', downregulated: n = ', n_genes$n[2])
@@ -543,26 +543,26 @@
     ## plotting table --------
 
     plot_tbl <-
-      dplyr::mutate(data,
-                    significant = ifelse(.data[[p_variable]] < signif_level,
-                                         'yes', 'no'),
-                    regulation = ifelse(significant == 'no',
-                                        'ns',
-                                        ifelse(.data[[regulation_variable]] > regulation_level,
-                                               'upregulated',
-                                               ifelse(.data[[regulation_variable]] < -regulation_level,
-                                                      'downregulated', 'ns'))),
-                    regulation = factor(regulation, c('upregulated',
-                                                      'downregulated',
-                                                      'ns')))
+      mutate(data,
+             significant = ifelse(.data[[p_variable]] < signif_level,
+                                  'yes', 'no'),
+             regulation = ifelse(significant == 'no',
+                                 'ns',
+                                 ifelse(.data[[regulation_variable]] > regulation_level,
+                                        'upregulated',
+                                        ifelse(.data[[regulation_variable]] < -regulation_level,
+                                               'downregulated', 'ns'))),
+             regulation = factor(regulation, c('upregulated',
+                                               'downregulated',
+                                               'ns')))
 
     ## plotting -------
 
     forest <-
       ggplot(plot_tbl,
              aes(x = .data[[regulation_variable]],
-                 y = stats::reorder(.data[[label_variable]],
-                                    .data[[regulation_variable]]),
+                 y = reorder(.data[[label_variable]],
+                             .data[[regulation_variable]]),
                  color = regulation,
                  fill = regulation)) +
       scale_fill_manual(values = fill_scale,
@@ -581,9 +581,9 @@
     if(!is.null(lower_ci_variable) & !is.null(upper_ci_variable)) {
 
       forest <- forest +
-        ggplot2::geom_errorbarh(aes(xmin = .data[[lower_ci_variable]],
-                                             xmax = .data[[upper_ci_variable]]),
-                                height = 0)
+        geom_errorbarh(aes(xmin = .data[[lower_ci_variable]],
+                           xmax = .data[[upper_ci_variable]]),
+                       height = 0)
 
     }
 
@@ -599,28 +599,28 @@
 
     }
 
-    desc_tbl <- dplyr::mutate(plot_tbl,
-                              plot_lab = signif(.data[[regulation_variable]],
-                                                signif_digits))
+    desc_tbl <- mutate(plot_tbl,
+                       plot_lab = signif(.data[[regulation_variable]],
+                                         signif_digits))
 
     if(show_ci_txt & all(!is.null(c(lower_ci_variable, upper_ci_variable)))) {
 
       desc_tbl <-
-        dplyr::mutate(desc_tbl,
-                      plot_lab = paste0(plot_lab,
-                                        ' [', signif(.data[[lower_ci_variable]],
-                                                     signif_digits),
-                                        ' - ', signif(.data[[upper_ci_variable]],
-                                                      signif_digits), ']'))
+        mutate(desc_tbl,
+               plot_lab = paste0(plot_lab,
+                                 ' [', signif(.data[[lower_ci_variable]],
+                                              signif_digits),
+                                 ' - ', signif(.data[[upper_ci_variable]],
+                                               signif_digits), ']'))
 
     }
 
     forest <- forest +
-      ggplot2::geom_text(data = desc_tbl,
-                         aes(label = plot_lab),
-                         size = txt_size,
-                         hjust = txt_hjust,
-                         vjust = txt_vjust)
+      geom_text(data = desc_tbl,
+                aes(label = plot_lab),
+                size = txt_size,
+                hjust = txt_hjust,
+                vjust = txt_vjust)
 
     return(forest)
 
@@ -721,18 +721,18 @@
     top_regulated <- as.integer(top_regulated)
 
     plot_tbl <-
-      dplyr::mutate(data,
-                    reg_sign = ifelse(.data[[regulation_variable]] > 0,
-                                      'up', 'down'),
-                    reg_sign = factor(reg_sign, c('up', 'down')))
+      mutate(data,
+             reg_sign = ifelse(.data[[regulation_variable]] > 0,
+                               'up', 'down'),
+             reg_sign = factor(reg_sign, c('up', 'down')))
 
-    plot_tbl <- dplyr::group_by(plot_tbl, reg_sign)
+    plot_tbl <- group_by(plot_tbl, reg_sign)
 
-    plot_tbl <- dplyr::top_n(plot_tbl,
-                             n = top_regulated,
-                             abs(.data[[regulation_variable]]))
+    plot_tbl <- top_n(plot_tbl,
+                      n = top_regulated,
+                      abs(.data[[regulation_variable]]))
 
-    plot_tbl <- dplyr::ungroup(plot_tbl)
+    plot_tbl <- ungroup(plot_tbl)
 
     ## plotting ------
 
@@ -841,21 +841,21 @@
 
     ## plotting table -------
 
-    plot_tbl <- dplyr::top_n(data, n = top_significant, -.data[[p_variable]])
+    plot_tbl <- top_n(data, n = top_significant, -.data[[p_variable]])
 
-    plot_tbl <- dplyr::mutate(plot_tbl,
-                              significant = ifelse(.data[[p_variable]] < signif_level,
-                                                   'significant',
-                                                   'ns'),
-                              significant = factor(significant,
-                                                   c('significant', 'ns')))
+    plot_tbl <- mutate(plot_tbl,
+                       significant = ifelse(.data[[p_variable]] < signif_level,
+                                            'significant',
+                                            'ns'),
+                       significant = factor(significant,
+                                            c('significant', 'ns')))
 
     ## plotting ------
 
     ggplot(plot_tbl,
            aes(x = -log10(.data[[p_variable]]),
-               y = stats::reorder(.data[[label_variable]],
-                                  -.data[[p_variable]]),
+               y = reorder(.data[[label_variable]],
+                           -.data[[p_variable]]),
                fill = significant)) +
       geom_bar(stat = 'identity',
                color = 'black') +
@@ -945,41 +945,40 @@
     regulation_raw <- NULL
 
     plot_data <-
-      dplyr::mutate(data,
-                    significant = ifelse(.data[[p_variable]] < signif_level,
-                                         'yes', 'no'),
-                    regulation = ifelse(significant == 'no',
-                                        'ns',
-                                        ifelse(.data[[regulation_variable]] > regulation_level,
-                                               'upregulated',
-                                               ifelse(.data[[regulation_variable]] < -regulation_level,
-                                                      'downregulated', 'ns'))),
-                    regulation = factor(regulation,
-                                        c('upregulated',
-                                          'downregulated',
-                                          'ns')),
-                    regulation_raw = ifelse(.data[[regulation_variable]] > 0,
-                                            'upregulated', 'downregulated'),
-                    regulation_raw = factor(regulation_raw,
-                                            c('upregulated', 'downregulated')))
+      mutate(data,
+             significant = ifelse(.data[[p_variable]] < signif_level,
+                                  'yes', 'no'),
+             regulation = ifelse(significant == 'no',
+                                 'ns',
+                                 ifelse(.data[[regulation_variable]] > regulation_level,
+                                        'upregulated',
+                                        ifelse(.data[[regulation_variable]] < -regulation_level,
+                                               'downregulated', 'ns'))),
+             regulation = factor(regulation,
+                                 c('upregulated',
+                                   'downregulated',
+                                   'ns')),
+             regulation_raw = ifelse(.data[[regulation_variable]] > 0,
+                                     'upregulated', 'downregulated'),
+             regulation_raw = factor(regulation_raw,
+                                     c('upregulated', 'downregulated')))
+
+    plot_data <- group_by(plot_data, regulation_raw)
 
     plot_data <-
-      dplyr::group_by(plot_data, regulation_raw)
+      top_n(plot_data,
+            n = top_regulated,
+            wt = abs(.data[[regulation_variable]]))
 
-    plot_data <-
-      dplyr::top_n(plot_data,
-                   n = top_regulated,
-                   wt = abs(.data[[regulation_variable]]))
-
-    plot_data <- dplyr::ungroup(plot_data)
+    plot_data <- ungroup(plot_data)
 
     ## label position
 
     txt_pos <- NULL
 
     plot_data <-
-      dplyr::mutate(plot_data,
-                    txt_pos = (1 - txt_offset) * .data[[regulation_variable]])
+      mutate(plot_data,
+             txt_pos = (1 - txt_offset) * .data[[regulation_variable]])
 
     ## plotting --------
 
@@ -1002,12 +1001,12 @@
     if(show_txt) {
 
       bar_plot <- bar_plot +
-        ggplot2::geom_text(aes(label = signif(.data[[regulation_variable]],
-                                              signif_digits),
-                               x = txt_pos),
-                           vjust = txt_vjust,
-                           size = txt_size,
-                           color = txt_color)
+        geom_text(aes(label = signif(.data[[regulation_variable]],
+                                     signif_digits),
+                      x = txt_pos),
+                  vjust = txt_vjust,
+                  size = txt_size,
+                  color = txt_color)
 
     }
 
@@ -1129,8 +1128,8 @@
     }
 
     variable_classification <-
-      rlang::set_names(variable_classification[, 1:2],
-                       c('variable', 'variable_subset'))
+      set_names(variable_classification[, 1:2],
+                c('variable', 'variable_subset'))
 
     stopifnot(is.logical(facet))
     stopifnot(inherits(cust_theme, 'theme'))
@@ -1145,16 +1144,16 @@
 
     observation <- NULL
 
-    data <- dplyr::mutate(data[c(split_fct, variables)],
-                          observation = paste0('obs_', 1:nrow(data)))
+    data <- mutate(data[c(split_fct, variables)],
+                   observation = paste0('obs_', 1:nrow(data)))
 
     if(is.null(plot_subtitle)) {
 
-      n_numbers <- dplyr::count(data, .data[[split_fct]])
+      n_numbers <- count(data, .data[[split_fct]])
 
       plot_subtitle <-
-        purrr::map2_chr(n_numbers[[1]], n_numbers[[2]],
-                        paste, sep = ': n = ')
+        map2_chr(n_numbers[[1]], n_numbers[[2]],
+                 paste, sep = ': n = ')
 
       plot_subtitle <- paste(plot_subtitle, collapse = ', ')
 
@@ -1164,11 +1163,11 @@
 
       center_fun <- switch(norm_center,
                            mean = function(x) mean(x, na.rm = TRUE),
-                           median = function(x) stats::median(x, na.rm = TRUE))
+                           median = function(x) median(x, na.rm = TRUE))
 
       data[variables] <-
-        purrr::map_dfc(data[variables],
-                       ~scale(.x, center = center_fun(.x))[, 1])
+        map_dfc(data[variables],
+                ~scale(.x, center = center_fun(.x))[, 1])
 
     }
 
@@ -1181,15 +1180,15 @@
                           names_to = 'variable',
                           values_to = 'value')
 
-    data <- dplyr::left_join(data,
-                             variable_classification,
-                             by = 'variable')
+    data <- left_join(data,
+                      variable_classification,
+                      by = 'variable')
 
     plot_order <- unique(variable_classification$variable)
 
     data <-
-      dplyr::mutate(data,
-                    variable = factor(variable, plot_order))
+      mutate(data,
+             variable = factor(variable, plot_order))
 
     ## plotting -------
 
@@ -1202,12 +1201,12 @@
     if(facet) {
 
       facet_formula <-
-        stats::as.formula(paste('variable_subset ~', split_fct))
+        as.formula(paste('variable_subset ~', split_fct))
 
     } else {
 
       facet_formula <-
-        stats::as.formula(paste('. ~', split_fct))
+        as.formula(paste('. ~', split_fct))
 
     }
 
@@ -1406,9 +1405,9 @@
     if(wrap) {
 
       data[[label_variable]] <-
-        purrr::map_chr(data[[label_variable]],
-                       wrap_text,
-                       len = len)
+        map_chr(data[[label_variable]],
+                wrap_text,
+                len = len)
 
     }
 
@@ -1427,8 +1426,7 @@
 
     } else {
 
-      data <- dplyr::mutate(data,
-                            rot_angle = 0)
+      data <- mutate(data, rot_angle = 0)
 
     }
 
@@ -1496,8 +1494,7 @@
 
     if(!is.null(split_fct)) {
 
-      wrap_formula <-
-        stats::as.formula(paste('~', split_fct))
+      wrap_formula <- as.formula(paste('~', split_fct))
 
       word_plot <- word_plot +
         ggplot2::facet_wrap(wrap_formula, nrow = nrow)

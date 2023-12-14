@@ -1,10 +1,10 @@
 Package: microViz
 Type: Package
 Title: Visualization of Genome-Wide Expression Data
-Version: 1.0.0
+Version: 1.1.0
 Maintainer: Piotr Tymoszuk <piotr.s.tymoszuk@gmail.com>
-Description: Provides a medley of plotting tools: heat maps, Forest plots and 
-    volcano plots compatible with a wide range of tabular data.
+Description: Provides a medley of testing amd plotting tools: heat maps, Forest 
+    plots and volcano plots compatible with a wide range of tabular data.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -15,12 +15,10 @@ Authors@R:
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 Imports: 
-    caret,
-    coxed,
-    DescTools,
     dplyr,
     furrr,
     future,
+    ggplot2, 
     ggrepel,
     ggwordcloud,
     limma,
@@ -28,23 +26,28 @@ Imports:
     pROC,
     purrr,
     rcompanion,
+    Rcpp, 
+    rlang, 
     stringi,
     tibble,
     tidyr,
     utils
-Depends:
-    rlang, 
-    ggplot2
 Suggests: 
     clustTools
 Collate: 
+    'RcppExports.R'
+    'aggrgation.R'
     'classification.R'
     'data.R'
     'imports.R'
     'enrichment.R'
     'expression_estimates.R'
+    'multiple_plotting.R'
+    'multiple_testing.R'
     'numeric_functions.R'
     'plotting.R'
     'testing.R'
     'text_functions.R'
     'utils.R'
+LinkingTo: 
+    Rcpp

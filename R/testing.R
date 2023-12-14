@@ -49,15 +49,15 @@
 
       method <- res$method
 
-      if(stringi::stri_detect(method, fixed = 'Paired')) {
+      if(stri_detect(method, fixed = 'Paired')) {
 
         if(length(tst_vec[[1]]) != length(tst_vec[[2]])) return(NULL)
 
-        sd <- sqrt(stats::var(tst_vec[[1]] - tst_vec[[2]]))
+        sd <- sqrt(var(tst_vec[[1]] - tst_vec[[2]]))
 
-      } else if(stringi::stri_detect(method, fixed = 'Welch')) {
+      } else if(stri_detect(method, fixed = 'Welch')) {
 
-        sd <- sqrt((stats::var(tst_vec[[1]]) + stats::var(tst_vec[[2]]))/2)
+        sd <- sqrt((var(tst_vec[[1]]) + var(tst_vec[[2]]))/2)
 
       } else {
 
@@ -74,24 +74,24 @@
 
       ## output
 
-      tibble::tibble(test = 'T test',
-                     method = method,
-                     response = variable,
-                     grouping = split_fct,
-                     stat_name = 't',
-                     stat = res$statistic[1],
-                     p_value = res$p.value[1],
-                     expect_x = res$estimate[1],
-                     expect_y = res$estimate[2],
-                     estimate = estimate,
-                     error_name = 'SEM',
-                     error = res$stderr,
-                     lower_ci = -res$conf.int[2],
-                     upper_ci = -res$conf.int[1],
-                     sd_name = 'pooled SD',
-                     sd = sd,
-                     effect_size_name = 'd',
-                     effect_size = estimate/sd)
+      tibble(test = 'T test',
+             method = method,
+             response = variable,
+             grouping = split_fct,
+             stat_name = 't',
+             stat = res$statistic[1],
+             p_value = res$p.value[1],
+             expect_x = res$estimate[1],
+             expect_y = res$estimate[2],
+             estimate = estimate,
+             error_name = 'SEM',
+             error = res$stderr,
+             lower_ci = -res$conf.int[2],
+             upper_ci = -res$conf.int[1],
+             sd_name = 'pooled SD',
+             sd = sd,
+             effect_size_name = 'd',
+             effect_size = estimate/sd)
 
     } else {
 
@@ -151,24 +151,25 @@
 
       }
 
-      tibble::tibble(test = 'Wilcoxon test',
-                     method = method,
-                     response = variable,
-                     grouping = split_fct,
-                     stat_name = 'w',
-                     stat = res$statistic[1],
-                     p_value = res$p.value[1],
-                     expect_x = if(conf.int) res$estimate[1] else NA,
-                     expect_y = if(conf.int) res$estimate[2] else NA,
-                     estimate = if(conf.int) res$estimate[1] else NA,
-                     error_name = 'none',
-                     error = NA,
-                     lower_ci = if(conf.int) res$conf.int[1] else NA,
-                     upper_ci = if(conf.int) res$conf.int[2] else NA,
-                     sd_name = '1 - R-square',
-                     sd = 1 - wilcox_r^2,
-                     effect_size_name = 'r',
-                     effect_size = unname(wilcox_r))
+      tibble(test = 'Wilcoxon test',
+             method = method,
+             response = variable,
+             grouping = split_fct,
+             stat_name = 'w',
+             stat = res$statistic[1],
+             p_value = res$p.value[1],
+             expect_x = if(conf.int) res$estimate[1] else NA,
+             expect_y = if(conf.int) res$estimate[2] else NA,
+             estimate = if(conf.int) res$estimate[1] else NA,
+             error_name = 'none',
+             error = NA,
+             lower_ci = if(conf.int) res$conf.int[1] else NA,
+             upper_ci = if(conf.int) res$conf.int[2] else NA,
+             sd_name = '1 - R-square',
+             sd = 1 - wilcox_r^2,
+             effect_size_name = 'r',
+             ## reversing effect size, the first level assumed control
+             effect_size = -unname(wilcox_r))
 
     } else {
 
@@ -209,21 +210,21 @@
 
     if(is.null(confounder)) {
 
-      form <- stats::as.formula(paste0('`',
-                                       variable,
-                                       '` ~ `',
-                                       split_fct,
-                                       '`'))
+      form <- as.formula(paste0('`',
+                                variable,
+                                '` ~ `',
+                                split_fct,
+                                '`'))
 
     } else {
 
-      form <- stats::as.formula(paste0('`',
-                                       variable,
-                                       '` ~ `',
-                                       confounder,
-                                       '` + `',
-                                       split_fct,
-                                       '`'))
+      form <- as.formula(paste0('`',
+                                variable,
+                                '` ~ `',
+                                confounder,
+                                '` + `',
+                                split_fct,
+                                '`'))
 
     }
 
@@ -239,8 +240,7 @@
 
     split_rex <- paste0('(', split_fct, ')|(Residuals)')
 
-    trunk_rows <-
-      stringi::stri_detect(rownames(aov_summary), regex = split_rex)
+    trunk_rows <- stri_detect(rownames(aov_summary), regex = split_rex)
 
     aov_summary_trunk <- aov_summary[trunk_rows, ]
 
@@ -257,19 +257,19 @@
     }
 
     aov_summary <-
-      tibble::tibble(test = 'one-way ANOVA',
-                     method = aov_method,
-                     response = variable,
-                     grouping = split_fct,
-                     confounder = if(is.null(confounder)) NA else confounder,
-                     n = stats::nobs(aov_model),
-                     stat_name = 'F',
-                     stat = aov_summary_trunk[['F value']][1],
-                     df1 = aov_summary_trunk$Df[1],
-                     df2 = aov_summary_trunk$Df[1],
-                     p_value = aov_summary_trunk[['Pr(>F)']][1],
-                     effect_size_name = '\u03B7\u00B2',
-                     effect_size = aov_summary_trunk[['eta_sq']][1])
+      tibble(test = 'one-way ANOVA',
+             method = aov_method,
+             response = variable,
+             grouping = split_fct,
+             confounder = if(is.null(confounder)) NA else confounder,
+             n = nobs(aov_model),
+             stat_name = 'F',
+             stat = aov_summary_trunk[['F value']][1],
+             df1 = aov_summary_trunk$Df[1],
+             df2 = aov_summary_trunk$Df[1],
+             p_value = aov_summary_trunk[['Pr(>F)']][1],
+             effect_size_name = '\u03B7\u00B2',
+             effect_size = aov_summary_trunk[['eta_sq']][1])
 
     ## linear modeling ------
 
@@ -277,13 +277,13 @@
 
     coef_rex <- paste0('(', split_fct, ')|(Intercept)')
 
-    trunk_rows <- stringi::stri_detect(rownames(lm_coefs), regex = coef_rex)
+    trunk_rows <- stri_detect(rownames(lm_coefs), regex = coef_rex)
 
     lm_coefs_trunk <- lm_coefs[trunk_rows, ]
 
-    lm_ci <- stats::confint(aov_model)
+    lm_ci <- confint(aov_model)
 
-    trunk_rows <- stringi::stri_detect(rownames(lm_ci), regex = coef_rex)
+    trunk_rows <- stri_detect(rownames(lm_ci), regex = coef_rex)
 
     lm_ci_trunk <- lm_ci[trunk_rows, ]
 
@@ -298,50 +298,49 @@
 
     resp_splits <- split(data[[variable]], data[[split_fct]])
 
-    split_variances <- purrr::map(resp_splits, stats::var)
+    split_variances <- map(resp_splits, var)
 
-    sd <- purrr::map_dbl(split_variances,
-                         ~sqrt((.x + split_variances[[1]])/2))
+    sd <- map_dbl(split_variances,
+                  ~sqrt((.x + split_variances[[1]])/2))
 
     level <- NULL
     n <- NULL
 
-    sd_table <- tibble::tibble(level = split_levs,
-                               n = purrr::map_dbl(resp_splits, length),
-                               sd = sd)
+    sd_table <- tibble(level = split_levs,
+                       n = map_dbl(resp_splits, length),
+                       sd = sd)
 
     ## lm output -------
 
     estimate <- NULL
 
     lm_summary <-
-      tibble::tibble(test = 'lm',
-                     method = lm_method,
-                     response = variable,
-                     grouping = split_fct,
-                     confounder = if(is.null(confounder)) NA else confounder,
-                     level = stringi::stri_replace(rownames(lm_coefs_trunk),
-                                                   fixed = split_fct,
-                                                   replacement = ''),
-                     stat_name = 't',
-                     stat = lm_coefs_trunk[, 't value'],
-                     estimate = lm_coefs_trunk[, 'Estimate'],
-                     error_name = 'SEM',
-                     error = lm_coefs_trunk[, 'Std. Error'],
-                     lower_ci = lm_ci_trunk[, 1],
-                     upper_ci = lm_ci_trunk[, 2],
-                     p_value = lm_coefs_trunk[, 'Pr(>|t|)'],
-                     sd_name = 'pooled SD')
+      tibble(test = 'lm',
+             method = lm_method,
+             response = variable,
+             grouping = split_fct,
+             confounder = if(is.null(confounder)) NA else confounder,
+             level = stri_replace(rownames(lm_coefs_trunk),
+                                  fixed = split_fct,
+                                  replacement = ''),
+             stat_name = 't',
+             stat = lm_coefs_trunk[, 't value'],
+             estimate = lm_coefs_trunk[, 'Estimate'],
+             error_name = 'SEM',
+             error = lm_coefs_trunk[, 'Std. Error'],
+             lower_ci = lm_ci_trunk[, 1],
+             upper_ci = lm_ci_trunk[, 2],
+             p_value = lm_coefs_trunk[, 'Pr(>|t|)'],
+             sd_name = 'pooled SD')
 
-    lm_summary <-
-      dplyr::left_join(lm_summary, sd_table, by = 'level')
+    lm_summary <- left_join(lm_summary, sd_table, by = 'level')
 
     effect_size_name <- NULL
     effect_size <- NULL
 
-    lm_summary <- dplyr::mutate(lm_summary,
-                                effect_size_name = 'd',
-                                effect_size = estimate/sd)
+    lm_summary <- mutate(lm_summary,
+                         effect_size_name = 'd',
+                         effect_size = estimate/sd)
 
     list(anova = aov_summary,
          lm = lm_summary[c('test', 'method', 'response', 'grouping',
@@ -366,21 +365,21 @@
 
     if(is.null(confounder)) {
 
-      form <- stats::as.formula(paste0('`',
-                                       variable,
-                                       '` ~ `',
-                                       split_fct,
-                                       '`'))
+      form <- as.formula(paste0('`',
+                                variable,
+                                '` ~ `',
+                                split_fct,
+                                '`'))
 
     } else {
 
-      form <- stats::as.formula(paste0('`',
-                                       variable,
-                                       '` ~ `',
-                                       confounder,
-                                       '` + `',
-                                       split_fct,
-                                       '`'))
+      form <- as.formula(paste0('`',
+                                variable,
+                                '` ~ `',
+                                confounder,
+                                '` + `',
+                                split_fct,
+                                '`'))
 
     }
 
@@ -398,12 +397,12 @@
 
     if(is.null(lm_coefs)) return(NULL)
 
-    lm_ci <- tryCatch(suppressMessages(stats::confint(nb_model)),
+    lm_ci <- tryCatch(suppressMessages(confint(nb_model)),
                       error = function(e) NULL)
 
     if(is.null(lm_ci)) return(NULL)
 
-    trunk_rows <- stringi::stri_detect(rownames(lm_coefs), regex =  coef_rex)
+    trunk_rows <- stri_detect(rownames(lm_coefs), regex =  coef_rex)
 
     lm_coefs_trunk <- lm_coefs[trunk_rows, , drop = FALSE]
 
@@ -416,7 +415,7 @@
 
     }
 
-    trunk_rows <- stringi::stri_detect(rownames(lm_ci), regex =  coef_rex)
+    trunk_rows <- stri_detect(rownames(lm_ci), regex =  coef_rex)
 
     lm_ci_trunk <- lm_ci[trunk_rows, , drop = FALSE]
 
@@ -435,32 +434,32 @@
     ## pooled SD: equal to the beta error, the model works with the Z statistic
 
     lm_summary <-
-      tibble::tibble(test = 'nb lm',
-                     method = lm_method,
-                     response = variable,
-                     grouping = split_fct,
-                     confounder = if(is.null(confounder)) NA else confounder,
-                     level = stringi::stri_replace(rownames(lm_coefs_trunk),
-                                                   fixed = split_fct,
-                                                   replacement = ''),
-                     stat_name = 'z',
-                     stat = lm_coefs_trunk[, 'z value'],
-                     estimate = lm_coefs_trunk[, 'Estimate'],
-                     error_name = 'SEM',
-                     error = lm_coefs_trunk[, 'Std. Error'],
-                     lower_ci = lm_ci_trunk[, 1],
-                     upper_ci = lm_ci_trunk[, 2],
-                     p_value = lm_coefs_trunk[, 'Pr(>|z|)'],
-                     sd_name = 'pooled SD',
-                     sd = lm_coefs_trunk[, 'Std. Error'],
-                     effect_size_name = 'd',
-                     effect_size = lm_coefs_trunk[, 'Estimate']/lm_coefs_trunk[, 'Std. Error'])
+      tibble(test = 'nb lm',
+             method = lm_method,
+             response = variable,
+             grouping = split_fct,
+             confounder = if(is.null(confounder)) NA else confounder,
+             level = stri_replace(rownames(lm_coefs_trunk),
+                                           fixed = split_fct,
+                                           replacement = ''),
+             stat_name = 'z',
+             stat = lm_coefs_trunk[, 'z value'],
+             estimate = lm_coefs_trunk[, 'Estimate'],
+             error_name = 'SEM',
+             error = lm_coefs_trunk[, 'Std. Error'],
+             lower_ci = lm_ci_trunk[, 1],
+             upper_ci = lm_ci_trunk[, 2],
+             p_value = lm_coefs_trunk[, 'Pr(>|z|)'],
+             sd_name = 'pooled SD',
+             sd = lm_coefs_trunk[, 'Std. Error'],
+             effect_size_name = 'd',
+             effect_size = lm_coefs_trunk[, 'Estimate']/lm_coefs_trunk[, 'Std. Error'])
 
     ## extracting the ANOVA table ------
 
     ## warnings concerning re-estimation of theta are suppressed
 
-    aov_summary <- suppressWarnings(stats::anova(nb_model, test = dev_test))
+    aov_summary <- suppressWarnings(anova(nb_model, test = dev_test))
 
     aov_summary <- as.data.frame(aov_summary)
 
@@ -470,21 +469,21 @@
     split_rex <- paste0('(', split_fct, ')|(NULL)')
 
     trunk_rows <-
-      stringi::stri_detect(rownames(aov_summary), regex = split_rex)
+      stri_detect(rownames(aov_summary), regex = split_rex)
 
     aov_summary <- aov_summary[trunk_rows, ]
 
     aov_summary <-
-      tibble::tibble(test = 'analysis of deviance',
-                     response = variable,
-                     grouping = split_fct,
-                     counfounder = if(is.null(confounder)) NA else confounder,
-                     deviance = aov_summary[['Deviance']][2],
-                     residual_deviance = aov_summary[['Resid. Dev']][2],
-                     df = aov_summary$Df[2],
-                     p_value = aov_summary[[ncol(aov_summary) - 1]][2],
-                     effect_size_name = '\u03B7\u00B2',
-                     effect_size = aov_summary[['eta_sq']][2])
+      tibble(test = 'analysis of deviance',
+             response = variable,
+             grouping = split_fct,
+             counfounder = if(is.null(confounder)) NA else confounder,
+             deviance = aov_summary[['Deviance']][2],
+             residual_deviance = aov_summary[['Resid. Dev']][2],
+             df = aov_summary$Df[2],
+             p_value = aov_summary[[ncol(aov_summary) - 1]][2],
+             effect_size_name = '\u03B7\u00B2',
+             effect_size = aov_summary[['eta_sq']][2])
 
     list(aod = aov_summary,
          lm = lm_summary)
@@ -574,40 +573,40 @@
 
     ## data split and testing --------
 
-    data_lst <- purrr::map(variables,
-                           ~data[c(split_fct, .x)])
+    data_lst <- map(variables,
+                    ~data[c(split_fct, .x)])
 
     if(.parallel) {
 
-      future::plan('multisession')
+      plan('multisession')
 
-      tst_res <- furrr::future_map2(variables,
-                                    data_lst,
-                                    function(x, y) test_fun(data = y,
-                                                            variable = x,
-                                                            split_fct = split_fct, ...),
-                                    .options = furrr::furrr_options(seed = TRUE,
-                                                                    packages = c('tibble')))
-
-      future::plan('sequential')
-
-    } else {
-
-      tst_res <- purrr::map2(variables,
+      tst_res <- future_map2(variables,
                              data_lst,
                              function(x, y) test_fun(data = y,
                                                      variable = x,
-                                                     split_fct = split_fct, ...))
+                                                     split_fct = split_fct, ...),
+                             .options = furrr_options(seed = TRUE,
+                                                      packages = c('tibble')))
+
+      plan('sequential')
+
+    } else {
+
+      tst_res <- map2(variables,
+                      data_lst,
+                      function(x, y) test_fun(data = y,
+                                              variable = x,
+                                              split_fct = split_fct, ...))
 
     }
 
-    tst_res <- purrr::compact(tst_res)
+    tst_res <- compact(tst_res)
 
     tst_res <- do.call('rbind', tst_res)
 
-    dplyr::mutate(tst_res,
-                  p_adjusted = stats::p.adjust(p_value, method = adj_method),
-                  significant = ifelse(p_adjusted < 0.05, 'yes', 'no'))
+    mutate(tst_res,
+           p_adjusted = p.adjust(p_value, method = adj_method),
+           significant = ifelse(p_adjusted < 0.05, 'yes', 'no'))
 
 
   }
@@ -636,7 +635,7 @@
 #' @param split_fct name of the group-defining variable, needs to be a factor.
 #' @param variables a vector with dependent variable names.
 #' @param confounder name of the confounding variable. Defaults to NULL, which
-#' means that no confounder is include in the model.
+#' means that no confounder is included in the model.
 #' @param adj_method p value adjustment method,
 #' see: \code{\link[stats]{p.adjust}}.
 #' @param .parallel should the testing be run in parallel?
@@ -699,52 +698,50 @@
 
     if(is.null(confounder)) {
 
-      data_lst <- purrr::map(variables,
-                             ~data[c(split_fct, .x)])
+      data_lst <- map(variables, ~data[c(split_fct, .x)])
 
     } else {
 
-      data_lst <- purrr::map(variables,
-                             ~data[c(split_fct, confounder, .x)])
+      data_lst <- map(variables, ~data[c(split_fct, confounder, .x)])
 
     }
 
     if(.parallel) {
 
-      future::plan('multisession')
+      plan('multisession')
 
       tst_res <-
-        furrr::future_map2(variables,
-                           data_lst,
-                           function(x, y) anova_tester(data = y,
-                                                       split_fct = split_fct,
-                                                       confounder = confounder,
-                                                       variable = x, ...),
-                           .options = furrr::furrr_options(seed = TRUE,
-                                                           packages = c('tibble')))
-
-      future::plan('sequential')
-
-    } else {
-
-      tst_res <-
-        purrr::map2(variables,
+        future_map2(variables,
                     data_lst,
                     function(x, y) anova_tester(data = y,
                                                 split_fct = split_fct,
                                                 confounder = confounder,
-                                                variable = x, ...))
+                                                variable = x, ...),
+                    .options = furrr_options(seed = TRUE,
+                                             packages = c('tibble')))
+
+      plan('sequential')
+
+    } else {
+
+      tst_res <-
+        map2(variables,
+             data_lst,
+             function(x, y) anova_tester(data = y,
+                                         split_fct = split_fct,
+                                         confounder = confounder,
+                                         variable = x, ...))
 
     }
 
-    tst_res <- purrr::transpose(purrr::compact(tst_res))
+    tst_res <- transpose(compact(tst_res))
 
-    tst_res <- purrr::map(tst_res, ~do.call('rbind', .x))
+    tst_res <- map(tst_res, ~do.call('rbind', .x))
 
-    purrr::map(tst_res,
-               dplyr::mutate,
-               p_adjusted = stats::p.adjust(p_value, method = adj_method),
-               significant = ifelse(p_adjusted < 0.05, 'yes', 'no'))
+    map(tst_res,
+        mutate,
+        p_adjusted = p.adjust(p_value, method = adj_method),
+        significant = ifelse(p_adjusted < 0.05, 'yes', 'no'))
 
   }
 
@@ -841,54 +838,52 @@
 
     if(is.null(confounder)) {
 
-      data_lst <- purrr::map(variables,
-                             ~data[c(split_fct, .x)])
+      data_lst <- map(variables, ~data[c(split_fct, .x)])
 
     } else {
 
-      data_lst <- purrr::map(variables,
-                             ~data[c(split_fct, confounder, .x)])
+      data_lst <- map(variables, ~data[c(split_fct, confounder, .x)])
 
     }
 
     if(.parallel) {
 
-      future::plan('multisession')
+      plan('multisession')
 
       tst_res <-
-        furrr::future_map2(variables,
-                           data_lst,
-                           function(x, y) nb_tester(data = y,
-                                                    split_fct = split_fct,
-                                                    confounder = confounder,
-                                                    dev_test = dev_test,
-                                                    variable = x, ...),
-                           .options = furrr::furrr_options(seed = TRUE,
-                                                           packages = c('tibble')))
-
-      future::plan('sequential')
-
-    } else {
-
-      tst_res <-
-        purrr::map2(variables,
+        future_map2(variables,
                     data_lst,
                     function(x, y) nb_tester(data = y,
                                              split_fct = split_fct,
                                              confounder = confounder,
                                              dev_test = dev_test,
-                                             variable = x, ...))
+                                             variable = x, ...),
+                    .options = furrr_options(seed = TRUE,
+                                             packages = c('tibble')))
+
+      plan('sequential')
+
+    } else {
+
+      tst_res <-
+        map2(variables,
+             data_lst,
+             function(x, y) nb_tester(data = y,
+                                      split_fct = split_fct,
+                                      confounder = confounder,
+                                      dev_test = dev_test,
+                                      variable = x, ...))
 
     }
 
-    tst_res <- purrr::transpose(purrr::compact(tst_res))
+    tst_res <- transpose(compact(tst_res))
 
-    tst_res <- purrr::map(tst_res, ~do.call('rbind', .x))
+    tst_res <- map(tst_res, ~do.call('rbind', .x))
 
-    purrr::map(tst_res,
-               dplyr::mutate,
-               p_adjusted = stats::p.adjust(p_value, method = adj_method),
-               significant = ifelse(p_adjusted < 0.05, 'yes', 'no'))
+    map(tst_res,
+        mutate,
+        p_adjusted = p.adjust(p_value, method = adj_method),
+        significant = ifelse(p_adjusted < 0.05, 'yes', 'no'))
 
   }
 

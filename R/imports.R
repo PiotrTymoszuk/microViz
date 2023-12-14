@@ -3,6 +3,7 @@
 #' @importFrom rlang `.data`
 #' @importFrom rlang `!!`
 #' @importFrom rlang `:=`
+#' @importFrom rlang set_names
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -20,5 +21,64 @@
 #' @importFrom ggplot2 element_blank
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 element_text
+#' @importFrom ggplot2 element_line
+#' @importFrom ggplot2 geom_errorbarh
+#' @importFrom ggplot2 geom_text
+#' @importFrom ggplot2 position_jitter
+#'
+#' @importFrom purrr map
+#' @importFrom purrr map_lgl
+#' @importFrom purrr map2
+#' @importFrom purrr transpose
+#' @importFrom purrr pmap
+#' @importFrom purrr map_dbl
+#' @importFrom purrr map_dfr
+#' @importFrom purrr map2_dfr
+#' @importFrom purrr map_dfc
+#' @importFrom purrr compact
+#' @importFrom purrr map_chr
+#' @importFrom purrr map2_chr
+#' @importFrom purrr reduce
+#'
+#' @importFrom dplyr tibble
+#' @importFrom dplyr as_tibble
+#' @importFrom dplyr mutate
+#' @importFrom dplyr left_join
+#' @importFrom dplyr group_by
+#' @importFrom dplyr ungroup
+#' @importFrom dplyr filter
+#' @importFrom dplyr arrange
+#' @importFrom dplyr transmute
+#' @importFrom dplyr count
+#' @importFrom dplyr top_n
+#' @importFrom dplyr summarise
+#'
+#' @importFrom tibble rownames_to_column
+#' @importFrom tibble column_to_rownames
+#'
+#' @importFrom stats median
+#' @importFrom stats complete.cases
+#' @importFrom stats p.adjust
+#' @importFrom stats var
+#' @importFrom stats as.formula
+#' @importFrom stats confint
+#' @importFrom stats anova
+#' @importFrom stats nobs
+#' @importFrom stats reorder
+#' @importFrom stats quantile
+#'
+#' @importFrom stringi stri_detect
+#' @importFrom stringi stri_replace
+#' @importFrom stringi stri_split
+#'
+#' @importFrom future plan
+#'
+#' @importFrom furrr future_map2
+#' @importFrom furrr furrr_options
+#' @importFrom furrr future_map
+#'
+#' @importFrom Rcpp evalCpp
+#'
+#' @useDynLib microViz
 
   NULL

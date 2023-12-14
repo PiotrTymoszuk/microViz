@@ -51,7 +51,47 @@
                                           r = 3,
                                           b = 3,
                                           unit = 'mm'),
-            panel.grid.major = ggplot2::element_line(color = 'gray90'))
+            panel.grid.major = element_line(color = 'gray90'))
+
+  }
+
+# Data frame check ------
+
+#' Check for a numeric data frame.
+#'
+#' @description
+#' The functions checks if all columns of a data frame are numeric or
+#' if a numeric matrix is provided.
+#'
+#' @param x a data frame or a matrix.
+#'
+#' @return a logical value.
+
+  check_df <- function(x) {
+
+    stopifnot(is.data.frame(x))
+
+    col_check <- map_lgl(x, is.numeric)
+
+    if(any(!col_check)) {
+
+      stop('A numeric data frame is required', call. = FALSE)
+
+    }
+
+  }
+
+#' @rdname check_df
+
+  check_mtx <- function(x) {
+
+    stopifnot(is.matrix(x))
+
+    if(!is.numeric(x)) {
+
+      stop('A numeric matrix is required.', call. = FALSE)
+
+    }
 
   }
 

@@ -1,4 +1,4 @@
-# Basic usage of the package with the breast cancer expression dataset
+# Basic usage of the package with a breast cancer expression data set
 
 # tools -------
 
@@ -34,7 +34,6 @@
                                'histology',
                                'er_status')]
 
-
   ## a data frame with log2-transformed variables
   ## increasing by 1 to avoid potential log2(zero)
 
@@ -43,28 +42,137 @@
   log_expression[genes] <- log_expression[genes] %>%
     map_dfc(~log2(.x + 1))
 
-# Column stats ---------
+# Numeric vector stats -------
+
+  ## geometric mean
+
+  Gmean(counts$HERC2)
+
+  counts$HERC2 %>%
+    psych::geometric.mean()
+
+  counts[, c("HERC1", "HERC2")] %>%
+    as.matrix %>%
+    Hmean
+
+  Hmean(counts$HERC2)
+
+  perCI(counts$HERC2)
+
+  counts$HERC2 %>%
+    quantile(c(0.025, 0.975))
+
+  bcaCI(counts$HERC2)
+
+  counts$HERC2 %>%
+    coxed::bca()
+
+  Gini(counts$HERC2, unbiased = FALSE)
+
+  Gini(counts$HERC2, unbiased = TRUE)
+
+  counts$HERC2 %>%
+    DescTools::Gini(unbiased = FALSE)
+
+  freqRatio(counts$TSPAN6)
+
+  percUnique(counts$TSPAN6)
+
+  counts$TSPAN6 %>%
+    caret::nzv(saveMetrics = T)
+
+# Column stats and selection of variant genes ---------
 
   counts[genes] %>%
-    colMedians(.parallel = TRUE)
+    colMedians(na.rm = TRUE)
 
   counts[genes] %>%
-    colVars(.parallel = TRUE)
+    colMins
 
   counts[genes] %>%
-    colSDs(.parallel = TRUE)
+    colMax
 
   counts[genes] %>%
-    colGini(.parallel = TRUE)
+    colGmeans
 
   counts[genes] %>%
-    distr_stats(.parallel = TRUE)
+    colHmeans
 
   counts[genes] %>%
-    colGmeans()
+    colVars
 
   counts[genes] %>%
-    colHmeans()
+    colSDs
+
+  counts[genes] %>%
+    colQuantiles(c(0.25, 0.5, 0.75))
+
+  counts[genes] %>%
+    colSDs
+
+  counts[genes] %>%
+    colGini
+
+  counts[genes] %>%
+    colFreqRatios
+
+  counts[genes] %>%
+    colPercUniques
+
+  counts[genes] %>%
+    colCI(method = 'bca')
+
+
+  ## selection of variant genes
+
+  colStats <- log_expression[genes] %>%
+    distr_stats(freqCut = 9, uniqueCut = 10)
+
+  variant_genes <- colStats %>%
+    filter(gini_coef >= 0.1,
+           freqRatio < 5) %>%
+    .$variable
+
+# Row stats -------
+
+  trans_counts <- counts %>%
+    column_to_rownames('sample_id') %>%
+    select(all_of(genes)) %>%
+    t %>%
+    as.data.frame
+
+  microViz::rowMedians(trans_counts)
+
+  rowMins(trans_counts)
+
+  microViz::rowMax(trans_counts)
+
+  rowGmeans(trans_counts)
+
+  rowHmeans(trans_counts)
+
+  rowVars(trans_counts)
+
+  rowSDs(trans_counts)
+
+  rowGini(trans_counts)
+
+  rowQuantiles(trans_counts, c(0, 0.25, 0.5, 0.75, 1))
+
+  rowCI(trans_counts, method = 'percentile')
+
+  rowCI(trans_counts, method = 'bca')
+
+  row_stats(trans_counts)
+
+# Shared elements ---------
+
+  set.seed(12345)
+
+  gene_sets <- 1:10 %>%
+    map(function(x) sample(variant_genes[1:1000], size = 300))
+
+  shared_features(gene_sets, m = 6)
 
 # Two-sample test -------
 
@@ -76,16 +184,18 @@
     filter(!is.na(er_status)) %>%
     test_two_groups(split_fct = 'er_status',
                     type = 't',
-                    variables = genes,
+                    variables = variant_genes,
                     adj_method = 'BH',
                     .parallel = TRUE)
 
-  ## identification of significantly regulate genes: pFDR < 0.05
-  ## and large effect size (d >= 0.08)
+  ## identification of significantly regulated genes: pFDR < 0.05
+  ## and moderate-to-large effect size (d >= 0.5)
 
   er_significant <- er_dge %>%
-    filter(p_adjusted < 0.05,
-           abs(effect_size) >= 0.5)
+    identify_significant(label_variable = 'response',
+                         p_variable = 'p_adjusted',
+                         regulation_variable = 'effect_size',
+                         regulation_level = 0.5)
 
   ## volcano plot: effect size and significance
 
@@ -111,27 +221,28 @@
 
   ## forest plot for the top-regulated genes
 
-  plot_top(data = er_significant,
-           regulation_variable = 'estimate',
-           label_variable = 'response',
-           p_variable = 'p_adjusted',
-           signif_level = 0.05,
-           regulation_level = 0,
-           lower_ci_variable = 'lower_ci',
-           upper_ci_variable = 'upper_ci',
-           top_regulated = 30,
-           plot_title = 'Top regulated genes',
-           x_lab = expression("log"[2] * "regulation,  ER- vs ER+")) +
+  er_dge %>%
+    filter(response %in% unlist(er_significant)) %>%
+    plot_top(regulation_variable = 'estimate',
+             label_variable = 'response',
+             p_variable = 'p_adjusted',
+             signif_level = 0.05,
+             regulation_level = 0,
+             lower_ci_variable = 'lower_ci',
+             upper_ci_variable = 'upper_ci',
+             top_regulated = 30,
+             plot_title = 'Top regulated genes',
+             x_lab = expression("log"[2] * "regulation,  ER- vs ER+")) +
     theme(axis.text.y = element_text(face = 'italic'))
 
   plot_regulated(data = er_dge,
-                 regulation_variable = 'estimate',
+                 regulation_variable = 'effect_size',
                  label_variable = 'response',
                  p_variable = 'p_value',
                  regulation_level = 1,
                  top_regulated = 20,
                  plot_title = 'Top regulated genes, ER status',
-                 x_lab = expression("log"[2] * "regulation,  ER- vs ER+"),
+                 x_lab = "Effect size, Cohen's d",
                  show_txt = TRUE,
                  txt_size = 2.5,
                  txt_color = 'white') +
@@ -147,15 +258,19 @@
 
   histo_dge <- histo_data %>%
     test_anova(split_fct = 'histology',
-               variables = genes, adj_method = 'BH',
+               variables = variant_genes,
+               adj_method = 'BH',
                .parallel = TRUE)
 
   ## identification of significantly regulated genes: pFDR < 0.05 and
   ## eta-squared >= 0.06 in ANOVA
 
   histo_significant <- histo_dge$anova %>%
-    filter(p_adjusted < 0.05,
-           effect_size >= 0.06)
+    identify_significant(label_variable = 'response',
+                         p_variable = 'p_adjusted',
+                         regulation_variable = 'effect_size',
+                         signif_level = 0.05,
+                         regulation_level = 0.06)
 
   ## volcano plots
 
@@ -181,7 +296,7 @@
 
   histo_class <-
     classify(data = histo_data,
-             variables = histo_significant$response,
+             variables = histo_significant,
              split_fct = 'histology')
 
   histo_class$classification %>%
@@ -200,13 +315,13 @@
                    nrow = 2)
 
   heat_map(data = histo_data,
-           variables = histo_significant$response,
+           variables = histo_significant,
            split_fct = 'histology',
            midpoint = 0,
            limits = c(-3, 3),
            oob = scales::squish,
            hide_x_axis_text = TRUE,
-           facet = FALSE,
+           facet = TRUE,
            plot_title = 'Histology-specific genes')
 
   histo_data <- histo_data %>%
@@ -216,10 +331,12 @@
 
   histo_distances <-
     subset_distance(histo_data,
-                    variables = histo_significant$response,
+                    variables = histo_significant,
                     split_fct = 'histology',
                     dist_FUN = calculate_dist,
                     method = 'cosine')
+
+  histo_distances %>% plot
 
 # Modeling with a confounder -------
 
@@ -241,17 +358,20 @@
 
   time_dge <- time_data %>%
     test_anova(split_fct = 'timepoint',
-               variables = genes,
+               variables = variant_genes,
                confounder = 'patient_id',
                adj_method = 'BH',
                .parallel = TRUE)
 
   time_signifcant <- time_dge$anova %>%
-    filter(p_value < 0.05,
-           effect_size >= 0.06)
+    identify_significant(label_variable = 'response',
+                         p_variable = 'p_value',
+                         regulation_variable = 'effect_size',
+                         signif_level = 0.05,
+                         regulation_level = 0.06)
 
   heat_map(data = time_data,
-           variables = time_signifcant$response,
+           variables = time_signifcant,
            split_fct = 'timepoint')
 
 # GO enrichment --------
@@ -260,17 +380,18 @@
 
   go_universe <-
     mapIds(org.Hs.eg.db,
-           keys = genes,
+           keys = variant_genes,
            keytype = 'SYMBOL',
            column = 'ENTREZID')
 
   go_universe <- go_universe[!is.na(go_universe)]
 
   go_input <- list(er = er_dge,
-                        histo = histo_dge$anova,
-                        time = time_dge$anova) %>%
-    map(filter, p_value < 0.05) %>%
-    map(~.x$response) %>%
+                   histo = histo_dge$anova,
+                   time = time_dge$anova) %>%
+    map(identify_significant,
+        label_variable = 'response',
+        p_variable = 'p_value') %>%
     map(mapIds,
         x = org.Hs.eg.db,
         keytype = 'SYMBOL',
@@ -395,11 +516,39 @@
     avg_deviation(data = log_expression,
                   variables = genes,
                   split_fct = 'histology',
-                  grand_center = 'median',
-                  split_center = 'median',
-                  ci = 'distr',
-                  .parallel = TRUE)
+                  grand_center = 'mean',
+                  split_center = 'mean',
+                  ci = 'percentile')
 
+# Aggregation --------
 
+  aggRows(iris[1:4], f = iris$Species, fun = colMeans)
+
+  test_biopsy <- MASS::biopsy
+
+  large_biopsy <- rep(list(test_biopsy), 1000) %>%
+    do.call('rbind', .)
+
+  agg_biopsy <- aggRows(as.matrix(test_biopsy[, 2:10]),
+                        f = test_biopsy$ID,
+                        fun = colMins)
+
+  agg_large_biopsy <- aggRows(as.matrix(large_biopsy[, 2:10]),
+                              f = large_biopsy$ID,
+                              fun = colMins,
+                              na.rm = TRUE,
+                              .parallel = FALSE)
+
+  agg_col_biopsy <- aggCols(as.data.frame(agg_large_biopsy[, 1:9]),
+                            f = c('cat1', 'cat1',
+                                  'cat2', 'cat2',
+                                  'cat3', 'cat2',
+                                  'cat1', 'cat3',
+                                  'cat4'),
+                            fun = rowGmeans)
+
+  summary(agg_large_biopsy)
+  summary(agg_biopsy)
+  summary(test_biopsy)
 
 # END ------
