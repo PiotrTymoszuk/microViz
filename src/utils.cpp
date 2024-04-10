@@ -301,4 +301,28 @@ double percUniqueCpp(NumericVector x) {
 
 }
 
+// fill a matrix given a vector of numeric values and a two column
+// matrix of x and y indexes
+
+// [[Rcpp::export]]
+
+NumericMatrix fillMat(NumericVector x,
+                      IntegerMatrix ind,
+                      int dim) {
+
+  if(x.size() != ind.nrow()) stop("Improper x length.");
+
+  NumericMatrix res(dim, dim);
+
+  for(int i = 0; i < x.size(); ++i) {
+
+    res(ind(i, 0), ind(i, 1)) = x[i];
+    res(ind(i, 1), ind(i, 0)) = x[i];
+
+  }
+
+  return res;
+
+}
+
 // END

@@ -736,6 +736,7 @@
 
     mean_variance <-
       tibble(variable = var_names,
+             median = colMedians(x),
              mean = colMeans(x),
              var = colVars(x),
              gini_coef = colGini(x, unbiased = unbiased))
@@ -1334,6 +1335,7 @@
 
     mean_variance <-
       tibble(variable = var_names,
+             median = rowMedians(x),
              mean = rowMeans(x),
              var = rowVars(x),
              gini_coef = rowGini(x, unbiased = unbiased))

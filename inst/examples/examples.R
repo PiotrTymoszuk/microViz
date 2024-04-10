@@ -6,6 +6,7 @@
   library(rlang)
   library(microViz)
   library(trafo)
+  library(GOSemSim)
 
   library(org.Hs.eg.db)
   library(AnnotationDbi)
@@ -13,6 +14,7 @@
   ## for parallelization
 
   library(furrr)
+  library(GOSemSim)
 
   select <- dplyr::select
   reduce <- purrr::reduce
@@ -83,23 +85,21 @@
 
 # Column stats and selection of variant genes ---------
 
+  system.time(counts[genes] %>%
+                colMedians(na.rm = TRUE))
+
   counts[genes] %>%
     colMedians(na.rm = TRUE)
 
-  counts[genes] %>%
-    colMins
+  colMins(counts[genes]) %>% head
 
-  counts[genes] %>%
-    colMax
+  counts[genes] %>% colMax %>% head
 
-  counts[genes] %>%
-    colGmeans
+  counts[genes] %>% colGmeans %>% head
 
-  counts[genes] %>%
-    colHmeans
+  counts[genes] %>% colHmeans %>% head
 
-  counts[genes] %>%
-    colVars
+  counts[genes] %>% colVars %>% head
 
   counts[genes] %>%
     colSDs
@@ -110,14 +110,11 @@
   counts[genes] %>%
     colSDs
 
-  counts[genes] %>%
-    colGini
+  counts[genes] %>% colGini %>% head
 
-  counts[genes] %>%
-    colFreqRatios
+  counts[genes] %>% colFreqRatios %>% head
 
-  counts[genes] %>%
-    colPercUniques
+  counts[genes] %>% colPercUniques %>% head
 
   counts[genes] %>%
     colCI(method = 'bca')
@@ -125,8 +122,14 @@
 
   ## selection of variant genes
 
+  system.time(distr_stats(log_expression[genes]))
+
+  #system.time(caret::nearZeroVar(log_expression[genes]))
+
+  ## selection of genes with a Gini coefficient cutoff
+
   colStats <- log_expression[genes] %>%
-    distr_stats(freqCut = 9, uniqueCut = 10)
+    distr_stats
 
   variant_genes <- colStats %>%
     filter(gini_coef >= 0.1,
@@ -276,19 +279,24 @@
 
   histo_dge$lm %>%
     filter(level == 'MIXED_IDLC') %>%
-    plot_volcano( regulation_variable = 'estimate',
+    plot_volcano( regulation_variable = 'effect_size',
                   p_variable = 'p_adjusted',
                   signif_level = 0.05,
-                  regulation_level = log2(1.5),
+                  regulation_level = 0.5,
+                  top_regulated = 20,
+                  label_variable = 'response',
                   x_lab = expression("log"[2] * "regulation, mixed vs ductal carcinoma"),
                   plot_title = "Differential gene expression, mixed-histology cancers")
 
   histo_dge$lm %>%
     filter(level == 'ILC') %>%
-    plot_volcano( regulation_variable = 'estimate',
+    plot_volcano( regulation_variable = 'effect_size',
                   p_variable = 'p_adjusted',
                   signif_level = 0.05,
-                  regulation_level = log2(1.5),
+                  regulation_level = 0.8,
+                  top_regulated = 10,
+                  label_variable = 'response',
+                  label_type = 'text',
                   x_lab = expression("log"[2] * "regulation, luminal vs ductal carcinoma"),
                   plot_title = "Differential gene expression, luminal cancers")
 
@@ -550,5 +558,24 @@
   summary(agg_large_biopsy)
   summary(agg_biopsy)
   summary(test_biopsy)
+
+# Semantic distances -----
+
+  go_db <- godata('org.Hs.eg.db', ont = "BP", computeIC = FALSE)
+
+  gene_sem(go_input$er[1:10],
+           semData = go_db,
+           measure = 'Wang',
+           as_dist = FALSE,
+           .parallel = FALSE)
+
+  go_dists <-
+    go_sem(go_enrichment$histo$go_id,
+           semData = go_db,
+           measure = 'Wang',
+           as_dist = FALSE,
+           .parallel = TRUE)
+
+
 
 # END ------

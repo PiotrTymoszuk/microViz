@@ -61,11 +61,17 @@
 #' @importFrom stats p.adjust
 #' @importFrom stats var
 #' @importFrom stats as.formula
+#' @importFrom stats as.dist
 #' @importFrom stats confint
 #' @importFrom stats anova
 #' @importFrom stats nobs
 #' @importFrom stats reorder
 #' @importFrom stats quantile
+#' @importFrom stats t.test
+#' @importFrom stats aov
+#' @importFrom stats summary.lm
+#'
+#' @importFrom utils combn
 #'
 #' @importFrom stringi stri_detect
 #' @importFrom stringi stri_replace
@@ -76,6 +82,9 @@
 #' @importFrom furrr future_map2
 #' @importFrom furrr furrr_options
 #' @importFrom furrr future_map
+#'
+#' @importFrom GOSemSim geneSim
+#' @importFrom GOSemSim goSim
 #'
 #' @importFrom Rcpp evalCpp
 #'

@@ -57,6 +57,22 @@ colMa <- function(x, na_rm = TRUE) {
     .Call('_microViz_colMa', PACKAGE = 'microViz', x, na_rm)
 }
 
+poolVarPaired <- function(x, y) {
+    .Call('_microViz_poolVarPaired', PACKAGE = 'microViz', x, y)
+}
+
+poolVarWelch <- function(x, y) {
+    .Call('_microViz_poolVarWelch', PACKAGE = 'microViz', x, y)
+}
+
+poolVarStandard <- function(x, y) {
+    .Call('_microViz_poolVarStandard', PACKAGE = 'microViz', x, y)
+}
+
+poolVarLM <- function(x) {
+    .Call('_microViz_poolVarLM', PACKAGE = 'microViz', x)
+}
+
 rowMed <- function(x, na_rm = TRUE) {
     .Call('_microViz_rowMed', PACKAGE = 'microViz', x, na_rm)
 }
@@ -155,5 +171,9 @@ freqRatioCpp <- function(x) {
 
 percUniqueCpp <- function(x) {
     .Call('_microViz_percUniqueCpp', PACKAGE = 'microViz', x)
+}
+
+fillMat <- function(x, ind, dim) {
+    .Call('_microViz_fillMat', PACKAGE = 'microViz', x, ind, dim)
 }
 

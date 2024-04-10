@@ -27,8 +27,7 @@
 
     tst_vec <- split(data[[variable]], data[[split_fct]])
 
-    res <- tryCatch(stats::t.test(x = tst_vec[[1]],
-                                  y = tst_vec[[2]], ...),
+    res <- tryCatch(t.test(x = tst_vec[[1]], y = tst_vec[[2]], ...),
                     error = function(e) NULL)
 
     if(!is.null(res)) {
@@ -53,22 +52,15 @@
 
         if(length(tst_vec[[1]]) != length(tst_vec[[2]])) return(NULL)
 
-        sd <- sqrt(var(tst_vec[[1]] - tst_vec[[2]]))
+        sd <- sqrt(poolVarPaired(tst_vec[[1]], tst_vec[[2]]))
 
       } else if(stri_detect(method, fixed = 'Welch')) {
 
-        sd <- sqrt((var(tst_vec[[1]]) + var(tst_vec[[2]]))/2)
+        sd <- sqrt(poolVarWelch(tst_vec[[1]], tst_vec[[2]]))
 
       } else {
 
-        sd_sq1 <- (tst_vec[[1]] - mean(tst_vec[[1]], na.rm = TRUE))^2
-        sd_sq2 <- (tst_vec[[2]] - mean(tst_vec[[2]], na.rm = TRUE))^2
-
-        n_diff <- length(tst_vec[[1]] + length(tst_vec[[2]]) - 2)
-
-        if(n_diff == 0) n_diff <- 1
-
-        sd <- sqrt((sum(sd_sq1) + sum(sd_sq2))/n_diff)
+        sd <- sqrt(poolVarStandard(tst_vec[[1]], tst_vec[[2]]))
 
       }
 
@@ -228,7 +220,7 @@
 
     }
 
-    aov_model <- tryCatch(stats::aov(formula = form, data = data, ...),
+    aov_model <- tryCatch(aov(formula = form, data = data, ...),
                           error = function(e) NULL)
 
     if(is.null(aov_model)) return(NULL)
@@ -273,7 +265,7 @@
 
     ## linear modeling ------
 
-    lm_coefs <- stats::summary.lm(aov_model)$coefficients
+    lm_coefs <- summary.lm(aov_model)$coefficients
 
     coef_rex <- paste0('(', split_fct, ')|(Intercept)')
 
@@ -296,19 +288,16 @@
 
     split_levs[1] <- '(Intercept)'
 
-    resp_splits <- split(data[[variable]], data[[split_fct]])
-
-    split_variances <- map(resp_splits, var)
-
-    sd <- map_dbl(split_variances,
-                  ~sqrt((.x + split_variances[[1]])/2))
+    split_variances <-
+      poolVarLM(split(data[[variable]], data[[split_fct]]))
 
     level <- NULL
     n <- NULL
+    sd <- NULL
 
     sd_table <- tibble(level = split_levs,
-                       n = map_dbl(resp_splits, length),
-                       sd = sd)
+                       n = as.numeric(table(data[[split_fct]])),
+                       sd = sqrt(split_variances))
 
     ## lm output -------
 
@@ -570,35 +559,22 @@
     start_time <- Sys.time()
     message(paste('Testing for n =', length(variables), 'variables'))
     on.exit(message(paste('Elapsed:', Sys.time() - start_time)))
+    on.exit(plan('sequential'), add = TRUE)
+
+    if(.parallel) plan('multisession')
 
     ## data split and testing --------
 
     data_lst <- map(variables,
                     ~data[c(split_fct, .x)])
 
-    if(.parallel) {
-
-      plan('multisession')
-
-      tst_res <- future_map2(variables,
-                             data_lst,
-                             function(x, y) test_fun(data = y,
-                                                     variable = x,
-                                                     split_fct = split_fct, ...),
-                             .options = furrr_options(seed = TRUE,
-                                                      packages = c('tibble')))
-
-      plan('sequential')
-
-    } else {
-
-      tst_res <- map2(variables,
-                      data_lst,
-                      function(x, y) test_fun(data = y,
-                                              variable = x,
-                                              split_fct = split_fct, ...))
-
-    }
+    tst_res <- future_map2(variables,
+                           data_lst,
+                           function(x, y) test_fun(data = y,
+                                                   variable = x,
+                                                   split_fct = split_fct, ...),
+                           .options = furrr_options(seed = TRUE,
+                                                    packages = c('tibble')))
 
     tst_res <- compact(tst_res)
 
@@ -693,6 +669,9 @@
     start_time <- Sys.time()
     message(paste('Testing for n =', length(variables), 'variables'))
     on.exit(message(paste('Elapsed:', Sys.time() - start_time)))
+    on.exit(plan('sequential'), add = TRUE)
+
+    if(.parallel) plan('multisession')
 
     ## data split and testing --------
 
@@ -706,33 +685,15 @@
 
     }
 
-    if(.parallel) {
-
-      plan('multisession')
-
-      tst_res <-
-        future_map2(variables,
-                    data_lst,
-                    function(x, y) anova_tester(data = y,
-                                                split_fct = split_fct,
-                                                confounder = confounder,
-                                                variable = x, ...),
-                    .options = furrr_options(seed = TRUE,
-                                             packages = c('tibble')))
-
-      plan('sequential')
-
-    } else {
-
-      tst_res <-
-        map2(variables,
-             data_lst,
-             function(x, y) anova_tester(data = y,
-                                         split_fct = split_fct,
-                                         confounder = confounder,
-                                         variable = x, ...))
-
-    }
+    tst_res <-
+      future_map2(variables,
+                  data_lst,
+                  function(x, y) anova_tester(data = y,
+                                              split_fct = split_fct,
+                                              confounder = confounder,
+                                              variable = x, ...),
+                  .options = furrr_options(seed = TRUE,
+                                           packages = c('tibble')))
 
     tst_res <- transpose(compact(tst_res))
 
@@ -833,6 +794,9 @@
     start_time <- Sys.time()
     message(paste('Testing for n =', length(variables), 'variables'))
     on.exit(message(paste('Elapsed:', Sys.time() - start_time)))
+    on.exit(plan('sequential'), add = TRUE)
+
+    if(.parallel) plan('multisession')
 
     ## data split and testing ---------
 
@@ -846,35 +810,16 @@
 
     }
 
-    if(.parallel) {
-
-      plan('multisession')
-
-      tst_res <-
-        future_map2(variables,
-                    data_lst,
-                    function(x, y) nb_tester(data = y,
-                                             split_fct = split_fct,
-                                             confounder = confounder,
-                                             dev_test = dev_test,
-                                             variable = x, ...),
-                    .options = furrr_options(seed = TRUE,
-                                             packages = c('tibble')))
-
-      plan('sequential')
-
-    } else {
-
-      tst_res <-
-        map2(variables,
-             data_lst,
-             function(x, y) nb_tester(data = y,
-                                      split_fct = split_fct,
-                                      confounder = confounder,
-                                      dev_test = dev_test,
-                                      variable = x, ...))
-
-    }
+    tst_res <-
+      future_map2(variables,
+                  data_lst,
+                  function(x, y) nb_tester(data = y,
+                                           split_fct = split_fct,
+                                           confounder = confounder,
+                                           dev_test = dev_test,
+                                           variable = x, ...),
+                  .options = furrr_options(seed = TRUE,
+                                           packages = c('tibble')))
 
     tst_res <- transpose(compact(tst_res))
 

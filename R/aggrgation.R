@@ -96,7 +96,11 @@
     ## keeping separate the elements that do not need to be aggregated
     ## aggregation --------
 
-    multi_splits <- future_map(x_splits[duplicated_f],
+    multi_splits <- compact(x_splits[duplicated_f])
+
+    duplicated_f <- names(multi_splits)
+
+    multi_splits <- future_map(multi_splits[duplicated_f],
                                fun, ...,
                                .options = .paropts)
 
@@ -200,7 +204,11 @@
 
     split_x <- map(split_lst, ~x[, .x, drop = FALSE])
 
-    multi_splits <- future_map(split_x[duplicated_f],
+    multi_splits <- compact(split_x[duplicated_f])
+
+    duplicated_f <- names(multi_splits)
+
+    multi_splits <- future_map(multi_splits[duplicated_f],
                                fun, ...,
                                .options = .paropts)
 

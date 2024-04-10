@@ -180,6 +180,53 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// poolVarPaired
+double poolVarPaired(NumericVector x, NumericVector y);
+RcppExport SEXP _microViz_poolVarPaired(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(poolVarPaired(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// poolVarWelch
+double poolVarWelch(NumericVector x, NumericVector y);
+RcppExport SEXP _microViz_poolVarWelch(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(poolVarWelch(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// poolVarStandard
+double poolVarStandard(NumericVector x, NumericVector y);
+RcppExport SEXP _microViz_poolVarStandard(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(poolVarStandard(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// poolVarLM
+NumericVector poolVarLM(List x);
+RcppExport SEXP _microViz_poolVarLM(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(poolVarLM(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rowMed
 NumericVector rowMed(NumericMatrix x, bool na_rm);
 RcppExport SEXP _microViz_rowMed(SEXP xSEXP, SEXP na_rmSEXP) {
@@ -474,6 +521,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// fillMat
+NumericMatrix fillMat(NumericVector x, IntegerMatrix ind, int dim);
+RcppExport SEXP _microViz_fillMat(SEXP xSEXP, SEXP indSEXP, SEXP dimSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type ind(indSEXP);
+    Rcpp::traits::input_parameter< int >::type dim(dimSEXP);
+    rcpp_result_gen = Rcpp::wrap(fillMat(x, ind, dim));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_microViz_colMed", (DL_FUNC) &_microViz_colMed, 2},
@@ -490,6 +550,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_Delta", (DL_FUNC) &_microViz_Delta, 2},
     {"_microViz_colMi", (DL_FUNC) &_microViz_colMi, 2},
     {"_microViz_colMa", (DL_FUNC) &_microViz_colMa, 2},
+    {"_microViz_poolVarPaired", (DL_FUNC) &_microViz_poolVarPaired, 2},
+    {"_microViz_poolVarWelch", (DL_FUNC) &_microViz_poolVarWelch, 2},
+    {"_microViz_poolVarStandard", (DL_FUNC) &_microViz_poolVarStandard, 2},
+    {"_microViz_poolVarLM", (DL_FUNC) &_microViz_poolVarLM, 1},
     {"_microViz_rowMed", (DL_FUNC) &_microViz_rowMed, 2},
     {"_microViz_rowGeoMean", (DL_FUNC) &_microViz_rowGeoMean, 2},
     {"_microViz_rowHarmMean", (DL_FUNC) &_microViz_rowHarmMean, 2},
@@ -515,6 +579,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_Table", (DL_FUNC) &_microViz_Table, 1},
     {"_microViz_freqRatioCpp", (DL_FUNC) &_microViz_freqRatioCpp, 1},
     {"_microViz_percUniqueCpp", (DL_FUNC) &_microViz_percUniqueCpp, 1},
+    {"_microViz_fillMat", (DL_FUNC) &_microViz_fillMat, 3},
     {NULL, NULL, 0}
 };
 

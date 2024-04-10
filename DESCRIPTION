@@ -1,7 +1,7 @@
 Package: microViz
 Type: Package
 Title: Visualization of Genome-Wide Expression Data
-Version: 1.1.0
+Version: 1.1.1
 Maintainer: Piotr Tymoszuk <piotr.s.tymoszuk@gmail.com>
 Description: Provides a medley of testing amd plotting tools: heat maps, Forest 
     plots and volcano plots compatible with a wide range of tabular data.
@@ -18,16 +18,17 @@ Imports:
     dplyr,
     furrr,
     future,
-    ggplot2, 
+    ggplot2,
     ggrepel,
     ggwordcloud,
+    GOSemSim,
     limma,
     MASS,
     pROC,
     purrr,
     rcompanion,
-    Rcpp, 
-    rlang, 
+    Rcpp,
+    rlang,
     stringi,
     tibble,
     tidyr,
@@ -46,6 +47,7 @@ Collate:
     'multiple_testing.R'
     'numeric_functions.R'
     'plotting.R'
+    'similarity.R'
     'testing.R'
     'text_functions.R'
     'utils.R'
