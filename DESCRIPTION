@@ -1,10 +1,11 @@
 Package: microViz
 Type: Package
 Title: Visualization of Genome-Wide Expression Data
-Version: 1.1.1
+Version: 1.1.2
 Maintainer: Piotr Tymoszuk <piotr.s.tymoszuk@gmail.com>
-Description: Provides a medley of testing amd plotting tools: heat maps, Forest 
-    plots and volcano plots compatible with a wide range of tabular data.
+Description: Provides a medley of pre-processing, testing and plotting tools: 
+    heat maps, Forest plots and Volcano plots, tesing and similarity analysis 
+    tools compatible with a wide range of tabular data.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
