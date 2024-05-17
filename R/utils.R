@@ -1,4 +1,4 @@
-# Exported utilities.
+# Exported and non-exported utilities.
 
 
 #' @include imports.R
@@ -60,8 +60,8 @@
 #' Check for a numeric data frame.
 #'
 #' @description
-#' The functions checks if all columns of a data frame are numeric or
-#' if a numeric matrix is provided.
+#' The functions checks if all columns of a data frame or matrix are numeric or
+#' binary.
 #'
 #' @param x a data frame or a matrix.
 #'
@@ -90,6 +90,22 @@
     if(!is.numeric(x)) {
 
       stop('A numeric matrix is required.', call. = FALSE)
+
+    }
+
+  }
+
+#' @rdname check_df
+
+  check_binary_df <- function(x) {
+
+    check_df(x)
+
+    lev_check <- map_lgl(x, function(var) all(var == 0 | var == 1))
+
+    if(any(!lev_check)) {
+
+      stop('At least one of variables is not binary.', call. = FALSE)
 
     }
 

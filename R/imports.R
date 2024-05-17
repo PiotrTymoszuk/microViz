@@ -52,6 +52,8 @@
 #' @importFrom dplyr count
 #' @importFrom dplyr top_n
 #' @importFrom dplyr summarise
+#' @importFrom dplyr relocate
+#' @importFrom dplyr arrange
 #'
 #' @importFrom tibble rownames_to_column
 #' @importFrom tibble column_to_rownames
@@ -73,6 +75,8 @@
 #'
 #' @importFrom utils combn
 #'
+#' @importFrom car recode
+#'
 #' @importFrom stringi stri_detect
 #' @importFrom stringi stri_replace
 #' @importFrom stringi stri_split
@@ -82,6 +86,8 @@
 #' @importFrom furrr future_map2
 #' @importFrom furrr furrr_options
 #' @importFrom furrr future_map
+#' @importFrom furrr future_map_dfc
+#'
 #'
 #' @importFrom GOSemSim geneSim
 #' @importFrom GOSemSim goSim

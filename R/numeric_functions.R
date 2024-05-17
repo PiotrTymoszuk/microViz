@@ -188,6 +188,7 @@
 #'
 #' `distr_stats()` returns a data frame with the following columns:
 #' * `variable`: variable names
+#' * `median`: variable medians
 #' * `mean`: variable means
 #' * `var`: variances
 #' * `gini_coef`: Gini coefficients
@@ -787,6 +788,7 @@
 #' `row_stats()` returns a data frame with the following columns:
 #' * `variable`: if the input object has defined row names, they will be
 #' displayed here, otherwise observation numbers.
+#' * `median`: row medians
 #' * `mean`: row means
 #' * `var`: row variances
 #' * `gini_coef`: Gini coefficients of the rows
@@ -1350,6 +1352,66 @@
                                          freqRatio > freqCut | percentUnique <= uniqueCut))
 
     mean_variance
+
+  }
+
+# Minimum shift of numeric data ----------
+
+#' Offset numeric vectors be their minimum.
+#'
+#' @description
+#' Offsets a numeric vectors or columns of a numeric matrix or a data frame by
+#' the respective minimal values.
+#' This results in non-negative values with minimum corresponding to 0.
+#' Any `NA`s are removed silently for minimum calculation but kept in the output.
+#'
+#' @return a numeric vector, matrix or data frame, depending on the input.
+#'
+#' @param x an object: numeric vector, matrix or data frame.
+#' @param ... exra arguments passed to the methods.
+#'
+#' @export
+
+  minimum_shift <- function(x, ...) UseMethod('minimum_shift')
+
+#' @rdname minimum_shift
+#' @export
+
+  minimum_shift.default <- function(x, ...) {
+
+    stopifnot(is.numeric(x))
+
+    offsetVector(x)
+
+  }
+
+#' @rdname minimum_shift
+#' @export
+
+  minimum_shift.matrix <- function(x, ...) {
+
+    check_mtx(x)
+
+    res <- offsetMatrix(x)
+
+    if(!is.null(rownames(x))) {
+
+      res <- set_names(res, rownames(x))
+
+    }
+
+    res
+
+  }
+
+#' @rdname minimum_shift
+#' @export
+
+  minimum_shift.data.frame <- function(x, ...) {
+
+    check_df(x)
+
+    as.data.frame(minimum_shift(as.matrix(x)))
 
   }
 

@@ -1,7 +1,7 @@
 Package: microViz
 Type: Package
 Title: Visualization of Genome-Wide Expression Data
-Version: 1.1.2
+Version: 1.2.0
 Maintainer: Piotr Tymoszuk <piotr.s.tymoszuk@gmail.com>
 Description: Provides a medley of pre-processing, testing and plotting tools: 
     heat maps, Forest plots and Volcano plots, tesing and similarity analysis 
@@ -16,6 +16,7 @@ Authors@R:
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 Imports: 
+    car,
     dplyr,
     furrr,
     future,
@@ -44,6 +45,7 @@ Collate:
     'imports.R'
     'enrichment.R'
     'expression_estimates.R'
+    'genetics.R'
     'multiple_plotting.R'
     'multiple_testing.R'
     'numeric_functions.R'

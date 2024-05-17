@@ -1722,4 +1722,157 @@
 
   }
 
+# Box plot from distribution statistics -------
+
+#' Plot a box plot given median, interquartile and 95% percentile range.
+#'
+#' @description
+#' Generates a `ggplot` box plot from distribution statistics: median,
+#' 25% and 75% percentiles, and 2.5% and 95% percentiles.
+#' The function may be useful at plotting distribution statistic for very large
+#' data sets (e.g. whole transcriptome). In this case, a box plot made with
+#' pre-calculated distribution statistic is going to spare a lot of memory.
+#'
+#' @return a `ggplot` object.
+#'
+#' @param data a data frame with the following columns: `median`,
+#' `perc25`, `perc75`, `perc025`, and `perc975` storing the stats.
+#' @param x_variable name of the variable presented in the X axis.
+#' @param fill_variable name of the variable defining color of the box plots.
+#' @param fill_color fill color for the boxes, ignored if `fill_variable = NULL`.
+#' @param width width of the boxes.
+#' @param alpha alpha of the box plots.
+#' @param plot_title plot title,
+#' @param plot_subtitle plot subtitle.
+#' @param x_lab x axis title.
+#' @param y_lab y axis title.
+#' @param cust_theme custom `ggplot` theme
+#'
+#' @export
+
+  box_from_stats <- function(data,
+                             x_variable,
+                             fill_variable = NULL,
+                             fill_color = 'steelblue',
+                             width = 0.8,
+                             alpha = 1,
+                             plot_title = NULL,
+                             plot_subtitle = NULL,
+                             x_lab = NULL,
+                             y_lab = NULL,
+                             cust_theme = microViz::theme_micro()) {
+
+    ## input control -------
+
+    if(!is.data.frame(data)) {
+
+      stop("'data' has to be a data frame.", call. = FALSE)
+
+    }
+
+    if(!x_variable %in% names(data)) {
+
+      stop("'x_variable' missing from the input data.", call. = FALSE)
+
+    }
+
+    if(!is.factor(data[[x_variable]])) {
+
+      data[[x_variable]] <- factor(data[[x_variable]])
+
+    }
+
+    if(!is.null(fill_variable)) {
+
+      if(!fill_variable %in% names(data)) {
+
+        stop("'fill_variable' is missing from the input data.", call. = FALSE)
+
+      }
+
+    }
+
+    if(any(!c('median', 'perc25', 'perc75', 'perc025', 'perc975') %in% names(data))) {
+
+      error_txt <-
+        paste("'data' has to have the following variables:",
+              "'median', 'perc25', 'perc75', 'perc025', and 'perc975'")
+
+     stop(error_txt, call. = FALSE)
+
+    }
+
+    stopifnot(is.numeric(width))
+    stopifnot(is.numeric(alpha))
+
+    if(!inherits(cust_theme, 'theme')) {
+
+      stop("'cust_theme' has to be a valid ggplot theme.",
+           call. = FALSE)
+
+    }
+
+    ## plotting ---------
+
+    ## plots a box plot given a data frame with the columns
+    ## `median`, `perc25`, `perc75`, `perc025` and `perc975`
+    ## storing the median expression, interquartile and 95 percentile ranges
+
+    center_pos <- NULL
+    median <- NULL
+    perc25 <- NULL
+    perc75 <- NULL
+    perc025 <- NULL
+    perc975 <- NULL
+
+    data <- mutate(data, center_pos = as.numeric(.data[[x_variable]]))
+
+    if(is.null(fill_variable)) {
+
+      box_plot <-
+        ggplot(data,
+               aes(x = .data[[x_variable]],
+                   y = median)) +
+        geom_errorbar(aes(ymin = perc025,
+                          ymax = perc975),
+                      width = 0) +
+        geom_rect(aes(xmin = center_pos - 0.5 * width,
+                      xmax = center_pos + 0.5 * width,
+                      ymin = perc25,
+                      ymax = perc75),
+                  color = 'black',
+                  fill = fill_color)
+
+    } else {
+
+      box_plot <-
+        ggplot(data,
+               aes(x = .data[[x_variable]],
+                   y = median,
+                   fill = .data[[fill_variable]])) +
+        geom_errorbar(aes(ymin = perc025,
+                          ymax = perc975),
+                      width = 0) +
+        geom_rect(aes(xmin = center_pos - 0.5 * width,
+                      xmax = center_pos + 0.5 * width,
+                      ymin = perc25,
+                      ymax = perc75),
+                  color = 'black')
+
+    }
+
+    box_plot +
+      geom_segment(aes(x = center_pos - 0.5 * width,
+                       xend = center_pos + 0.5 * width,
+                       y = median,
+                       yend = median),
+                   color = 'black') +
+      cust_theme +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           x = x_lab,
+           y = y_lab)
+
+  }
+
 # END -----

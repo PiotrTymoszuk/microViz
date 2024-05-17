@@ -57,6 +57,14 @@ colMa <- function(x, na_rm = TRUE) {
     .Call('_microViz_colMa', PACKAGE = 'microViz', x, na_rm)
 }
 
+offsetVector <- function(x) {
+    .Call('_microViz_offsetVector', PACKAGE = 'microViz', x)
+}
+
+offsetMatrix <- function(x) {
+    .Call('_microViz_offsetMatrix', PACKAGE = 'microViz', x)
+}
+
 poolVarPaired <- function(x, y) {
     .Call('_microViz_poolVarPaired', PACKAGE = 'microViz', x, y)
 }

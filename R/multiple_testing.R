@@ -215,35 +215,65 @@
 
 # Shared elements ----------
 
-#' Identify shared elements in sets.
+#' Tally and identify shared elements in sets.
 #'
 #' @description
-#' The function chooses elements shared by at least n elements of a list.
-#' As such it may be useful at identifying e.g. significantly regulated genes
+#' The functions count and select elements shared by at least n elements of
+#' a list.
+#' As such they may be useful at identifying e.g. significantly regulated genes
 #' or pathways in several data sets.
 #'
-#' @return a vector with the features shared by the given number of
-#' elements.
+#' @return `shared_features()`: a vector with the features shared by the given
+#' number of elements.
+#' `count_features()`: a data frame with the following columns:
+#'
+#' * `element`: element names
+#'
+#' * `n`: number of sets, where the element was present
+#'
+#' * `n_total`: total number of sets
+#'
+#' * `percent`: percentage of sets, where the given element was present
 #'
 #' @param x a list of character or numeric vectors.
 #' @param m number of sets which share the common features.
 #'
 #' @export
 
-  shared_features <- function(x, m = 2) {
-
-    ## input control ------
+  count_features <- function(x) {
 
     stopifnot(is.list(x))
 
-    element_combos <- utils::combn(seq_along(x), m = m, simplify = FALSE)
+    all_lst <- reduce(compact(x), c)
 
-    intersects <- map(element_combos,
-                      ~x[.x])
+    freq_tbl <- as.data.frame(table(all_lst))
 
-    intersects <- map(intersects, reduce, intersect)
+    freq_tbl <- set_names(freq_tbl, c('element', 'n'))
 
-    unique(unlist(intersects))
+    n <- NULL
+    n_total <- NULL
+    percent <- NULL
+
+    freq_tbl <- mutate(freq_tbl,
+                       n_total = length(x),
+                       percent = n/n_total * 100)
+
+    freq_tbl <- arrange(freq_tbl, -percent)
+
+    as_tibble(freq_tbl)
+
+  }
+
+#' @rdname count_features
+#' @export
+
+  shared_features <- function(x, m = 2) {
+
+    ft_tbl <- count_features(x)
+
+    n <- NULL
+
+    filter(ft_tbl, n >= m)$element
 
   }
 

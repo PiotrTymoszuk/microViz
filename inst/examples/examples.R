@@ -175,6 +175,8 @@
   gene_sets <- 1:10 %>%
     map(function(x) sample(variant_genes[1:1000], size = 300))
 
+  count_features(gene_sets)
+
   shared_features(gene_sets, m = 6)
 
 # Two-sample test -------
@@ -576,6 +578,34 @@
            as_dist = FALSE,
            .parallel = TRUE)
 
+# Binary data frequencies -----------
 
+  ## samples with at least 100 copies of RNA
+
+  bin_data <- counts[c('er_status', genes[1:5])]
+
+  bin_data[genes[1:5]] <- bin_data[genes[1:5]] %>%
+    map_dfc(~ifelse(.x >= 2, 'expressed', 'not_expressed'))
+
+
+  count_binary(data = bin_data,
+               variables = genes[1:5])
+
+  count_binary(data = bin_data,
+               #variables = genes[1:5],
+               split_fct = 'er_status')
+
+# Box plot from stats ---------
+
+  stat_tbl <-
+    colQuantiles(counts[genes[1:20]],
+                 c(0.5, 0.25, 0.75, 0.025, 0.975)) %>%
+    set_colnames(c('median', 'perc25', 'perc75', 'perc025', 'perc975')) %>%
+    as.data.frame %>%
+    rownames_to_column('gene_symbol')
+
+  box_from_stats(stat_tbl,
+                 x_variable = 'gene_symbol',
+                 fill_variable = 'gene_symbol')
 
 # END ------

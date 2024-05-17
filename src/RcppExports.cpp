@@ -180,6 +180,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// offsetVector
+NumericVector offsetVector(NumericVector x);
+RcppExport SEXP _microViz_offsetVector(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(offsetVector(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// offsetMatrix
+NumericMatrix offsetMatrix(NumericMatrix x);
+RcppExport SEXP _microViz_offsetMatrix(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(offsetMatrix(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // poolVarPaired
 double poolVarPaired(NumericVector x, NumericVector y);
 RcppExport SEXP _microViz_poolVarPaired(SEXP xSEXP, SEXP ySEXP) {
@@ -550,6 +572,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_Delta", (DL_FUNC) &_microViz_Delta, 2},
     {"_microViz_colMi", (DL_FUNC) &_microViz_colMi, 2},
     {"_microViz_colMa", (DL_FUNC) &_microViz_colMa, 2},
+    {"_microViz_offsetVector", (DL_FUNC) &_microViz_offsetVector, 1},
+    {"_microViz_offsetMatrix", (DL_FUNC) &_microViz_offsetMatrix, 1},
     {"_microViz_poolVarPaired", (DL_FUNC) &_microViz_poolVarPaired, 2},
     {"_microViz_poolVarWelch", (DL_FUNC) &_microViz_poolVarWelch, 2},
     {"_microViz_poolVarStandard", (DL_FUNC) &_microViz_poolVarStandard, 2},
