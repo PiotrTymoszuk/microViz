@@ -12,7 +12,7 @@
   expression <-
     read_tsv('./inst/examples/brca_mbcproject_2022/data_mrna_seq_v2_rsem.txt')
 
-  ## selection of genes with the sympbol assigned
+  ## selection of genes with the symbol assigned
 
   expression <- expression %>%
     filter(!is.na(Hugo_Symbol),

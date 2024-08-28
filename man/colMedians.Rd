@@ -37,6 +37,9 @@
 \alias{colCI}
 \alias{colCI.matrix}
 \alias{colCI.data.frame}
+\alias{colMissing}
+\alias{colMissing.matrix}
+\alias{colMissing.data.frame}
 \alias{distr_stats}
 \title{Compute statistics for numeric columns of a data frame or a matrix.}
 \usage{
@@ -112,12 +115,18 @@ colCI(x, conf_level, ...)
 
 \method{colCI}{data.frame}(x, conf_level = 0.95, method = c("percentile", "bca"), na.rm = TRUE, ...)
 
+colMissing(x, ...)
+
+\method{colMissing}{matrix}(x, ...)
+
+\method{colMissing}{data.frame}(x, ...)
+
 distr_stats(x, unbiased = TRUE, freqCut = 95/5, uniqueCut = 10, ...)
 }
 \arguments{
 \item{x}{a numeric data frame or matrix.}
 
-\item{...}{extra arguments passed to methods, currently none.}
+\item{...}{extra arguments passed to methods.}
 
 \item{na.rm}{logical: should NAs be removed?}
 
@@ -150,6 +159,7 @@ element to the second one for each column; the function silently skips any
 \code{NAs}.
 \code{colPercUniques()} returns percentages of unique observations in each column;
 \code{NAs} are silently removed.
+\code{colMissing} returns numbers of missing observations.
 
 \code{distr_stats()} returns a data frame with the following columns:
 \itemize{
@@ -165,6 +175,11 @@ second most common element.
 \item \code{zeroVar}: logical, indicates if the variable has only one unique value.
 \item \code{nzv}: logical, indicates if the variable passes the variability criteria
 defined by the \code{freqCut} and \code{uniqueCut} arguments.
+\item \code{n}: total observation number.
+\item \code{n_missing}: number of missing observations
+\item \code{perc_missing}: percentage of missing observations
+For the \code{distr_stats()} output, any missing observations are removed
+silently prior to calculation of the numeric statistics.
 }
 }
 \description{

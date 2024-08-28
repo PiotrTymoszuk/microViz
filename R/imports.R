@@ -25,6 +25,13 @@
 #' @importFrom ggplot2 geom_errorbarh
 #' @importFrom ggplot2 geom_text
 #' @importFrom ggplot2 position_jitter
+#' @importFrom ggplot2 position_dodge
+#' @importFrom ggplot2 geom_errorbar
+#' @importFrom ggplot2 geom_rect
+#' @importFrom ggplot2 geom_segment
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 scale_x_discrete
+#' @importFrom ggplot2 guide_axis
 #'
 #' @importFrom purrr map
 #' @importFrom purrr map_lgl
@@ -44,6 +51,7 @@
 #' @importFrom dplyr as_tibble
 #' @importFrom dplyr mutate
 #' @importFrom dplyr left_join
+#' @importFrom dplyr full_join
 #' @importFrom dplyr group_by
 #' @importFrom dplyr ungroup
 #' @importFrom dplyr filter
@@ -54,6 +62,9 @@
 #' @importFrom dplyr summarise
 #' @importFrom dplyr relocate
 #' @importFrom dplyr arrange
+#' @importFrom dplyr all_of
+#'
+#' @importFrom tidyr pivot_longer
 #'
 #' @importFrom tibble rownames_to_column
 #' @importFrom tibble column_to_rownames
@@ -72,6 +83,11 @@
 #' @importFrom stats t.test
 #' @importFrom stats aov
 #' @importFrom stats summary.lm
+#' @importFrom stats rnorm
+#' @importFrom stats cmdscale
+#' @importFrom stats hclust
+#'
+#' @importFrom umap umap
 #'
 #' @importFrom utils combn
 #'
@@ -88,11 +104,17 @@
 #' @importFrom furrr future_map
 #' @importFrom furrr future_map_dfc
 #'
+#' @importFrom ggrepel geom_text_repel
+#' @importFrom ggrepel geom_label_repel
 #'
 #' @importFrom GOSemSim geneSim
 #' @importFrom GOSemSim goSim
 #'
 #' @importFrom Rcpp evalCpp
+#'
+#' @importFrom generics components
+#'
+#' @importFrom ggdendro ggdendrogram
 #'
 #' @useDynLib microViz
 

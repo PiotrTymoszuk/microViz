@@ -243,25 +243,25 @@
       if(label_type == 'label') {
 
         volc <- volc +
-          ggrepel::geom_label_repel(data = desc_tbl,
-                                    aes(label = .data[[label_variable]]),
-                                    size = txt_size,
-                                    color = txt_color,
-                                    label.padding = 0.1,
-                                    box.padding = 0.1,
-                                    show.legend = FALSE,
-                                    fontface = txt_face)
+          geom_label_repel(data = desc_tbl,
+                           aes(label = .data[[label_variable]]),
+                           size = txt_size,
+                           color = txt_color,
+                           label.padding = 0.1,
+                           box.padding = 0.1,
+                           show.legend = FALSE,
+                           fontface = txt_face)
 
       } else {
 
         volc <- volc +
-          ggrepel::geom_text_repel(data = desc_tbl,
-                                   aes(label = .data[[label_variable]]),
-                                   size = txt_size,
-                                   color = txt_color,
-                                   box.padding = 0.1,
-                                   show.legend = FALSE,
-                                   fontface = txt_face)
+          geom_text_repel(data = desc_tbl,
+                          aes(label = .data[[label_variable]]),
+                          size = txt_size,
+                          color = txt_color,
+                          box.padding = 0.1,
+                          show.legend = FALSE,
+                          fontface = txt_face)
 
       }
 
@@ -1019,18 +1019,30 @@
 #' Heat map of levels of variables of interest.
 #'
 #' @description
-#' The function draws a heat map of levels of the variables of interest in
+#' The functions draw a heat map of levels of the variables of interest in
 #' data set subsets defined by a splitting factor.
+#' While `heat_map()` operates with a single data frame, `common_data_frame()`
+#' takes a list of data frames as the first argument.
+#' In the former case, observations or samples are presented in the X axis and
+#' variables are shown in the Y axis, color intensity codes for the variable
+#' value.
+#' In the later case, levels of variables of interest are averaged within
+#' levels of the splitting factor (argument `spit_fct`); data sets are presented
+#' in the X axis, variables are presented in the Y axis, and tile color codes
+#' for the average.
 #'
 #' @return a `ggplot` graphics.
 #'
-#' @param data a data frame.
+#' @param data a data frame (`heat_map()`) or a list of data frames
+#' (`common_heat_map()`).
 #' @param variables a vector with names of the variables of interest.
 #' @param split_fct name of the splitting factor.
 #' @param normalize logical, should the data frame variables be normalized prior
 #' to plotting?
 #' @param norm_center defines centering of the variable during scaling: mean
 #' (default) or median. Ignored if `normalize = FALSE`.
+#' @param average_fun a function used to calculate average values of the
+#' variables within levels of the splitting factor.
 #' @param variable_classification a optional two column data frame, which
 #' defines the classification scheme of the variables, e.g. cluster assignment.
 #' The first variable stores the variable name and the second indicated the
@@ -1054,7 +1066,8 @@
 #' middle and upper point of the color scale.
 #' @param midpoint optional, the middle point of the fill scale.
 #' @param ... additional arguments passed to
-#' \code{\link[ggplot2]{scale_fill_gradient2}}.
+#' \code{\link[ggplot2]{scale_fill_gradient2}} (`heat_map()`), or additional
+#' arguments passed to `heat_map()` (`common_heat_map()`).
 #'
 #' @export
 
@@ -1084,6 +1097,14 @@
 
       stop('At least one variable is missing from the data.',
            call. = FALSE)
+
+    }
+
+    classes <- map_lgl(data[variables], is.numeric)
+
+    if(any(!classes)) {
+
+      stop("Some of the variables are not numeric.", call. = FALSE)
 
     }
 
@@ -1175,10 +1196,10 @@
     value <- NULL
 
     data <-
-      tidyr::pivot_longer(data,
-                          cols = dplyr::all_of(variables),
-                          names_to = 'variable',
-                          values_to = 'value')
+      pivot_longer(data,
+                   cols = all_of(variables),
+                   names_to = 'variable',
+                   values_to = 'value')
 
     data <- left_join(data,
                       variable_classification,
@@ -1236,6 +1257,177 @@
         theme(axis.text.x = element_blank(),
               axis.ticks.x = element_blank(),
               axis.line = element_blank())
+
+    }
+
+    hm_plot
+
+  }
+
+#' @rdname heat_map
+#' @export
+
+  common_heat_map <- function(data,
+                              variables,
+                              split_fct,
+                              normalize = TRUE,
+                              norm_center = c('mean', 'median'),
+                              average_fun = colMeans,
+                              plot_title = NULL,
+                              plot_subtitle = NULL,
+                              x_lab = 'data set',
+                              y_lab = 'variable',
+                              fill_lab = 'average Z-score',
+                              hide_x_axis_text = FALSE,
+                              cust_theme = theme_micro(),
+                              color_scale = c("steelblue", "black", "firebrick"),
+                              midpoint = 0, ...) {
+
+    ## entry control for the data argument ---------
+
+    stopifnot(is.list(data))
+
+    classes <- map_lgl(data, is.data.frame)
+
+    if(any(!classes)) {
+
+      stop("At least element of 'data' is not a data frame.", call. = FALSE)
+
+    }
+
+    split_present <- map_lgl(data, ~split_fct %in% names(.x))
+
+    if(any(!split_present)) {
+
+      stop("'split_fct' is missing from at least one data set.", call. = FALSE)
+
+    }
+
+    split_is_factor <- map_lgl(data, ~is.factor(.x[[split_fct]]))
+
+    if(any(!split_is_factor)) {
+
+      stop('In at least one of data frames, splitting variable is not factor.',
+           call. = FALSE)
+
+    }
+
+    variables_present <- map_lgl(data, ~all(variables %in% names(.x)))
+
+    if(any(!variables_present)) {
+
+      stop('Some of the variables are missing from the data.', call. = FALSE)
+
+    }
+
+    variables_numeric <-
+      map(data,
+          function(ds) map_lgl(ds[variables], is.numeric))
+
+    variables_numeric <- map_lgl(variables_numeric, all)
+
+    if(any(!variables_numeric)) {
+
+      stop('Some of the variables are not numeric.', call. = FALSE)
+
+    }
+
+    ## entry control for the remaining arguments -------
+
+    stopifnot(is.logical(normalize))
+
+    norm_center <- match.arg(norm_center[1], c('mean', 'median'))
+
+    if(!is.function(average_fun)) {
+
+      stop("'average_fun' has to be a function.", call. = FALSE)
+
+    }
+
+    stopifnot(inherits(cust_theme, 'theme'))
+
+    if(length(color_scale) < 3) {
+
+      stop('Not enough colors.', call. = FALSE)
+
+    }
+
+    ## plotting data -------
+
+    if(is.null(plot_subtitle)) {
+
+      plot_subtitle <- paste('data sets: n =', length(data))
+
+    }
+
+    data_names <- names(data)
+
+    data <- map(data, ~.x[c(split_fct, variables)])
+
+    if(normalize) {
+
+      center_fun <- switch(norm_center,
+                           mean = function(x) mean(x, na.rm = TRUE),
+                           median = function(x) median(x, na.rm = TRUE))
+
+      for(i in seq_along(data)) {
+
+        data[[i]][variables] <-
+          map_dfc(data[[i]][variables],
+                  ~scale(.x, center = center_fun(.x))[, 1])
+
+      }
+
+    }
+
+    split_vec <- map(data, ~.x[[split_fct]])
+
+    levs <- map(split_vec, levels)
+
+    data_splits <-
+      map2(data, split_vec,
+           ~split(.x[variables], .y, drop = TRUE))
+
+    data_splits <- map(data_splits, map, average_fun)
+
+    data_splits <- map(data_splits, reduce, rbind)
+
+    data_splits <- map(data_splits, as.data.frame)
+
+    data_splits <-
+      map2(data_splits, levs,
+           ~mutate(.x, !!split_fct := factor(.y, .y)))
+
+    data_set <- NULL
+
+    plot_tbl <- map2_dfr(data_splits, names(data_splits),
+                         ~mutate(.x, data_set = .y))
+
+    ax_labs <-
+      set_names(plot_tbl$data_set,
+                paste0('obs_', 1:nrow(plot_tbl)))
+
+    ## heat map -------
+
+    hm_plot <- heat_map(plot_tbl,
+                        variables = variables,
+                        split_fct = split_fct,
+                        normalize = FALSE,
+                        plot_title = plot_title,
+                        plot_subtitle = plot_subtitle,
+                        x_lab = x_lab,
+                        y_lab = y_lab,
+                        cust_theme = cust_theme,
+                        color_scale = color_scale,
+                        midpoint = midpoint, ...) +
+      scale_x_discrete(labels = ax_labs) +
+      guides(x = guide_axis(angle = 45))
+
+    if(hide_x_axis_text) {
+
+      hm_plot <- hm_plot +
+        theme(axis.text.x = element_blank(),
+              axis.ticks.x = element_blank())
 
     }
 
@@ -1421,8 +1613,8 @@
                        prob = c(1 - fraction_rotated,
                                 fraction_rotated))
 
-      data <- dplyr::mutate(data,
-                            rot_angle = angles)
+      data <- mutate(data,
+                     rot_angle = angles)
 
     } else {
 
@@ -1606,7 +1798,7 @@
 
       color_var <- NULL
 
-      data <- dplyr::mutate(data, color_var = point_color)
+      data <- mutate(data, color_var = point_color)
 
       color_variable <- 'color_var'
 

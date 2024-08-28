@@ -316,7 +316,7 @@ NumericVector colPercUnique(NumericMatrix x) {
 
 }
 
-//deviations from data center
+// deviations from data center
 
 //[[Rcpp::export]]
 
@@ -391,6 +391,29 @@ NumericVector colMa(NumericMatrix x, bool na_rm = true) {
     }
 
     res[i] = Rcpp::max(col_inp);
+
+  }
+
+  return res;
+
+}
+
+// missing observations
+
+//[[Rcpp::export]]
+
+NumericVector colMis(NumericMatrix x) {
+
+  int x_ncols = x.ncol();
+
+  NumericVector col_inp;
+  NumericVector res(x_ncols);
+
+  for(int i = 0; i < x_ncols; ++i) {
+
+    col_inp = x(_, i);
+
+    res[i] = missingCpp(col_inp);
 
   }
 

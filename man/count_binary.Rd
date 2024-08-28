@@ -24,6 +24,7 @@ percentage of events within all observations (\code{percent}).
 }
 \description{
 Computes frequencies and percentages for binary data split by a factor.
+Any NA's are silently removed.
 }
 \details{
 The binary data can be provided in a 0/1 form or as two-level factors.

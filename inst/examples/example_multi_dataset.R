@@ -1,4 +1,4 @@
-# Example of a multi-dataset analysis
+# Example of a multi-data set analysis
 
 # tools -------
 
@@ -85,19 +85,57 @@
         type = 't') %>%
     map(~.x$result) %>%
     compact %>%
-    map2_dfr(., names(.),
-            ~mutate(.x, class = .y)) %>%
-    re_adjust(p_variable = 'p_value', method = 'BH')
+    map(mutate,
+        regulation = ifelse(p_value >= 0.05, 'ns',
+                            ifelse(effect_size > 0, 'positive',
+                                   ifelse(effect_size < 0,
+                                          'negative', 'ns'))),
+        regulation = factor(regulation, c('positive', 'negative', 'ns'))
+        )
 
-  class_test %>%
-    draw_estimate_scatter(label_variable = 'response',
+  ## effect sizes and significance in single classes
+
+  estimate_plot <- class_test %>%
+    plot_common_estimates(label_variable = 'response',
                           regulation_variable = 'effect_size',
-                          regulation_level = 0.5,
-                          p_variable = 'p_value',
-                          signif_level = 0.1,
-                          central_stat = 'mean',
-                          error_stat = 'percentile_ci',
+                          regulation_status = 'regulation',
                           plot_title = 'Effect of SES in single classes',
                           x_lab = "Cohen's d") +
     geom_vline(xintercept = 0,
                linetype = 'dashed')
+
+  ## numbers of classes with significant effects and average effect sizes
+
+  effect_plot <- class_test %>%
+    plot_common_effect(label_variable = 'response',
+                       regulation_variable = 'estimate',
+                       regulation_status = 'regulation',
+                       plot_title = 'Effect of SES in single classes',
+                       x_lab = "difference in score",
+                       cutoff = 10)
+
+# Visualization: multi-class heat map and before-after plots -------
+
+  common_heat_map <- class_data %>%
+    common_heat_map(variables = c('lang', 'IQ'),
+                    split_fct = 'SES_class')
+
+  common_before_after <- class_data %>%
+    plot_common_change(variables = c('lang', 'IQ'),
+                       split_fct = 'SES_class',
+                       dodge = 0,
+                       show_whiskers = TRUE,
+                       txt_color = 'black',
+                       txt_position = 'right',
+                       palette = c('steelblue', 'orangered3'),
+                       normalize = FALSE)
+
+# Differences in variables of interest between the SES classes ------
+
+  class_data %>%
+    map(delta,
+        split_fct = 'SES_class',
+        variables = c('lang', 'IQ'),
+        average_fun = colMedians)
+
+# END -------

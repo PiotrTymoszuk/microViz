@@ -119,6 +119,8 @@
   counts[genes] %>%
     colCI(method = 'bca')
 
+  counts[genes] %>%
+    colMissing
 
   ## selection of variant genes
 
@@ -167,6 +169,36 @@
   rowCI(trans_counts, method = 'bca')
 
   row_stats(trans_counts)
+
+# Descriptive stats for numeric variables -------
+
+  test_counts <- counts[, c('metastasis', 'histology', genes[1:100])] %>%
+    filter(complete.cases(.))
+
+  test_counts[10, genes[5]] <- NA
+
+  colComplete(test_counts)
+
+  fast_num_stats(test_counts,
+                 split_fct = 'histology',
+                 variables = genes[1:100],
+                 format = 'full')
+
+# Visualization of differences in expression of selected genes ---------
+
+  ## differences in median expression between the histology strata
+
+  test_counts %>%
+    delta(split_fct = 'histology',
+          variables = genes[1:100],
+          extreme = FALSE,
+          average_fun = colMedians)
+
+  test_counts %>%
+    blast(metastasis) %>%
+    plot_common_change(variables = genes[1:4],
+                       split_fct = 'histology')
+
 
 # Shared elements ---------
 
@@ -587,6 +619,9 @@
   bin_data[genes[1:5]] <- bin_data[genes[1:5]] %>%
     map_dfc(~ifelse(.x >= 2, 'expressed', 'not_expressed'))
 
+  ## introducing some NAs
+
+  bin_data$TSPAN6[100] <- NA
 
   count_binary(data = bin_data,
                variables = genes[1:5])

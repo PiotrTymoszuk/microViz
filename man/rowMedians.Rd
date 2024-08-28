@@ -37,6 +37,9 @@
 \alias{rowCI}
 \alias{rowCI.matrix}
 \alias{rowCI.data.frame}
+\alias{rowMissing}
+\alias{rowMissing.matrix}
+\alias{rowMissing.data.frame}
 \alias{row_stats}
 \title{Compute distribution metrics for rows of a data frame or a matrix.}
 \usage{
@@ -112,12 +115,18 @@ rowCI(x, conf_level, ...)
 
 \method{rowCI}{data.frame}(x, conf_level = 0.95, method = c("percentile", "bca"), na.rm = TRUE, ...)
 
+rowMissing(x, ...)
+
+\method{rowMissing}{matrix}(x, ...)
+
+\method{rowMissing}{data.frame}(x, ...)
+
 row_stats(x, unbiased = TRUE, freqCut = 95/5, uniqueCut = 10, ...)
 }
 \arguments{
 \item{x}{a numeric data frame or matrix.}
 
-\item{...}{extra arguments passed to methods, currently none.}
+\item{...}{extra arguments passed to methods.}
 
 \item{na.rm}{logical: should NAs be removed?}
 
@@ -166,6 +175,11 @@ second most common element.
 \item \code{zeroVar}: logical, indicates if the row has only one unique value.
 \item \code{nzv}: logical, indicates if the row passes the variability criteria
 defined by the \code{freqCut} and \code{uniqueCut} arguments.
+\item \code{n}: numbers of row entries
+\item \code{n_missing}: numbrers of missing row entries
+\item \code{perc_missing}: percentage of missing row entries
+Note, that \code{row_stats()} silently removes missing values prior to
+computation of the distribution statistics.
 }
 }
 \description{

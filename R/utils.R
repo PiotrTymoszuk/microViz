@@ -101,7 +101,9 @@
 
     check_df(x)
 
-    lev_check <- map_lgl(x, function(var) all(var == 0 | var == 1))
+    lev_check <- map(x, ~.x[!is.na(.x)])
+
+    lev_check <- map_lgl(lev_check, function(var) all(var == 0 | var == 1))
 
     if(any(!lev_check)) {
 

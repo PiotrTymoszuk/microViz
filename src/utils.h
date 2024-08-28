@@ -20,4 +20,6 @@ NumericVector bca(NumericVector theta, double conf_level);
 
 IntegerVector Table(NumericVector x);
 
+double missingCpp(NumericVector x);
+
 #endif // __utils__

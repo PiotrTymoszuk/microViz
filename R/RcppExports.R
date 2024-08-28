@@ -57,6 +57,10 @@ colMa <- function(x, na_rm = TRUE) {
     .Call('_microViz_colMa', PACKAGE = 'microViz', x, na_rm)
 }
 
+colMis <- function(x) {
+    .Call('_microViz_colMis', PACKAGE = 'microViz', x)
+}
+
 offsetVector <- function(x) {
     .Call('_microViz_offsetVector', PACKAGE = 'microViz', x)
 }
@@ -133,6 +137,26 @@ rowMa <- function(x, na_rm = TRUE) {
     .Call('_microViz_rowMa', PACKAGE = 'microViz', x, na_rm)
 }
 
+rowMis <- function(x) {
+    .Call('_microViz_rowMis', PACKAGE = 'microViz', x)
+}
+
+vecSimilarity <- function(x, y, method = "jaccard") {
+    .Call('_microViz_vecSimilarity', PACKAGE = 'microViz', x, y, method)
+}
+
+vecTversky <- function(x, y, a = 1, b = 1) {
+    .Call('_microViz_vecTversky', PACKAGE = 'microViz', x, y, a, b)
+}
+
+setSimilarity <- function(x, method = "jaccard") {
+    .Call('_microViz_setSimilarity', PACKAGE = 'microViz', x, method)
+}
+
+setTversky <- function(x, a, b) {
+    .Call('_microViz_setTversky', PACKAGE = 'microViz', x, a, b)
+}
+
 Median <- function(x) {
     .Call('_microViz_Median', PACKAGE = 'microViz', x)
 }
@@ -183,5 +207,9 @@ percUniqueCpp <- function(x) {
 
 fillMat <- function(x, ind, dim) {
     .Call('_microViz_fillMat', PACKAGE = 'microViz', x, ind, dim)
+}
+
+missingCpp <- function(x) {
+    .Call('_microViz_missingCpp', PACKAGE = 'microViz', x)
 }
 

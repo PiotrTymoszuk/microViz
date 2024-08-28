@@ -325,4 +325,17 @@ NumericMatrix fillMat(NumericVector x,
 
 }
 
+// number of missing observations
+
+//[[Rcpp::export]]
+
+double missingCpp(NumericVector x) {
+
+  double x_size = x.size();
+  double x_complete_size = na_omit(x).size();
+
+  return x_size - x_complete_size;
+
+}
+
 // END

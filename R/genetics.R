@@ -109,6 +109,7 @@
 #'
 #' @description
 #' Computes frequencies and percentages for binary data split by a factor.
+#' Any NA's are silently removed.
 #'
 #' @details
 #' The binary data can be provided in a 0/1 form or as two-level factors.
@@ -187,20 +188,23 @@
 
     if(is.null(split_fct)) {
 
-      stats <- colSums(data[variables])
+      stats <- colSums(data[variables], na.rm = TRUE)
+
+      n_totals <- map_dbl(data[variables], ~length(.x[!is.na(.x)]))
 
       stats <- tibble(variable = variables,
                       n = unname(stats),
-                      n_total = nrow(data),
-                      percent = unname(stats)/nrow(data) * 100)
+                      n_total = n_totals,
+                      percent = unname(stats)/n_totals * 100)
 
     } else {
 
       data <- split(data[variables], f = data[[split_fct]])
 
-      stats <- map(data, colSums)
+      stats <- map(data, colSums, na.rm = TRUE)
 
-      totals <- map_dbl(data, nrow)
+      totals <- map(data,
+                    function(sp) map_dbl(sp, ~length(.x[!is.na(.x)])))
 
       stats <-
         map2(stats, totals,

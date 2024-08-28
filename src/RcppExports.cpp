@@ -180,6 +180,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// colMis
+NumericVector colMis(NumericMatrix x);
+RcppExport SEXP _microViz_colMis(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(colMis(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // offsetVector
 NumericVector offsetVector(NumericVector x);
 RcppExport SEXP _microViz_offsetVector(SEXP xSEXP) {
@@ -407,6 +418,69 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rowMis
+NumericVector rowMis(NumericMatrix x);
+RcppExport SEXP _microViz_rowMis(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowMis(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vecSimilarity
+double vecSimilarity(CharacterVector x, CharacterVector y, String method);
+RcppExport SEXP _microViz_vecSimilarity(SEXP xSEXP, SEXP ySEXP, SEXP methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< String >::type method(methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(vecSimilarity(x, y, method));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vecTversky
+double vecTversky(CharacterVector x, CharacterVector y, double a, double b);
+RcppExport SEXP _microViz_vecTversky(SEXP xSEXP, SEXP ySEXP, SEXP aSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(vecTversky(x, y, a, b));
+    return rcpp_result_gen;
+END_RCPP
+}
+// setSimilarity
+NumericMatrix setSimilarity(List x, String method);
+RcppExport SEXP _microViz_setSimilarity(SEXP xSEXP, SEXP methodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type x(xSEXP);
+    Rcpp::traits::input_parameter< String >::type method(methodSEXP);
+    rcpp_result_gen = Rcpp::wrap(setSimilarity(x, method));
+    return rcpp_result_gen;
+END_RCPP
+}
+// setTversky
+NumericMatrix setTversky(List x, double a, double b);
+RcppExport SEXP _microViz_setTversky(SEXP xSEXP, SEXP aSEXP, SEXP bSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type b(bSEXP);
+    rcpp_result_gen = Rcpp::wrap(setTversky(x, a, b));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Median
 double Median(NumericVector x);
 RcppExport SEXP _microViz_Median(SEXP xSEXP) {
@@ -556,6 +630,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// missingCpp
+double missingCpp(NumericVector x);
+RcppExport SEXP _microViz_missingCpp(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(missingCpp(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_microViz_colMed", (DL_FUNC) &_microViz_colMed, 2},
@@ -572,6 +657,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_Delta", (DL_FUNC) &_microViz_Delta, 2},
     {"_microViz_colMi", (DL_FUNC) &_microViz_colMi, 2},
     {"_microViz_colMa", (DL_FUNC) &_microViz_colMa, 2},
+    {"_microViz_colMis", (DL_FUNC) &_microViz_colMis, 1},
     {"_microViz_offsetVector", (DL_FUNC) &_microViz_offsetVector, 1},
     {"_microViz_offsetMatrix", (DL_FUNC) &_microViz_offsetMatrix, 1},
     {"_microViz_poolVarPaired", (DL_FUNC) &_microViz_poolVarPaired, 2},
@@ -591,6 +677,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_rowPercUnique", (DL_FUNC) &_microViz_rowPercUnique, 1},
     {"_microViz_rowMi", (DL_FUNC) &_microViz_rowMi, 2},
     {"_microViz_rowMa", (DL_FUNC) &_microViz_rowMa, 2},
+    {"_microViz_rowMis", (DL_FUNC) &_microViz_rowMis, 1},
+    {"_microViz_vecSimilarity", (DL_FUNC) &_microViz_vecSimilarity, 3},
+    {"_microViz_vecTversky", (DL_FUNC) &_microViz_vecTversky, 4},
+    {"_microViz_setSimilarity", (DL_FUNC) &_microViz_setSimilarity, 2},
+    {"_microViz_setTversky", (DL_FUNC) &_microViz_setTversky, 3},
     {"_microViz_Median", (DL_FUNC) &_microViz_Median, 1},
     {"_microViz_geoMean", (DL_FUNC) &_microViz_geoMean, 1},
     {"_microViz_harmMean", (DL_FUNC) &_microViz_harmMean, 1},
@@ -604,6 +695,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_freqRatioCpp", (DL_FUNC) &_microViz_freqRatioCpp, 1},
     {"_microViz_percUniqueCpp", (DL_FUNC) &_microViz_percUniqueCpp, 1},
     {"_microViz_fillMat", (DL_FUNC) &_microViz_fillMat, 3},
+    {"_microViz_missingCpp", (DL_FUNC) &_microViz_missingCpp, 1},
     {NULL, NULL, 0}
 };
 

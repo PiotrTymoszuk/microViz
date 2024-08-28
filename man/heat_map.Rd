@@ -2,6 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{heat_map}
 \alias{heat_map}
+\alias{common_heat_map}
 \title{Heat map of levels of variables of interest.}
 \usage{
 heat_map(
@@ -24,9 +25,29 @@ heat_map(
   midpoint = NULL,
   ...
 )
+
+common_heat_map(
+  data,
+  variables,
+  split_fct,
+  normalize = TRUE,
+  norm_center = c("mean", "median"),
+  average_fun = colMeans,
+  plot_title = NULL,
+  plot_subtitle = NULL,
+  x_lab = "data set",
+  y_lab = "variable",
+  fill_lab = "average Z-score",
+  hide_x_axis_text = FALSE,
+  cust_theme = theme_micro(),
+  color_scale = c("steelblue", "black", "firebrick"),
+  midpoint = 0,
+  ...
+)
 }
 \arguments{
-\item{data}{a data frame.}
+\item{data}{a data frame (\code{heat_map()}) or a list of data frames
+(\code{common_heat_map()}).}
 
 \item{variables}{a vector with names of the variables of interest.}
 
@@ -73,12 +94,25 @@ middle and upper point of the color scale.}
 \item{midpoint}{optional, the middle point of the fill scale.}
 
 \item{...}{additional arguments passed to
-\code{\link[ggplot2]{scale_fill_gradient2}}.}
+\code{\link[ggplot2]{scale_fill_gradient2}} (\code{heat_map()}), or additional
+arguments passed to \code{heat_map()} (\code{common_heat_map()}).}
+
+\item{average_fun}{a function used to calculate average values of the
+variables within levels of the splitting factor.}
 }
 \value{
 a \code{ggplot} graphics.
 }
 \description{
-The function draws a heat map of levels of the variables of interest in
+The functions draw a heat map of levels of the variables of interest in
 data set subsets defined by a splitting factor.
+While \code{heat_map()} operates with a single data frame, \code{common_data_frame()}
+takes a list of data frames as the first argument.
+In the former case, observations or samples are presented in the X axis and
+variables are shown in the Y axis, color intensity codes for the variable
+value.
+In the later case, levels of variables of interest are averaged within
+levels of the splitting factor (argument \code{spit_fct}); data sets are presented
+in the X axis, variables are presented in the Y axis, and tile color codes
+for the average.
 }

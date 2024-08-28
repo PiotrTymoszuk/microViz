@@ -374,4 +374,27 @@ NumericVector rowMa(NumericMatrix x, bool na_rm = true) {
 
 }
 
+// missing observations
+
+//[[Rcpp::export]]
+
+NumericVector rowMis(NumericMatrix x) {
+
+  int x_nrows = x.nrow();
+
+  NumericVector row_inp;
+  NumericVector res(x_nrows);
+
+  for(int i = 0; i < x_nrows; ++i) {
+
+    row_inp = x(i, _);
+
+    res[i] = missingCpp(row_inp);
+
+  }
+
+  return res;
+
+}
+
 // END
