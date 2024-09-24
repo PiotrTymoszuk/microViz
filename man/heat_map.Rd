@@ -10,7 +10,8 @@ heat_map(
   variables,
   split_fct,
   normalize = TRUE,
-  norm_center = c("mean", "median"),
+  norm_center = c("mean", "median", "geo_mean", "harm_mean"),
+  norm_dispersion = c("sd", "sem"),
   variable_classification = NULL,
   direction = "<",
   facet = TRUE,
@@ -31,7 +32,9 @@ common_heat_map(
   variables,
   split_fct,
   normalize = TRUE,
-  norm_center = c("mean", "median"),
+  norm_center = c("mean", "median", "geo_mean", "harm_mean"),
+  norm_dispersion = c("sd", "sem"),
+  variable_classification = NULL,
   average_fun = colMeans,
   plot_title = NULL,
   plot_subtitle = NULL,
@@ -56,13 +59,18 @@ common_heat_map(
 \item{normalize}{logical, should the data frame variables be normalized prior
 to plotting?}
 
-\item{norm_center}{defines centering of the variable during scaling: mean
-(default) or median. Ignored if \code{normalize = FALSE}.}
+\item{norm_center}{defines centering of the variable during Z-score
+calculation: mean (default), median, geometric mean or harmonic mean.
+Ignored if \code{normalize = FALSE}. Please refer to \code{\link{zScores}}
+for details.}
 
-\item{variable_classification}{a optional two column data frame, which
-defines the classification scheme of the variables, e.g. cluster assignment.
-The first variable stores the variable name and the second indicated the
-variable subset. If not provided, the variables are classified with by their
+\item{norm_dispersion}{name of the dispersion statistic used for variable
+normalization: standard deviation (SD) or standard error of the mean (SEM).
+Please refer to \code{\link{zScores}} for details.}
+
+\item{variable_classification}{optional, a data frame, \code{clust_analysis}
+object or a list thereof as outlined in Details.
+If not provided, the variables are classified with by their
 specificity for the data set subsets defined by \code{split_fct} with
 \code{\link{classify}}.}
 
@@ -115,4 +123,20 @@ In the later case, levels of variables of interest are averaged within
 levels of the splitting factor (argument \code{spit_fct}); data sets are presented
 in the X axis, variables are presented in the Y axis, and tile color codes
 for the average.
+}
+\details{
+Normalization of variables id done by \code{\link{zScores}}.
+The \code{variable_classification} argument may be provided in several forms:
+\itemize{
+\item as a data frame with at least two columns. The first variable stores the
+variable name and the second indicates the variable subset. This input is
+accepted both by \code{heat_map()} and \code{common_heat_map()}.
+\item as a list of data frames like the one described above. This form is
+accepted only by \code{common_heat_map()}.
+\item as a \code{clust_analysis} object generated with one of the tools of
+\code{clustTools} package. The cluster assignment is extracted automatically.
+This form works with both functions.
+\item as a list of \code{clust_analysis} objects described above. This input is
+accepted only by \code{common_heat_map()}. #'
+}
 }

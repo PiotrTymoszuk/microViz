@@ -14,7 +14,10 @@
 #' under the receiver-operating characteristic (ROC) in a comparison of the
 #' subset with the pooled remaining subsets (i.e. the rest of the data set).
 #' Of note, these remaining subsets are set as the baseline or control in the
-#' ROC analysis. AUC ROC is computed with \code{\link[pROC]{roc}}.
+#' ROC analysis. The are under the ROC curve is computed by trapezoidal
+#' integration of specificity over 1 - sensitivity. The best performing cutoffs
+#' for assignment to the subset of interest by variable value are determined by
+#' maximizing Youden's J statistic (J = sensitivity + specificty - 1).
 #'
 #' @param data a data frame.
 #' @param variables a vector of names of the variables of interest.
@@ -30,9 +33,15 @@
 #'
 #' * `variable`: variable name
 #' * `split_fct`: a column named after the splitting factor
-#' * `auc`: are under the ROC curve for detection of the particular data subset
+#' * `auc`: area under the ROC curve (AUC ROC) for detection of the
+#' particular data subset
 #' * `delta_auc`: difference in AUC ROC for the particular subset and mean AUC
-#' ROC computed across all subsets.
+#' ROC computed across all subsets
+#' * `cutoff`: the best performing cutoff of the variable, that maximizes
+#' Youden's J statistic for detection of the subset of interest
+#' * `Se`: sensitivity at the optimal variable cutoff
+#' * `Sp`: specificity at the optimal variable cutoff
+#' * `J`: Jouden's J at the optimal variable cutoff
 #'
 #' @export
 
@@ -79,7 +88,8 @@
 
     ## subsets are compared in a pairwise manner
 
-    data <- data[c(split_fct, variables)]
+    data <- mutate(data[c(split_fct, variables)],
+                   !!split_fct := droplevels(.data[[split_fct]]))
 
     split_levs <- levels(data[[split_fct]])
 
@@ -98,49 +108,31 @@
 
     ## ROC AUC for detection of the particular subset versus the pooled rest
 
-    roc_objects <-
+    roc_lst <-
       map(split_data,
-          function(df) map(variables,
-                           ~pROC::roc(df[['sub_class']],
-                                      df[[.x]],
-                                      levels = c('no', 'yes'),
-                                      direction = direction)))
+          function(df) aucMtx(as.integer(df[['sub_class']]) - 1,
+                              as.matrix(df[, variables, drop = FALSE]),
+                              direction = direction))
 
-    roc_objects <- transpose(roc_objects)
+    roc_lst <- map(roc_lst, as.data.frame)
 
-    roc_objects <- set_names(roc_objects, variables)
+    roc_lst <- map(roc_lst, rownames_to_column, 'variable')
 
-    auc_tbl <- map(roc_objects, map_dbl, ~.x$auc)
-
-    auc <- NULL
-    delta_auc <- NULL
-    variable <- NULL
-
-    auc_tbl <-
-      map(auc_tbl,
-          ~tibble(!!split_fct := names(.x),
-                  auc = .x))
-
-    auc_tbl <-
-      map2_dfr(auc_tbl, names(auc_tbl),
-               ~mutate(.x, variable = .y))
+    roc_table <- map2_dfr(roc_lst, names(roc_lst),
+                          ~mutate(.x,
+                                  !!split_fct := factor(.y, split_levs)))
 
     ## computing deviance from the mean AUC
 
-    auc_tbl <- group_by(auc_tbl, variable)
+    roc_table <- group_by(roc_table, variable)
 
-    auc_tbl <- mutate(auc_tbl, delta_auc = auc - mean(auc))
+    roc_table <- mutate(roc_table, delta_auc = auc - mean(auc))
 
-    auc_tbl <- ungroup(auc_tbl)
-
-    auc_tbl <-
-      mutate(auc_tbl,
-             !!split_fct := factor(.data[[split_fct]],
-                                   split_levs))
+    roc_table <- ungroup(roc_table)
 
     ## selecting the cluster with the best detection accuracy ------
 
-    best_clusters <- group_by(auc_tbl, variable)
+    best_clusters <- group_by(roc_table, variable)
 
     best_clusters <- filter(best_clusters, auc == max(auc))
 
@@ -148,14 +140,11 @@
 
     best_clusters <- arrange(best_clusters, .data[[split_fct]], delta_auc)
 
-    list(auc = auc_tbl[c('variable',
-                         split_fct,
-                         'auc',
-                         'delta_auc')],
-         classification = best_clusters[c('variable',
-                                          split_fct,
-                                          'auc',
-                                          'delta_auc')])
+    map(list(auc = roc_table,
+             classification = best_clusters),
+        ~.x[c('variable', split_fct,
+              'auc', 'delta_auc',
+              'cutoff', 'Se', 'Sp', 'J')])
 
   }
 

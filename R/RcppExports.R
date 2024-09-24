@@ -61,6 +61,30 @@ colMis <- function(x) {
     .Call('_microViz_colMis', PACKAGE = 'microViz', x)
 }
 
+minMaxVec <- function(x) {
+    .Call('_microViz_minMaxVec', PACKAGE = 'microViz', x)
+}
+
+minMaxCols <- function(x) {
+    .Call('_microViz_minMaxCols', PACKAGE = 'microViz', x)
+}
+
+minMaxRows <- function(x) {
+    .Call('_microViz_minMaxRows', PACKAGE = 'microViz', x)
+}
+
+zScoreVec <- function(x, center = "mean", dispersion = "sd") {
+    .Call('_microViz_zScoreVec', PACKAGE = 'microViz', x, center, dispersion)
+}
+
+zScoreCols <- function(x, center = "mean", dispersion = "sd") {
+    .Call('_microViz_zScoreCols', PACKAGE = 'microViz', x, center, dispersion)
+}
+
+zScoreRows <- function(x, center = "mean", dispersion = "sd") {
+    .Call('_microViz_zScoreRows', PACKAGE = 'microViz', x, center, dispersion)
+}
+
 offsetVector <- function(x) {
     .Call('_microViz_offsetVector', PACKAGE = 'microViz', x)
 }
@@ -83,6 +107,22 @@ poolVarStandard <- function(x, y) {
 
 poolVarLM <- function(x) {
     .Call('_microViz_poolVarLM', PACKAGE = 'microViz', x)
+}
+
+rocThreshold <- function(outcome, marker, threshold, direction = "<", skip_control = FALSE) {
+    .Call('_microViz_rocThreshold', PACKAGE = 'microViz', outcome, marker, threshold, direction, skip_control)
+}
+
+rocMarker <- function(outcome, marker, direction = "auto", skip_control = FALSE) {
+    .Call('_microViz_rocMarker', PACKAGE = 'microViz', outcome, marker, direction, skip_control)
+}
+
+aucVec <- function(outcome, marker, direction = "auto", skip_control = FALSE) {
+    .Call('_microViz_aucVec', PACKAGE = 'microViz', outcome, marker, direction, skip_control)
+}
+
+aucMtx <- function(outcome, markers, direction = "auto") {
+    .Call('_microViz_aucMtx', PACKAGE = 'microViz', outcome, markers, direction)
 }
 
 rowMed <- function(x, na_rm = TRUE) {
@@ -177,6 +217,10 @@ SD <- function(x) {
     .Call('_microViz_SD', PACKAGE = 'microViz', x)
 }
 
+SEM <- function(x) {
+    .Call('_microViz_SEM', PACKAGE = 'microViz', x)
+}
+
 GiniCpp <- function(x, unbiased = TRUE) {
     .Call('_microViz_GiniCpp', PACKAGE = 'microViz', x, unbiased)
 }
@@ -211,5 +255,17 @@ fillMat <- function(x, ind, dim) {
 
 missingCpp <- function(x) {
     .Call('_microViz_missingCpp', PACKAGE = 'microViz', x)
+}
+
+sortByFirstColumn <- function(mat, decreasing = FALSE) {
+    .Call('_microViz_sortByFirstColumn', PACKAGE = 'microViz', mat, decreasing)
+}
+
+sortIndexes <- function(x, decreasing = FALSE) {
+    .Call('_microViz_sortIndexes', PACKAGE = 'microViz', x, decreasing)
+}
+
+trapezoidal_integration <- function(x, y) {
+    .Call('_microViz_trapezoidal_integration', PACKAGE = 'microViz', x, y)
 }
 

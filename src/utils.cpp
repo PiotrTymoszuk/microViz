@@ -6,7 +6,14 @@
 
 using namespace Rcpp;
 
-// calculation of median
+// calculation of mean and median
+// Mean() serves as a wrapper for other Cpp functions only
+
+double Mean(NumericVector x) {
+
+  return(mean(x));
+
+}
 
 // [[Rcpp::export]]
 
@@ -96,6 +103,14 @@ double Var(NumericVector x) {
 double SD(NumericVector x) {
 
   return std::sqrt(Var(x));
+
+}
+
+// [[Rcpp::export]]
+
+double SEM(NumericVector x) {
+
+  return std::sqrt(Var(x))/std::sqrt(x.size());
 
 }
 
@@ -335,6 +350,149 @@ double missingCpp(NumericVector x) {
   double x_complete_size = na_omit(x).size();
 
   return x_size - x_complete_size;
+
+}
+
+
+// checking if a matrix has column and row names
+
+LogicalVector checkNames(const NumericMatrix &x) {
+
+  List s = x.attr("dimnames");  // could be nil or list
+
+  LogicalVector res(2, false);
+
+  if(s.length() == 0) return res;
+
+  if(!Rf_isNull(s[0])) res[0] = true;
+  if(!Rf_isNull(s[1])) res[1] = true;
+
+  return res;
+
+}
+
+// arranging a numeric matrix
+
+// [[Rcpp::export]]
+
+NumericMatrix sortByFirstColumn(NumericMatrix mat,
+                                bool decreasing = false) {
+
+  // dimensions of the matrix
+
+  int n_rows = mat.nrow();
+  int n_cols = mat.ncol();
+
+  // Initialize the vector of pairs with the appropriate size
+  // which will store matrix values
+
+  std::vector<std::pair<double, double>> vec(n_rows);
+
+  // Directly assign values to the vector
+
+  for (int i = 0; i < n_rows; ++i) {
+
+    vec[i] = std::make_pair(mat(i, 0), mat(i, 1));
+
+  }
+
+  // Sort the vector by the first element of the pair
+
+  if(decreasing) {
+
+    std::sort(vec.rbegin(), vec.rend());
+
+  } else {
+
+    std::sort(vec.begin(), vec.end());
+
+  }
+
+  // Convert the sorted vector back to a matrix
+
+  NumericMatrix sortedMat(n_rows, n_cols);
+
+  for (int i = 0; i < n_rows; ++i) {
+
+    sortedMat(i, 0) = vec[i].first;
+    sortedMat(i, 1) = vec[i].second;
+
+  }
+
+  return sortedMat;
+
+}
+
+// indexes of sorted numeric vector
+
+//[[Rcpp::export]]
+
+IntegerVector sortIndexes(NumericVector x,
+                          bool decreasing = false) {
+
+  int n = x.size();
+
+  // Initialize the vector of pairs with the appropriate size
+  // The first element will store elements of x, and the second
+  // one their indexes
+
+  std::vector<std::pair<double, int>> vec(n);
+
+  for(int i = 0; i < n; ++i) {
+
+    vec[i] = std::make_pair(x[i], i);
+
+  }
+
+  // Sort the vector by the first element of the pair
+
+  if(decreasing) {
+
+    std::sort(vec.rbegin(), vec.rend());
+
+  } else {
+
+    std::sort(vec.begin(), vec.end());
+
+  }
+
+  // output vector of indexes
+
+  IntegerVector res(n);
+
+  for(int i = 0; i < n; ++i) {
+
+    res[i] = vec[i].second;
+
+  }
+
+  return res;
+
+}
+
+// trapezoidal integration
+
+//[[Rcpp::export]]
+
+double trapezoidal_integration(NumericVector x, NumericVector y) {
+
+  int n = x.size();
+
+  if (n != y.size()) {
+
+    stop("Vectors x and y must have the same length");
+
+  }
+
+  double integral = 0.0;
+
+  for (int i = 1; i < n; ++i) {
+
+    integral += 0.5 * (x[i] - x[i-1]) * (y[i] + y[i-1]);
+
+  }
+
+  return integral;
 
 }
 

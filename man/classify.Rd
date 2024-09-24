@@ -24,9 +24,15 @@ the data set. Both elements are data frames with the following columns:
 \itemize{
 \item \code{variable}: variable name
 \item \code{split_fct}: a column named after the splitting factor
-\item \code{auc}: are under the ROC curve for detection of the particular data subset
+\item \code{auc}: area under the ROC curve (AUC ROC) for detection of the
+particular data subset
 \item \code{delta_auc}: difference in AUC ROC for the particular subset and mean AUC
-ROC computed across all subsets.
+ROC computed across all subsets
+\item \code{cutoff}: the best performing cutoff of the variable, that maximizes
+Youden's J statistic for detection of the subset of interest
+\item \code{Se}: sensitivity at the optimal variable cutoff
+\item \code{Sp}: specificity at the optimal variable cutoff
+\item \code{J}: Jouden's J at the optimal variable cutoff
 }
 }
 \description{
@@ -38,5 +44,8 @@ Specificity for a given data subset is determined by calculation of area
 under the receiver-operating characteristic (ROC) in a comparison of the
 subset with the pooled remaining subsets (i.e. the rest of the data set).
 Of note, these remaining subsets are set as the baseline or control in the
-ROC analysis. AUC ROC is computed with \code{\link[pROC]{roc}}.
+ROC analysis. The are under the ROC curve is computed by trapezoidal
+integration of specificity over 1 - sensitivity. The best performing cutoffs
+for assignment to the subset of interest by variable value are determined by
+maximizing Youden's J statistic (J = sensitivity + specificty - 1).
 }

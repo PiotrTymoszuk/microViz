@@ -191,6 +191,78 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// minMaxVec
+NumericVector minMaxVec(NumericVector x);
+RcppExport SEXP _microViz_minMaxVec(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(minMaxVec(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// minMaxCols
+NumericMatrix minMaxCols(NumericMatrix x);
+RcppExport SEXP _microViz_minMaxCols(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(minMaxCols(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// minMaxRows
+NumericMatrix minMaxRows(NumericMatrix x);
+RcppExport SEXP _microViz_minMaxRows(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(minMaxRows(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// zScoreVec
+NumericVector zScoreVec(NumericVector x, String center, String dispersion);
+RcppExport SEXP _microViz_zScoreVec(SEXP xSEXP, SEXP centerSEXP, SEXP dispersionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< String >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< String >::type dispersion(dispersionSEXP);
+    rcpp_result_gen = Rcpp::wrap(zScoreVec(x, center, dispersion));
+    return rcpp_result_gen;
+END_RCPP
+}
+// zScoreCols
+NumericMatrix zScoreCols(NumericMatrix x, String center, String dispersion);
+RcppExport SEXP _microViz_zScoreCols(SEXP xSEXP, SEXP centerSEXP, SEXP dispersionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< String >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< String >::type dispersion(dispersionSEXP);
+    rcpp_result_gen = Rcpp::wrap(zScoreCols(x, center, dispersion));
+    return rcpp_result_gen;
+END_RCPP
+}
+// zScoreRows
+NumericMatrix zScoreRows(NumericMatrix x, String center, String dispersion);
+RcppExport SEXP _microViz_zScoreRows(SEXP xSEXP, SEXP centerSEXP, SEXP dispersionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< String >::type center(centerSEXP);
+    Rcpp::traits::input_parameter< String >::type dispersion(dispersionSEXP);
+    rcpp_result_gen = Rcpp::wrap(zScoreRows(x, center, dispersion));
+    return rcpp_result_gen;
+END_RCPP
+}
 // offsetVector
 NumericVector offsetVector(NumericVector x);
 RcppExport SEXP _microViz_offsetVector(SEXP xSEXP) {
@@ -257,6 +329,62 @@ BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< List >::type x(xSEXP);
     rcpp_result_gen = Rcpp::wrap(poolVarLM(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rocThreshold
+NumericVector rocThreshold(IntegerVector outcome, NumericVector marker, double threshold, String direction, bool skip_control);
+RcppExport SEXP _microViz_rocThreshold(SEXP outcomeSEXP, SEXP markerSEXP, SEXP thresholdSEXP, SEXP directionSEXP, SEXP skip_controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type outcome(outcomeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type marker(markerSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< String >::type direction(directionSEXP);
+    Rcpp::traits::input_parameter< bool >::type skip_control(skip_controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(rocThreshold(outcome, marker, threshold, direction, skip_control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rocMarker
+NumericMatrix rocMarker(IntegerVector outcome, NumericVector marker, String direction, bool skip_control);
+RcppExport SEXP _microViz_rocMarker(SEXP outcomeSEXP, SEXP markerSEXP, SEXP directionSEXP, SEXP skip_controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type outcome(outcomeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type marker(markerSEXP);
+    Rcpp::traits::input_parameter< String >::type direction(directionSEXP);
+    Rcpp::traits::input_parameter< bool >::type skip_control(skip_controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(rocMarker(outcome, marker, direction, skip_control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// aucVec
+NumericVector aucVec(IntegerVector outcome, NumericVector marker, String direction, bool skip_control);
+RcppExport SEXP _microViz_aucVec(SEXP outcomeSEXP, SEXP markerSEXP, SEXP directionSEXP, SEXP skip_controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type outcome(outcomeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type marker(markerSEXP);
+    Rcpp::traits::input_parameter< String >::type direction(directionSEXP);
+    Rcpp::traits::input_parameter< bool >::type skip_control(skip_controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(aucVec(outcome, marker, direction, skip_control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// aucMtx
+NumericMatrix aucMtx(IntegerVector outcome, NumericMatrix markers, String direction);
+RcppExport SEXP _microViz_aucMtx(SEXP outcomeSEXP, SEXP markersSEXP, SEXP directionSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type outcome(outcomeSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type markers(markersSEXP);
+    Rcpp::traits::input_parameter< String >::type direction(directionSEXP);
+    rcpp_result_gen = Rcpp::wrap(aucMtx(outcome, markers, direction));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -536,6 +664,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// SEM
+double SEM(NumericVector x);
+RcppExport SEXP _microViz_SEM(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(SEM(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GiniCpp
 double GiniCpp(NumericVector x, bool unbiased);
 RcppExport SEXP _microViz_GiniCpp(SEXP xSEXP, SEXP unbiasedSEXP) {
@@ -641,6 +780,42 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sortByFirstColumn
+NumericMatrix sortByFirstColumn(NumericMatrix mat, bool decreasing);
+RcppExport SEXP _microViz_sortByFirstColumn(SEXP matSEXP, SEXP decreasingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type mat(matSEXP);
+    Rcpp::traits::input_parameter< bool >::type decreasing(decreasingSEXP);
+    rcpp_result_gen = Rcpp::wrap(sortByFirstColumn(mat, decreasing));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sortIndexes
+IntegerVector sortIndexes(NumericVector x, bool decreasing);
+RcppExport SEXP _microViz_sortIndexes(SEXP xSEXP, SEXP decreasingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< bool >::type decreasing(decreasingSEXP);
+    rcpp_result_gen = Rcpp::wrap(sortIndexes(x, decreasing));
+    return rcpp_result_gen;
+END_RCPP
+}
+// trapezoidal_integration
+double trapezoidal_integration(NumericVector x, NumericVector y);
+RcppExport SEXP _microViz_trapezoidal_integration(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(trapezoidal_integration(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_microViz_colMed", (DL_FUNC) &_microViz_colMed, 2},
@@ -658,12 +833,22 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_colMi", (DL_FUNC) &_microViz_colMi, 2},
     {"_microViz_colMa", (DL_FUNC) &_microViz_colMa, 2},
     {"_microViz_colMis", (DL_FUNC) &_microViz_colMis, 1},
+    {"_microViz_minMaxVec", (DL_FUNC) &_microViz_minMaxVec, 1},
+    {"_microViz_minMaxCols", (DL_FUNC) &_microViz_minMaxCols, 1},
+    {"_microViz_minMaxRows", (DL_FUNC) &_microViz_minMaxRows, 1},
+    {"_microViz_zScoreVec", (DL_FUNC) &_microViz_zScoreVec, 3},
+    {"_microViz_zScoreCols", (DL_FUNC) &_microViz_zScoreCols, 3},
+    {"_microViz_zScoreRows", (DL_FUNC) &_microViz_zScoreRows, 3},
     {"_microViz_offsetVector", (DL_FUNC) &_microViz_offsetVector, 1},
     {"_microViz_offsetMatrix", (DL_FUNC) &_microViz_offsetMatrix, 1},
     {"_microViz_poolVarPaired", (DL_FUNC) &_microViz_poolVarPaired, 2},
     {"_microViz_poolVarWelch", (DL_FUNC) &_microViz_poolVarWelch, 2},
     {"_microViz_poolVarStandard", (DL_FUNC) &_microViz_poolVarStandard, 2},
     {"_microViz_poolVarLM", (DL_FUNC) &_microViz_poolVarLM, 1},
+    {"_microViz_rocThreshold", (DL_FUNC) &_microViz_rocThreshold, 5},
+    {"_microViz_rocMarker", (DL_FUNC) &_microViz_rocMarker, 4},
+    {"_microViz_aucVec", (DL_FUNC) &_microViz_aucVec, 4},
+    {"_microViz_aucMtx", (DL_FUNC) &_microViz_aucMtx, 3},
     {"_microViz_rowMed", (DL_FUNC) &_microViz_rowMed, 2},
     {"_microViz_rowGeoMean", (DL_FUNC) &_microViz_rowGeoMean, 2},
     {"_microViz_rowHarmMean", (DL_FUNC) &_microViz_rowHarmMean, 2},
@@ -687,6 +872,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_harmMean", (DL_FUNC) &_microViz_harmMean, 1},
     {"_microViz_Var", (DL_FUNC) &_microViz_Var, 1},
     {"_microViz_SD", (DL_FUNC) &_microViz_SD, 1},
+    {"_microViz_SEM", (DL_FUNC) &_microViz_SEM, 1},
     {"_microViz_GiniCpp", (DL_FUNC) &_microViz_GiniCpp, 2},
     {"_microViz_Quantile", (DL_FUNC) &_microViz_Quantile, 2},
     {"_microViz_perci", (DL_FUNC) &_microViz_perci, 2},
@@ -696,6 +882,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_percUniqueCpp", (DL_FUNC) &_microViz_percUniqueCpp, 1},
     {"_microViz_fillMat", (DL_FUNC) &_microViz_fillMat, 3},
     {"_microViz_missingCpp", (DL_FUNC) &_microViz_missingCpp, 1},
+    {"_microViz_sortByFirstColumn", (DL_FUNC) &_microViz_sortByFirstColumn, 2},
+    {"_microViz_sortIndexes", (DL_FUNC) &_microViz_sortIndexes, 2},
+    {"_microViz_trapezoidal_integration", (DL_FUNC) &_microViz_trapezoidal_integration, 2},
     {NULL, NULL, 0}
 };
 

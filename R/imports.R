@@ -68,6 +68,7 @@
 #'
 #' @importFrom tibble rownames_to_column
 #' @importFrom tibble column_to_rownames
+#' @importFrom tibble is_tibble
 #'
 #' @importFrom stats median
 #' @importFrom stats complete.cases

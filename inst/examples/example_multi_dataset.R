@@ -12,7 +12,9 @@
   school_data <- MASS::nlschools %>%
     mutate(SES_class = cut(SES,
                            c(-Inf, 25, Inf),
-                           c('low', 'high'))) %>%
+                           c('low', 'high')),
+           IQ_sum = IQ + lang,
+           IQ_sum_norm = zScores(IQ) + zScores(lang)) %>%
     as_tibble
 
   ## I'm including only classes with at least 20 students
@@ -38,21 +40,34 @@
     filter(class %in% classes) %>%
     mutate(class = droplevels(class))
 
+  ## variables of interest
+
+  vars <- c('lang', 'IQ', 'IQ_sum', 'IQ_sum_norm', 'GS')
+
 # Plotting variables of interest as a function of the SES -------
 
-  school_response_test <- test_two_groups(data = school_data,
-                                          split_fct = 'SES_class',
-                                          variables = c('lang', 'IQ'),
-                                          type = 't') %>%
+  school_response_test <-
+    test_two_groups(data = school_data,
+                    split_fct = 'SES_class',
+                    variables = vars,
+                    type = 't') %>%
     mutate(plot_cap = paste0(effect_size_name,
                              ' = ', signif(effect_size, 2),
                              ', p = ', signif(p_adjusted, 2)))
 
   school_response_plots <-
-    list(x = c('lang', 'IQ'),
-         y = c('Language skills', 'Verbal IQ'),
+    list(x = vars,
+         y = c('Language skills',
+               'Verbal IQ',
+               'Skill sum',
+               'Normalized skill sum',
+               'Class size'),
          v = school_response_test$plot_cap,
-         z = c('test score', 'points')) %>%
+         z = c('test score',
+               'points',
+               'points',
+               'Z-scores',
+               'Class size')) %>%
     pmap(function(x, y, v, z) school_data %>%
            ggplot(aes(x = SES_class,
                       y = .data[[x]],
@@ -68,7 +83,7 @@
                 subtitle = v,
                 y = z,
                 x = 'Socioeconomic status')) %>%
-    set_names(c('lang', 'IQ'))
+    set_names(vars)
 
 # Testing for differences in IQ and language skills in each class -------
 
@@ -81,7 +96,7 @@
   class_test <- class_data %>%
     map(safely(test_two_groups),
         split_fct = 'SES_class',
-        variables = c('lang', 'IQ'),
+        variables = vars,
         type = 't') %>%
     map(~.x$result) %>%
     compact %>%
@@ -90,8 +105,7 @@
                             ifelse(effect_size > 0, 'positive',
                                    ifelse(effect_size < 0,
                                           'negative', 'ns'))),
-        regulation = factor(regulation, c('positive', 'negative', 'ns'))
-        )
+        regulation = factor(regulation, c('positive', 'negative', 'ns')))
 
   ## effect sizes and significance in single classes
 
@@ -112,16 +126,35 @@
                        regulation_status = 'regulation',
                        plot_title = 'Effect of SES in single classes',
                        x_lab = "difference in score",
-                       cutoff = 10)
+                       y_lab = 'Number of classes',
+                       plot_subtitle = paste('classes: n =', length(class_test)),
+                       cutoff = 10,
+                       show_whiskers = FALSE)
 
 # Visualization: multi-class heat map and before-after plots -------
 
-  common_heat_map <- class_data %>%
-    common_heat_map(variables = c('lang', 'IQ'),
-                    split_fct = 'SES_class')
+  ## classification of the variables and common heat map
+
+  var_classification <- class_data %>%
+    map(classify,
+        variables = vars[-5],
+        split_fct = 'SES_class')
+
+  var_classification <- var_classification %>%
+    map(~.x$classification)
+
+  cm_heat_plot <- class_data %>%
+    common_heat_map(variables = vars[-5],
+                    split_fct = 'SES_class',
+                    normalize = TRUE,
+                    norm_center = 'mean',
+                    norm_dispersion = 'sem',
+                    variable_classification = var_classification)
+
+  ## before - after plots
 
   common_before_after <- class_data %>%
-    plot_common_change(variables = c('lang', 'IQ'),
+    plot_common_change(variables = vars[-5],
                        split_fct = 'SES_class',
                        dodge = 0,
                        show_whiskers = TRUE,

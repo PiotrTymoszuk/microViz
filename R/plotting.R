@@ -1031,6 +1031,24 @@
 #' in the X axis, variables are presented in the Y axis, and tile color codes
 #' for the average.
 #'
+#' @details
+#' Normalization of variables id done by \code{\link{zScores}}.
+#' The `variable_classification` argument may be provided in several forms:
+#'
+#' * as a data frame with at least two columns. The first variable stores the
+#' variable name and the second indicates the variable subset. This input is
+#' accepted both by `heat_map()` and `common_heat_map()`.
+#'
+#' * as a list of data frames like the one described above. This form is
+#' accepted only by `common_heat_map()`.
+#'
+#' * as a `clust_analysis` object generated with one of the tools of
+#' `clustTools` package. The cluster assignment is extracted automatically.
+#' This form works with both functions.
+#'
+#' * as a list of `clust_analysis` objects described above. This input is
+#' accepted only by `common_heat_map()`. #'
+#'
 #' @return a `ggplot` graphics.
 #'
 #' @param data a data frame (`heat_map()`) or a list of data frames
@@ -1039,14 +1057,18 @@
 #' @param split_fct name of the splitting factor.
 #' @param normalize logical, should the data frame variables be normalized prior
 #' to plotting?
-#' @param norm_center defines centering of the variable during scaling: mean
-#' (default) or median. Ignored if `normalize = FALSE`.
+#' @param norm_center defines centering of the variable during Z-score
+#' calculation: mean (default), median, geometric mean or harmonic mean.
+#' Ignored if `normalize = FALSE`. Please refer to \code{\link{zScores}}
+#' for details.
+#' @param norm_dispersion name of the dispersion statistic used for variable
+#' normalization: standard deviation (SD) or standard error of the mean (SEM).
+#' Please refer to \code{\link{zScores}} for details.
 #' @param average_fun a function used to calculate average values of the
 #' variables within levels of the splitting factor.
-#' @param variable_classification a optional two column data frame, which
-#' defines the classification scheme of the variables, e.g. cluster assignment.
-#' The first variable stores the variable name and the second indicated the
-#' variable subset. If not provided, the variables are classified with by their
+#' @param variable_classification optional, a data frame, `clust_analysis`
+#' object or a list thereof as outlined in Details.
+#' If not provided, the variables are classified with by their
 #' specificity for the data set subsets defined by `split_fct` with
 #' \code{\link{classify}}.
 #' @param direction determines direction of the comparison between the data set
@@ -1075,7 +1097,11 @@
                        variables,
                        split_fct,
                        normalize = TRUE,
-                       norm_center = c('mean', 'median'),
+                       norm_center = c('mean',
+                                       'median',
+                                       'geo_mean',
+                                       'harm_mean'),
+                       norm_dispersion = c('sd', 'sem'),
                        variable_classification = NULL,
                        direction = '<',
                        facet = TRUE,
@@ -1125,16 +1151,27 @@
     stopifnot(is.logical(normalize))
 
     norm_center <- match.arg(norm_center[1],
-                             c('mean', 'median'))
+                             c('mean', 'median', 'geo_mean', 'harm_mean'))
+
+    norm_dispersion <- match.arg(norm_dispersion[1], c('sd', 'sem'))
 
     if(!is.null(variable_classification)) {
 
-      stopifnot(is.data.frame(variable_classification))
+      if(inherits(variable_classification, 'clust_analysis')) {
 
-      if(ncol(variable_classification) == 1) {
+        variable_classification <-
+          variable_classification$clust_assignment[, c('observation', 'clust_id')]
 
-        stop("'variable_classification' must have at least two columns.",
-             call. = FALSE)
+      } else {
+
+        stopifnot(is.data.frame(variable_classification))
+
+        if(ncol(variable_classification) == 1) {
+
+          stop("'variable_classification' must have at least two columns.",
+               call. = FALSE)
+
+        }
 
       }
 
@@ -1182,13 +1219,9 @@
 
     if(normalize) {
 
-      center_fun <- switch(norm_center,
-                           mean = function(x) mean(x, na.rm = TRUE),
-                           median = function(x) median(x, na.rm = TRUE))
-
-      data[variables] <-
-        map_dfc(data[variables],
-                ~scale(.x, center = center_fun(.x))[, 1])
+      data[variables] <- zScores(data[variables],
+                                 center = norm_center,
+                                 dispersion = norm_dispersion)
 
     }
 
@@ -1271,7 +1304,12 @@
                               variables,
                               split_fct,
                               normalize = TRUE,
-                              norm_center = c('mean', 'median'),
+                              norm_center = c('mean',
+                                              'median',
+                                              'geo_mean',
+                                              'harm_mean'),
+                              norm_dispersion = c('sd', 'sem'),
+                              variable_classification = NULL,
                               average_fun = colMeans,
                               plot_title = NULL,
                               plot_subtitle = NULL,
@@ -1336,7 +1374,13 @@
 
     stopifnot(is.logical(normalize))
 
-    norm_center <- match.arg(norm_center[1], c('mean', 'median'))
+    norm_center <- match.arg(norm_center[1],
+                             c('mean',
+                               'median',
+                               'geo_mean',
+                               'harm_mean'))
+
+    norm_dispersion <- match.arg(norm_dispersion[1], c('sd', 'sem'))
 
     if(!is.function(average_fun)) {
 
@@ -1366,17 +1410,11 @@
 
     if(normalize) {
 
-      center_fun <- switch(norm_center,
-                           mean = function(x) mean(x, na.rm = TRUE),
-                           median = function(x) median(x, na.rm = TRUE))
-
-      for(i in seq_along(data)) {
-
-        data[[i]][variables] <-
-          map_dfc(data[[i]][variables],
-                  ~scale(.x, center = center_fun(.x))[, 1])
-
-      }
+      data <- map(data,
+                  zScores,
+                  variables = variables,
+                  center = norm_center,
+                  dispersion = norm_dispersion)
 
     }
 
@@ -1407,19 +1445,109 @@
       set_names(plot_tbl$data_set,
                 paste0('obs_', 1:nrow(plot_tbl)))
 
+    ## variable classification ----------
+
+    if(inherits(variable_classification, 'clust_analysis')) {
+
+      variable_classification <-
+        variable_classification$clust_assignment[, c('observation', 'clust_id')]
+
+    }
+
+    if(is.data.frame(variable_classification)) {
+
+      if(ncol(variable_classification) < 2) {
+
+        stop("'variable_classification' has to heve at least two columns.",
+             call. = FALSE)
+
+      }
+
+      variable_classification <- variable_classification[, c(1:2)]
+
+    }
+
+    if(inherits(variable_classification, 'list')) {
+
+      ## extraction of the subset assignment from a list
+
+      feature_clust <- NULL
+      variable <- NULL
+      score <- NULL
+
+      clust_assign <-
+        map(variable_classification,
+            function(x) {
+
+          if(inherits(x, 'clust_analysis')) {
+
+            return(x$clust_assignment[, c('observation', 'clust_id')])
+
+          } else {
+
+            return(x[, 1:2])
+
+          }
+
+        })
+
+      clust_assign <-
+        map_dfr(clust_assign,
+                set_names,
+                c('variable', 'feature_clust'))
+
+      if(!is.factor(clust_assign$feature_clust)) {
+
+        clust_assign$feature_clust <- factor(clust_assign$feature_clust)
+
+      }
+
+      feature_levs <- levels(clust_assign$feature_clust)
+
+      ## counting occurrences in the feature cluster
+      ## and voting for the consensus assignment
+
+      clust_assign <- split(clust_assign$feature_clust,
+                            clust_assign$variable)
+
+      clust_assign <- map(clust_assign,
+                          ~sort(table(.x), decreasing = TRUE))
+
+      clust_assign <- map(clust_assign,
+                          ~data.frame(feature_clust = names(.x)[1],
+                                      score = unname(.x[1])))
+
+      variable_classification <-
+        map2_dfr(clust_assign, names(clust_assign),
+                 ~mutate(.x, variable = .y))
+
+      variable_classification$feature_clust <-
+        factor(variable_classification$feature_clust, feature_levs)
+
+      variable_classification <- arrange(variable_classification, score)
+
+      variable_classification <-
+        variable_classification[, c('variable', 'feature_clust')]
+
+    }
+
     ## heat map -------
 
     hm_plot <- heat_map(plot_tbl,
                         variables = variables,
                         split_fct = split_fct,
                         normalize = FALSE,
+                        variable_classification = variable_classification,
                         plot_title = plot_title,
                         plot_subtitle = plot_subtitle,
                         x_lab = x_lab,
                         y_lab = y_lab,
                         cust_theme = cust_theme,
                         color_scale = color_scale,
-                        midpoint = midpoint, ...) +
+                        midpoint = midpoint, ...)
+
+
+    hm_plot <- hm_plot +
       scale_x_discrete(labels = ax_labs) +
       guides(x = guide_axis(angle = 45))
 
