@@ -6,7 +6,7 @@ The `microViz` package provides tools for data pre-processing and variable selec
 
 ## Installation
 
-You may easily fetch the package `devtools`: 
+You may easily fetch the package via `devtools`: 
 
 ```r
 
