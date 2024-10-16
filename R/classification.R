@@ -106,6 +106,10 @@
 
     ## ROC analysis, extraction of the AUC ------
 
+    variable <- NULL
+    auc <- NULL
+    delta_auc <- NULL
+
     ## ROC AUC for detection of the particular subset versus the pooled rest
 
     roc_lst <-

@@ -1143,7 +1143,7 @@
 
     if(!is.factor(data[[split_fct]])) {
 
-      stop('The splitting factor has to abe a vector.',
+      stop('The splitting factor has to be a vector.',
            call. = FALSE)
 
     }

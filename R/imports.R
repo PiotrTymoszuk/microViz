@@ -13,6 +13,7 @@
 #' @importFrom ggplot2 facet_grid
 #' @importFrom ggplot2 geom_hline
 #' @importFrom ggplot2 scale_fill_manual
+#' @importFrom ggplot2 scale_fill_gradient
 #' @importFrom ggplot2 scale_fill_gradient2
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 geom_vline
@@ -32,6 +33,14 @@
 #' @importFrom ggplot2 guides
 #' @importFrom ggplot2 scale_x_discrete
 #' @importFrom ggplot2 guide_axis
+#' @importFrom ggplot2 guide_legend
+#' @importFrom ggplot2 margin
+#' @importFrom ggplot2 geom_label
+#'
+#' @importFrom cowplot plot_grid
+#' @importFrom cowplot get_legend
+#' @importFrom cowplot get_title
+#' @importFrom cowplot get_subtitle
 #'
 #' @importFrom purrr map
 #' @importFrom purrr map_lgl
@@ -63,6 +72,8 @@
 #' @importFrom dplyr relocate
 #' @importFrom dplyr arrange
 #' @importFrom dplyr all_of
+#' @importFrom dplyr pick
+#' @importFrom dplyr desc
 #'
 #' @importFrom tidyr pivot_longer
 #'
@@ -87,6 +98,7 @@
 #' @importFrom stats rnorm
 #' @importFrom stats cmdscale
 #' @importFrom stats hclust
+#' @importFrom stats na.omit
 #'
 #' @importFrom umap umap
 #'
@@ -111,11 +123,11 @@
 #' @importFrom GOSemSim geneSim
 #' @importFrom GOSemSim goSim
 #'
-#' @importFrom Rcpp evalCpp
+#' @importFrom ggdendro ggdendrogram
 #'
 #' @importFrom generics components
 #'
-#' @importFrom ggdendro ggdendrogram
+#' @importFrom Rcpp evalCpp
 #'
 #' @useDynLib microViz
 
