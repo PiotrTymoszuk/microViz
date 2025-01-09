@@ -81,11 +81,11 @@
 
   stack_plot <-
     plot_bistack(data = tcga_mutations,
-                 variables = genes,
+                 variables = genes[1:10],
                  split_fct = 'clust_id',
                  variable_classification = gene_classification,
                  scale = 'percentage',
-                 show_frequencies = FALSE)
+                 show_frequencies = TRUE)
 
 
 # END -------

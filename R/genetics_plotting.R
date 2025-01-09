@@ -967,7 +967,7 @@
     if(show_frequencies) {
 
       stack_plot <- stack_plot +
-        geom_label(aes(label = round_fun(x),
+        geom_label(aes(label = round_fun(freq),
                        x = plot_pos),
                    size = text_size,
                    color = text_color, ...)
