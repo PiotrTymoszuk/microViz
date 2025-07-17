@@ -1542,6 +1542,7 @@
                         plot_subtitle = plot_subtitle,
                         x_lab = x_lab,
                         y_lab = y_lab,
+                        fill_lab = fill_lab,
                         cust_theme = cust_theme,
                         color_scale = color_scale,
                         midpoint = midpoint, ...)
