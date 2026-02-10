@@ -2,7 +2,11 @@
 
 Pre-processing, visualization, testing and interpretation tools for whole genome differential gene expression analyses
 
-The `microViz` package provides tools for data pre-processing and variable selection (e.g. by Gini index or variance cutoff), testing for differences between dataset subsets in ahigh throughput manner (t test, Wilcoxon test, ANOVA and negative binomial modeling) and interpretation of the comparison results (subset marker finding and distances between the data subsets).
+The `microViz` package provides tools for data pre-processing and 
+variable selection (e.g. by Gini index or variance cutoff), 
+visualization of high dimension data (e.g. genetics, transcriptomics), 
+and interpretation of the comparison results 
+(subset marker finding and distances between the data subsets).
 
 ## Installation
 
@@ -28,7 +32,18 @@ The package maintainer is [Piotr Tymoszuk](mailto:piotr.s.tymoszuk@gmail.com).
 
 ## Acknowledgements
 
-Many thanks to authors, maintainers and contributors of the [tidyverse evironment](https://www.tidyverse.org/), and packages [furrr](https://furrr.futureverse.org/) and [future](https://www.futureverse.org/packages-overview.html), [ggrepel](https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html), [ggwordcloud](https://lepennec.github.io/ggwordcloud/), [limma](https://kasperdanielhansen.github.io/genbioconductor/html/limma.html), [MASS](https://cran.r-project.org/web/packages/MASS/index.html), [pROC](https://github.com/cran/pROC/tree/master), [rcompanion](https://rcompanion.org/handbook/), [stringi](https://stringi.gagolewski.com/index.html), [utils](https://cran.r-project.org/web/packages/R.utils/index.html), and [rlang](https://rlang.r-lib.org/).
+Many thanks to authors, maintainers and contributors of 
+the [tidyverse evironment](https://www.tidyverse.org/), and packages 
+[furrr](https://furrr.futureverse.org/) and [future](https://www.futureverse.org/packages-overview.html), 
+[ggrepel](https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html), 
+[ggwordcloud](https://lepennec.github.io/ggwordcloud/), 
+[limma](https://kasperdanielhansen.github.io/genbioconductor/html/limma.html), 
+[MASS](https://cran.r-project.org/web/packages/MASS/index.html), 
+[pROC](https://github.com/cran/pROC/tree/master), 
+[stringi](https://stringi.gagolewski.com/index.html), 
+[utils](https://cran.r-project.org/web/packages/R.utils/index.html), 
+[ggforce](https://ggforce.data-imaginist.com/), 
+and [rlang](https://rlang.r-lib.org/).
 
 ## Usage
 
@@ -36,7 +51,15 @@ Many thanks to authors, maintainers and contributors of the [tidyverse evironmen
 
 <details>
 
-Let's start with some example whole genome data provided with the `microViz` package. The `brca` data set stores normalized gene counts obtained by RNA sequencing of more than 150 breast carcinomas from [a patient-intitiated study]( https://www.cbioportal.org/study/summary?id=brca_mbcproject_2022). The data set comes along with clinical information concerning time point of sampling, metastatasis, histology and estrogen receptor (ER) status. In this vignette, we'll use both the untransformed counts as well as counts following `log2(x + 1)` transformation:
+Let's start with some example whole genome data provided with the `microViz` package. 
+The `brca` data set stores normalized gene counts obtained by RNA sequencing of 
+more than 150 breast carcinomas from 
+[a patient-intitiated study]( https://www.cbioportal.org/study/summary?id=brca_mbcproject_2022). 
+The data set comes along with clinical information concerning time point of sampling, 
+metastasis, histology and estrogen receptor (ER) status. In this vignette, we'll use both 
+the non-transformed counts as well as counts following `log2(x + 1)` transformation. 
+In the analyses, we'll also use development packages [trafo](https://github.com/PiotrTymoszuk/trafo) 
+and [fastTest](https://github.com/PiotrTymoszuk/fastTest)
 
 ```r
 ## some tools
@@ -44,7 +67,16 @@ Let's start with some example whole genome data provided with the `microViz` pac
   library(tidyverse)
   library(rlang)
   library(microViz)
+  
+  ## addtional list and data frame transformation tools
+  
   library(trafo)
+  
+  ## statistical hypothesis testing
+  
+  library(fastTest)
+  
+  ## annotations
 
   library(org.Hs.eg.db)
   library(AnnotationDbi)
@@ -127,7 +159,9 @@ Let's start with some example whole genome data provided with the `microViz` pac
 
 <details>
   
-The package provides a wode range of statistics of central tendency and distribution which somehow are not provided in base R. For sake of speed, they all operate in C++ under the hood:
+The package provides a wide range of statistics of central tendency and 
+distribution which somehow are not provided in base R. For sake of speed, t
+hey all operate in C++ under the hood:
 
 ```r
 ## geometric mean
@@ -164,7 +198,9 @@ The package provides a wode range of statistics of central tendency and distribu
 > percUnique(counts$TSPAN6)
 [1] 91.71975
 ```
-Each of them has a column- and row-wise counterpart, which may be useful at selection of genes expressed with sufficient variability for differential gene expression analysis of modeling:
+Each of them has a column- and row-wise counterpart, which may be useful at 
+selection of genes expressed with sufficient variability for a differential 
+gene expression analysis:
 
 ```r
 ## numeric stats for 38K+ genes, here for variable medians:
@@ -216,7 +252,11 @@ Each of them has a column- and row-wise counterpart, which may be useful at sele
 91.71975 64.33121 97.45223 94.90446 95.54140 80.25478 
 
 ```
-The process of variable selection based e.g. on Gini coefficient, frequency ratio, or variance to mean ratio can be facilitated by the `distr_stats()` (variables in columns) and `row_stats()` (variables in rows). As such, those two functions generate ta similar output bunch of stats as `caret::nearZeroVar()()` but are expected to be several times faster:
+The process of variable selection based e.g. on Gini coefficient, frequency ratio, 
+or variance-to-mean ratio can be facilitated by the `distr_stats()` (variables in columns) 
+and `row_stats()` (variables in rows). 
+As such, those two functions generate ta similar output bunch of stats as `caret::nearZeroVar()()` 
+but are expected to be several times faster:
 
 ```r
 >   system.time(distr_stats(log_expression[genes]))

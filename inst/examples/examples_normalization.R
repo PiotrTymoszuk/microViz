@@ -41,6 +41,8 @@
 
 # Min-max scaling ---------
 
+  minMax(log_expression$BRCA2)
+
   minMax(as.matrix(log_expression[test_genes]),
          feature_type = 'columns')
 

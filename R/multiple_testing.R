@@ -178,7 +178,7 @@
 
     data <-
       mutate(data,
-             .regulation = ifelse(.significant == 'significant',
+             .regulation = ifelse(.significant == 'ns',
                                   'ns',
                                   ifelse(.data[[regulation_variable]] == 0,
                                          'ns',

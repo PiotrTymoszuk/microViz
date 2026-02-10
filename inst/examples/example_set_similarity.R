@@ -49,7 +49,7 @@
 
   vector_similarity(test_sets[[1]], test_sets[[2]], 'tversky', a = 0.25, b = 1)
 
-  set_similarity(test_sets, 'tversky', a = 0.25, b = 1, as_dist = TRUE)
+  set_similarity(test_sets, 'tversky', a = 0.25, b = 1)
 
 # Dimensionality reduction and plotting of the set distances -------
 
@@ -61,24 +61,24 @@
   dist_clust <- set_dists %>%
     components(type = 'hcl')
 
-  plot.set_sim(set_dists,
-               type = 'heat_map',
-               order_by_similarity = 'ascending')
+  plot(set_dists,
+       type = 'heat_map',
+       order_by_similarity = 'ascending')
 
-  plot.set_sim(set_dists,
-               type = 'mds',
-               point_wjitter = 0.002,
-               point_hjitter = 0.002,
-               show_txt = FALSE)
+  plot(set_dists,
+       type = 'mds',
+       point_wjitter = 0.002,
+       point_hjitter = 0.002,
+       show_txt = FALSE)
 
-  plot.set_sim(set_dists,
-               type = 'umap',
-               point_wjitter = 0.002,
-               point_hjitter = 0.002,
-               show_txt = FALSE)
+  plot(set_dists,
+       type = 'umap',
+       point_wjitter = 0.002,
+       point_hjitter = 0.002,
+       show_txt = FALSE)
 
-  plot.set_sim(set_dists,
-               type = 'dendrogram',
-               method = 'ward.D2')
+  plot(set_dists,
+       type = 'dendrogram',
+       method = 'ward.D2')
 
 # END -------

@@ -970,7 +970,8 @@
         geom_label(aes(label = round_fun(freq),
                        x = plot_pos),
                    size = text_size,
-                   color = text_color, ...)
+                   color = text_color,
+                   show.legend = FALSE, ...)
 
     }
 

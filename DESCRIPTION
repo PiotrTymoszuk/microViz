@@ -31,7 +31,6 @@ Imports:
     limma,
     MASS,
     purrr,
-    rcompanion,
     Rcpp,
     rlang,
     stringi,
