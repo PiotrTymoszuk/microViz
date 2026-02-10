@@ -2298,6 +2298,16 @@
     center_tbl <- as_tibble(mutate(plot_data$centers,
                                    label = NA))
 
+    quantities <- NULL
+    label <- NULL
+    h <- NULL
+    k <- NULL
+    a <- NULL
+    b <- NULL
+    Set <- NULL
+    x <- NULL
+    y <- NULL
+
     if(show_labels) {
 
       if(show_quantities) {

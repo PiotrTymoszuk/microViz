@@ -24,6 +24,7 @@
 #' @importFrom ggplot2 geom_vline
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 theme_classic
+#' @importFrom ggplot2 theme_void
 #' @importFrom ggplot2 geom_bar
 #' @importFrom ggplot2 element_blank
 #' @importFrom ggplot2 scale_color_manual
@@ -46,7 +47,7 @@
 #' @importFrom ggplot2 geom_label
 #'
 #' @importFrom ggwordcloud geom_text_wordcloud
-#' @importFrom ggwordcloud geom_text_wordcloud
+#' @importFrom ggwordcloud geom_text_wordcloud_area
 #'
 #' @importFrom cowplot plot_grid
 #' @importFrom cowplot get_legend
