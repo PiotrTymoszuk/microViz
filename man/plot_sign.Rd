@@ -19,7 +19,7 @@ plot_sign(
   x_lab = "Gene",
   y_lab = "Regulation",
   show_trend = TRUE,
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   ...
 )
 }

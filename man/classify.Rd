@@ -47,5 +47,5 @@ Of note, these remaining subsets are set as the baseline or control in the
 ROC analysis. The are under the ROC curve is computed by trapezoidal
 integration of specificity over 1 - sensitivity. The best performing cutoffs
 for assignment to the subset of interest by variable value are determined by
-maximizing Youden's J statistic (J = sensitivity + specificty - 1).
+maximizing Youden's J statistic (J = sensitivity + specificity - 1).
 }

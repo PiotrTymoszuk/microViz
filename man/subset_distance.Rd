@@ -10,7 +10,7 @@ subset_distance(
   split_fct,
   normalize = TRUE,
   norm_center = c("mean", "median"),
-  dist_FUN = stats::dist,
+  dist_FUN = dist,
   ...
 )
 }

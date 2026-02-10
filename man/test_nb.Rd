@@ -36,24 +36,18 @@ see: \code{\link[stats]{p.adjust}}.}
 \item{...}{additional arguments passed to \code{\link[MASS]{glm.nb}}.}
 }
 \value{
-a list of data frames containing the analysis of deviance (AOD)
-and linear model estimates.
+\code{NULL} with a warning.
 }
 \description{
-Compares expression differences between multiple groups with
-negative binomial modeling. The method is particularly useful in finding
+The testing functions are not active anymore, because we offer a faster and
+more versatile tools for high-throughput statistical hypothesis testing.
+Please use functions from \code{fastTest} package instead
+(https://github.com/PiotrTymoszuk/fastTest/).
+When looking specifically for negative binomial modeling of gene expression
+data, please use EdgeR (https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+or DESeq2 (https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+instead.
 }
 \details{
-If a confounding variable is specified it will be included in the
-model as a leading fixed term. Statistics for the confounding term are
-not shown in the output. Effect size for the analysis of deviance (AOD),
-eta-squared statistic, is computed as the ratio of deviance to total deviance.
-Effect sizes for NB model coefficients, Cohen's d metrics, are calculated as
-ratios of betas to their errors:
-
-\deqn{d_{i} = \frac{\beta{1}}{SEM_{i}}}
-
-As such, these effects size statistics are likely too optimistic, and in
-case of models with a confounder, potentially biased. Please treat them with
-caution as raw estimates of the effect size.
+These functions are not active anymore and return \code{NULL} with a warning
 }

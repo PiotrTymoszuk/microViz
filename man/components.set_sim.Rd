@@ -32,7 +32,7 @@
   txt_alpha = 1,
   txt_face = "plain",
   labeller = identity,
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   ...
 )
 }

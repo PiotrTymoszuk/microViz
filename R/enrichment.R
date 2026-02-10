@@ -79,8 +79,7 @@
     N <- NULL
     P.DE <- NULL
 
-    res <- limma::goana(de = de,
-                        universe = universe, ...)
+    res <- goana(de = de, universe = universe, ...)
 
     ## formatting of the results ------
 

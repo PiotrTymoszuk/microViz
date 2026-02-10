@@ -91,8 +91,12 @@
 #' or effect size threshold.
 #'
 #' @return
-#' A character vector or a list of character vectors with names of significant
-#' variables derived from `label_variable`.
+#' If `return_data = FALSE`: a character vector or a list of character vectors
+#' with names of significant variables derived from `label_variable`.
+#' Otherwise, the function returns the input data frame with the following
+#' addtional columns:
+#' * `.significant`: indicates if the effect reaches statistical significance
+#' * `.regulation`: indicates the sign of significant regulation
 #'
 #' @param data a data frame with the testing results.
 #' @param label_variable name of the variable storing names of the tested
@@ -103,6 +107,8 @@
 #' p value threshold.
 #' @param signif_level p value threshold.
 #' @param regulation_level regulation or effect size threshold.
+#' @param return_data if `TRUE`, the input data frame is returned with additional
+#' columns indicating significance and regulation sign.
 #'
 #' @export
 
@@ -111,7 +117,8 @@
                                    p_variable,
                                    regulation_variable = NULL,
                                    signif_level = 0.05,
-                                   regulation_level = 0) {
+                                   regulation_level = 0,
+                                   return_data = FALSE) {
 
     ## input control --------
 
@@ -148,27 +155,20 @@
     stopifnot(is.numeric(signif_level))
     stopifnot(is.numeric(regulation_level))
 
-    if(is.null(regulation_variable)) {
-
-      reg_categories <- c('ns', 'significant')
-
-    } else {
-
-      reg_categories <- c('downregulated', 'ns', 'upregulated')
-
-    }
-
     ## identification of significant effects -------
 
     .significant <- NULL
 
     data <- mutate(data,
                    .significant = ifelse(.data[[p_variable]] < signif_level,
-                                        'yes', 'no'))
+                                        'significant', 'ns'),
+                   .significant = factor(.significant, c('significant', 'ns')))
 
     if(is.null(regulation_variable)) {
 
-      data <- filter(data, .significant == 'yes')
+      if(return_data) return(data)
+
+      data <- filter(data, .significant == 'significant')
 
       return(data[[label_variable]])
 
@@ -176,22 +176,25 @@
 
     .regulation <- NULL
 
-    data <- mutate(data,
-                   .regulation = ifelse(.significant == 'no',
-                                        'ns',
-                                        ifelse(.data[[regulation_variable]] == 0,
-                                               'ns',
-                                               ifelse(.data[[regulation_variable]] >= regulation_level,
-                                                      'upregulated',
-                                                      ifelse(.data[[regulation_variable]] <= -regulation_level,
-                                                             'downregulated', 'ns')))))
+    data <-
+      mutate(data,
+             .regulation = ifelse(.significant == 'significant',
+                                  'ns',
+                                  ifelse(.data[[regulation_variable]] == 0,
+                                         'ns',
+                                         ifelse(.data[[regulation_variable]] >= regulation_level,
+                                                'upregulated',
+                                                ifelse(.data[[regulation_variable]] <= -regulation_level,
+                                                       'downregulated', 'ns')))),
+             .regulation = factor(.regulation,
+                                  c('upregulated', 'downregulated', 'ns')))
+
+    if(return_data) return(data)
 
     data <- filter(data,
                    .regulation %in% c('upregulated', 'downregulated'))
 
-    data <- mutate(data,
-                   .regulation = factor(.regulation,
-                                        c('upregulated', 'downregulated')))
+    data <- mutate(data, .regulation = droplevels(.regulation))
 
     signif_vars <- split(data[[label_variable]],
                          data[['.regulation']])

@@ -16,7 +16,7 @@ plot_bionco(
   fill_lab = "status",
   hide_x_axis_text = FALSE,
   y_text_face = "plain",
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   color_scale = c("white", "steelblue"),
   color_labels = c("WT", "altered"),
   x_rug_scale = c("number", "percentage"),
@@ -29,7 +29,7 @@ plot_bionco(
   rel_heights = c(0.75, 0.25),
   rel_widths = c(0.75, 0.25),
   legend_position = c("inside", "right", "bottom", "top", "left"),
-  plot_margins = ggplot2::margin(t = -35, r = -35, b = -10, l = 0, unit = "pt"),
+  plot_margins = margin(t = -35, r = -35, b = -10, l = 0, unit = "pt"),
   title_panel_ratio = c(0.1, 0.9),
   legend_panel_ratio = c(0.1, 0.9)
 )

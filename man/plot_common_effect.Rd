@@ -34,7 +34,7 @@ plot_common_effect(
   y_lab = NULL,
   status_lab = regulation_status,
   plot_tag = NULL,
-  cust_theme = microViz::theme_micro()
+  cust_theme = theme_micro()
 )
 }
 \arguments{

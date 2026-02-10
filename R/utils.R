@@ -16,7 +16,7 @@
 
   theme_micro <- function() {
 
-    ggplot2::theme_classic() +
+    theme_classic() +
       theme(legend.text = element_text(size = 8,
                                        face = 'plain',
                                        color = 'black'),

@@ -11,7 +11,7 @@ aggRows(
   fun = colMeans,
   verbose = TRUE,
   .parallel = FALSE,
-  .paropts = furrr::furrr_options(seed = TRUE),
+  .paropts = furrr_options(seed = TRUE),
   ...
 )
 
@@ -21,7 +21,7 @@ aggCols(
   fun = rowMeans,
   verbose = TRUE,
   .parallel = FALSE,
-  .paropts = furrr::furrr_options(seed = TRUE),
+  .paropts = furrr_options(seed = TRUE),
   ...
 )
 }

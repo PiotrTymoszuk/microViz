@@ -22,7 +22,7 @@ plot_bubble(
   y_lab = y_variable,
   size_lab = NULL,
   color_lab = NULL,
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   txt_hjust = -1.4,
   txt_vjust = 0.5,
   txt_size = 2.75,

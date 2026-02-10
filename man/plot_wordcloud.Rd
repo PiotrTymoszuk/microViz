@@ -16,7 +16,7 @@ plot_wordcloud(
   midpoint = NULL,
   size_lab = size_variable,
   color_lab = color_variable,
-  cust_theme = ggplot2::theme_void(),
+  cust_theme = theme_void(),
   wrap = FALSE,
   len = 3,
   fraction_rotated = 0,
@@ -29,7 +29,7 @@ plot_wordcloud(
 
 \item{label_variable}{name of the variable storing the text to be plotted.}
 
-\item{split_fct}{optional, name of a variable that defines dataset subsets.
+\item{split_fct}{optional, name of a variable that defines data subsets.
 Each subset will be presented as a separate facet of the plot.}
 
 \item{size_variable}{optional, name of a variable numeric whose value will be

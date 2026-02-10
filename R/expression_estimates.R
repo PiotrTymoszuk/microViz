@@ -114,14 +114,14 @@
       switch(grand_center,
              mean = function(x) colMeans(x, na.rm = TRUE),
              median = function(x) colMedians(x, na.rm = TRUE),
-             gmean = function(x) colHmeans(x, na.rm = TRUE),
+             gmean = function(x) colGmeans(x, na.rm = TRUE),
              hmean = function(x) colHmeans(x, na.rm = TRUE))
 
     split_fun <-
       switch(split_center,
              mean = function(x) colMeans(x, na.rm = TRUE),
              median = function(x) colMedians(x, na.rm = TRUE),
-             gmean = function(x) colHmeans(x, na.rm = TRUE),
+             gmean = function(x) colGmeans(x, na.rm = TRUE),
              hmean = function(x) colHmeans(x, na.rm = TRUE))
 
     ## grand stats and single deviations from the grand stat -------
@@ -181,9 +181,9 @@
    output[['df']] <- split_counts[i] - 1
 
    output[['p_value']] <-
-     stats::pt(abs(output[['t']]),
-               df = output[['df']],
-               lower.tail = FALSE)
+     pt(abs(output[['t']]),
+        df = output[['df']],
+        lower.tail = FALSE)
 
    if(ci != 'distr') {
 
@@ -192,11 +192,11 @@
    } else {
 
      output[['lower_ci']] <- output[['deviation_center']] +
-       stats::qt(0.025, df = output[['df']]) *
+       qt(0.025, df = output[['df']]) *
        output[['deviation_sem']]
 
      output[['upper_ci']] <- output[['deviation_center']] +
-       stats::qt(0.975, df = output[['df']]) *
+       qt(0.975, df = output[['df']]) *
        output[['deviation_sem']]
 
    }

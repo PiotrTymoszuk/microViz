@@ -74,7 +74,7 @@
                            plot_title = NULL,
                            plot_subtitle = NULL,
                            plot_tag = NULL,
-                           cust_theme = microViz::theme_micro(),
+                           cust_theme = theme_micro(),
                            point_alpha = 0.8,
                            point_hjitter = 0,
                            point_wjitter = 0,
@@ -166,8 +166,8 @@
       geom_point(size = 2,
                  shape = 21,
                  alpha = point_alpha,
-                 position = ggplot2::position_jitter(width = point_wjitter,
-                                                     height = point_hjitter)) +
+                 position = position_jitter(width = point_wjitter,
+                                            height = point_hjitter)) +
       scale_fill_manual(values = fill_scale,
                         name = fill_title) +
       cust_theme +
@@ -317,7 +317,7 @@
                         x_lab = 'Gene',
                         y_lab = 'Regulation',
                         show_trend = TRUE,
-                        cust_theme = microViz::theme_micro(), ...) {
+                        cust_theme = theme_micro(), ...) {
 
     ## entry control --------
 
@@ -404,7 +404,7 @@
     if(show_trend) {
 
       bar <- bar +
-        ggplot2::geom_smooth(show.legend = FALSE, ...)
+        geom_smooth(show.legend = FALSE, ...)
 
     }
 
@@ -419,7 +419,7 @@
 #' @description
 #' Draws a Forest plot with the regulation estimates and,
 #' optionally confidence intervals for all items presented in a data frame
-#' (`plot_forest`) or top up- and downregulated fratures (`plot_top`).
+#' (`plot_forest`) or top up- and downregulated features (`plot_top`).
 #'
 #' @param data a data frame.
 #' @param regulation_variable name of the variable storing the regulation/effect
@@ -468,7 +468,7 @@
                           plot_subtitle = NULL,
                           plot_tag = NULL,
                           x_lab = 'Regulation',
-                          cust_theme = microViz::theme_micro(),
+                          cust_theme = theme_micro(),
                           signif_digits = 2,
                           show_txt = FALSE,
                           show_ci_txt = FALSE,
@@ -646,7 +646,7 @@
                        plot_subtitle = NULL,
                        plot_tag = NULL,
                        x_lab = 'Regulation',
-                       cust_theme = microViz::theme_micro(),
+                       cust_theme = theme_micro(),
                        signif_digits = 2,
                        show_txt = FALSE,
                        show_ci_txt = FALSE,
@@ -811,7 +811,7 @@
                                plot_title = NULL,
                                plot_subtitle = NULL,
                                plot_tag = NULL,
-                               cust_theme = microViz::theme_micro()) {
+                               cust_theme = theme_micro()) {
 
     ## entry control -------
 
@@ -829,7 +829,7 @@
 
     }
 
-    if(inherits(cust_theme, 'theme')) {
+    if(!inherits(cust_theme, 'theme')) {
 
       stop('Please provide a valid ggplot theme object.', call. = FALSE)
 
@@ -890,7 +890,7 @@
                              plot_subtitle = NULL,
                              plot_tag = NULL,
                              x_lab = 'Regulation',
-                             cust_theme = microViz::theme_micro(),
+                             cust_theme = theme_micro(),
                              show_txt = FALSE,
                              signif_digits = 2,
                              txt_color = 'black',
@@ -984,8 +984,8 @@
 
     bar_plot <- ggplot(plot_data,
                        aes(x = .data[[regulation_variable]],
-                           y = stats::reorder(.data[[label_variable]],
-                                              .data[[regulation_variable]]),
+                           y = reorder(.data[[label_variable]],
+                                       .data[[regulation_variable]]),
                            fill = regulation)) +
       geom_bar(color = 'black',
                stat = 'identity') +
@@ -1582,7 +1582,7 @@
 #'
 #' @param data a data frame.
 #' @param label_variable name of the variable storing the text to be plotted.
-#' @param split_fct optional, name of a variable that defines dataset subsets.
+#' @param split_fct optional, name of a variable that defines data subsets.
 #' Each subset will be presented as a separate facet of the plot.
 #' @param size_variable optional, name of a variable numeric whose value will be
 #' size coded.
@@ -1621,7 +1621,7 @@
                              midpoint = NULL,
                              size_lab = size_variable,
                              color_lab = color_variable,
-                             cust_theme = ggplot2::theme_void(),
+                             cust_theme = theme_void(),
                              wrap = FALSE,
                              len = 3,
                              fraction_rotated = 0,
@@ -1755,13 +1755,13 @@
 
     text_geom <-
       switch(size_type,
-             size = ggwordcloud::geom_text_wordcloud(...),
-             ares = ggwordcloud::geom_text_wordcloud_area(...))
+             size = geom_text_wordcloud(...),
+             ares = geom_text_wordcloud_area(...))
 
     size_scale <-
       switch(size_type,
-             size = ggplot2::scale_size_continuous(range = size_range),
-             area = ggplot2::scale_size_area(max_size = size_range[2]))
+             size = scale_size_continuous(range = size_range),
+             area = scale_size_area(max_size = size_range[2]))
 
     if(!is.null(color_variable)) {
 
@@ -1818,17 +1818,17 @@
       wrap_formula <- as.formula(paste('~', split_fct))
 
       word_plot <- word_plot +
-        ggplot2::facet_wrap(wrap_formula, nrow = nrow)
+        facet_wrap(wrap_formula, nrow = nrow)
 
     }
 
     word_plot +
       text_geom +
       size_scale +
-      ggplot2::scale_color_gradient2(low = color_scale[[1]],
-                                     mid = color_scale[[2]],
-                                     high = color_scale[[3]],
-                                     midpoint = midpoint) +
+      scale_color_gradient2(low = color_scale[[1]],
+                            mid = color_scale[[2]],
+                            high = color_scale[[3]],
+                            midpoint = midpoint) +
       cust_theme +
       theme(legend.position = 'right') +
       labs(color = color_lab,
@@ -1898,7 +1898,7 @@
                           y_lab = y_variable,
                           size_lab = NULL,
                           color_lab = NULL,
-                          cust_theme = microViz::theme_micro(),
+                          cust_theme = theme_micro(),
                           txt_hjust = -1.4,
                           txt_vjust = 0.5,
                           txt_size = 2.75, ...) {
@@ -1980,8 +1980,8 @@
 
     size_scale <-
       switch(size_type,
-             size = ggplot2::scale_radius(range = size_range, ...),
-             area = ggplot2::scale_size_area(max_size = size_range[2], ...))
+             size = scale_radius(range = size_range, ...),
+             area = scale_size_area(max_size = size_range[2], ...))
 
     if(!is.na(color_variable)) {
 
@@ -2081,7 +2081,7 @@
                              plot_subtitle = NULL,
                              x_lab = NULL,
                              y_lab = NULL,
-                             cust_theme = microViz::theme_micro()) {
+                             cust_theme = theme_micro()) {
 
     ## input control -------
 
@@ -2193,6 +2193,186 @@
            subtitle = plot_subtitle,
            x = x_lab,
            y = y_lab)
+
+  }
+
+# Two-set Euler plot ---------
+
+#' Two-set Euler/Venn plot.
+#'
+#' @description
+#' Creates a two-set Euler plot, i.e. a Venn plot, where areas of the
+#' intersecting and non-intersecting elements correspond to sizes of the
+#' intersecting and non-intersecting sets.
+#'
+#' @details
+#' The functions provides a handy tool for simple Euler plots in `ggplot`
+#' format.
+#' Internally, it employs \code{\link[eulerr]{euler}} function to calculate
+#' parameters of circles/ellipses.
+#' The idea comes from https://gist.github.com/danlooo/ - many thanks!
+#'
+#' @return
+#' An Euler plot in `ggplot` format.
+#'
+#' @param data a named list with two vectors; duplicated elements in the vectors
+#' are silently removed.
+#' @param show_quantities logical, should N numbers of the intersecting and
+#' non-intersecting parts be shown in the plots?
+#' @param show_labels logical, should names of the sets be displayed in the plot?
+#' @param fill_scale a two element character vector with colors for the sets.
+#' @param fill_title fill legend title.
+#' @param alpha alpha of the circles/ellipses.
+#' @param n_prefix text to be displayed before the N numbers. Omitted if
+#' `show_quantities = FALSE` or set to `NULL`.
+#' @param txt_size size of the text.
+#' @param txt_color text color.
+#' @param txt_face face of the text.
+#' @param plot_title plot title.
+#' @param plot_subtitle plot subtitle. #'
+#' @param cust_theme a custom `ggplot` theme.
+#' @param ... additional arguments passed to \code{\link[eulerr]{euler}}.
+#'
+#' @export
+
+  plot_two_euler <- function(data,
+                             show_quantities = TRUE,
+                             show_labels = TRUE,
+                             fill_scale = c("orangered3", "aquamarine3"),
+                             fill_title = "Set",
+                             alpha = 0.5,
+                             n_prefix = "n = ",
+                             txt_size = 2.75,
+                             txt_color = "black",
+                             txt_face = "plain",
+                             plot_title = NULL,
+                             plot_subtitle = NULL,
+                             cust_theme = theme_micro(), ...) {
+
+    ## input control --------
+
+    data_err_txt <-
+      "'data' has to be a named two element list."
+
+    if(!is.list(data)) stop(data_err_txt, call. = FALSE)
+
+    if(length(data) != 2) stop(data_err_txt, call. = FALSE)
+
+    if(is.null(names(data))) stop(data_err_txt, call. = FALSE)
+
+    data <- map(data, unique)
+
+    stopifnot(is.numeric(alpha))
+
+    stopifnot(is.numeric(txt_size))
+    stopifnot(is.character(txt_color))
+    stopifnot(is.character(txt_face))
+
+    if(length(fill_scale) < 2) {
+
+      stop("Not enough colors.", call. = FALSE)
+
+    }
+
+
+    if(!inherits(cust_theme, 'theme')) {
+
+      stop("'cust_theme' has to be a valid ggplot theme.",
+           call. = FALSE)
+
+    }
+
+    ## plotting data ---------
+
+    plot_data <- euler(combinations = data, ...)
+
+    plot_data <- pluck(plot(plot_data,
+                            quantities = show_quantities),
+                       "data")
+
+    ellipse_tbl <- as_tibble(plot_data$ellipses,
+                             rownames = "Set") ## ellipse parameters
+
+    labell <- NULL
+
+    center_tbl <- as_tibble(mutate(plot_data$centers,
+                                   label = NA))
+
+    if(show_labels) {
+
+      if(show_quantities) {
+
+        if(is.null(n_prefix)) {
+
+          sep <- "\n"
+
+        } else {
+
+          sep <- paste0("\n", n_prefix)
+
+        }
+
+        center_tbl <-
+          mutate(center_tbl,
+                 label = ifelse(is.na(labels),
+                                quantities,
+                                paste(labels,
+                                      quantities,
+                                      sep = sep)))
+
+      } else {
+
+        center_tbl <- mutate(center_tbl, label = labels)
+
+      }
+
+    } else {
+
+      if(show_quantities) {
+
+        center_tbl <- mutate(center_tbl, label = quantities)
+
+        if(!is.null(n_prefix)) {
+
+          center_tbl <- mutate(center_tbl,
+                               label = paste0(n_prefix, label))
+
+        }
+
+      }
+
+    }
+
+    ## the plot -------
+
+    euler_plot <-
+      ggplot(tibble()) +
+      geom_ellipse(data = ellipse_tbl,
+                   aes(x0 = h,
+                       y0 = k,
+                       a = a,
+                       b = b,
+                       angle = 0,
+                       fill = Set),
+                   alpha = alpha) +
+      scale_fill_manual(values = fill_scale,
+                        name = fill_title) +
+      cust_theme +
+      labs(title = plot_title,
+           subtitle = plot_subtitle)
+
+    if(show_quantities | show_labels) {
+
+      euler_plot <- euler_plot +
+        geom_text(data = center_tbl,
+                  aes(x = x,
+                      y = y,
+                      label = label),
+                  size = txt_size)
+
+    }
+
+    euler_plot
 
   }
 

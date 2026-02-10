@@ -20,7 +20,7 @@ plot_forest(
   plot_subtitle = NULL,
   plot_tag = NULL,
   x_lab = "Regulation",
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   signif_digits = 2,
   show_txt = FALSE,
   show_ci_txt = FALSE,
@@ -45,7 +45,7 @@ plot_top(
   plot_subtitle = NULL,
   plot_tag = NULL,
   x_lab = "Regulation",
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   signif_digits = 2,
   show_txt = FALSE,
   show_ci_txt = FALSE,
@@ -109,5 +109,5 @@ a ggplot object.
 \description{
 Draws a Forest plot with the regulation estimates and,
 optionally confidence intervals for all items presented in a data frame
-(\code{plot_forest}) or top up- and downregulated fratures (\code{plot_top}).
+(\code{plot_forest}) or top up- and downregulated features (\code{plot_top}).
 }

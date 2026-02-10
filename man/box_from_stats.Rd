@@ -15,7 +15,7 @@ box_from_stats(
   plot_subtitle = NULL,
   x_lab = NULL,
   y_lab = NULL,
-  cust_theme = microViz::theme_micro()
+  cust_theme = theme_micro()
 )
 }
 \arguments{

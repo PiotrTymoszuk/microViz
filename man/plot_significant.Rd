@@ -17,7 +17,7 @@ plot_significant(
   plot_title = NULL,
   plot_subtitle = NULL,
   plot_tag = NULL,
-  cust_theme = microViz::theme_micro()
+  cust_theme = theme_micro()
 )
 
 plot_regulated(
@@ -34,7 +34,7 @@ plot_regulated(
   plot_subtitle = NULL,
   plot_tag = NULL,
   x_lab = "Regulation",
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   show_txt = FALSE,
   signif_digits = 2,
   txt_color = "black",

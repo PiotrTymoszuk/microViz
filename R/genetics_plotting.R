@@ -95,7 +95,7 @@
                           fill_lab = 'status',
                           hide_x_axis_text = FALSE,
                           y_text_face = 'plain',
-                          cust_theme = microViz::theme_micro(),
+                          cust_theme = theme_micro(),
                           color_scale = c('white', 'steelblue'),
                           color_labels = c('WT', 'altered'),
                           x_rug_scale = c('number', 'percentage'),
@@ -109,9 +109,9 @@
                           rel_widths = c(0.75, 0.25),
                           legend_position = c('inside', 'right',
                                               'bottom', 'top', 'left'),
-                          plot_margins = ggplot2::margin(t = -35, r = -35,
-                                                         b = -10, l = 0,
-                                                         unit = 'pt'),
+                          plot_margins = margin(t = -35, r = -35,
+                                                b = -10, l = 0,
+                                                unit = 'pt'),
                           title_panel_ratio = c(0.1, 0.9),
                           legend_panel_ratio = c(0.1, 0.9)) {
 
@@ -288,9 +288,9 @@
     ## plotting data, variable and sample order --------
 
     long_data <- pivot_longer(data,
-                         cols = all_of(variables),
-                         names_to = 'variable',
-                         values_to = 'status')
+                              cols = all_of(variables),
+                              names_to = 'variable',
+                              values_to = 'status')
 
     if(!is.null(variable_classification)) {
 
@@ -689,7 +689,7 @@
                            x_lab = 'events, # observations',
                            y_lab = 'variable',
                            fill_lab = 'status',
-                           cust_theme = microViz::theme_micro(),
+                           cust_theme = theme_micro(),
                            color_scale = c('white', 'steelblue'),
                            color_labels = c('WT', 'altered'),
                            bar_rim_color = 'gray60',

@@ -76,7 +76,7 @@
                                  txt_color = NULL,
                                  txt_face = 'plain',
                                  labeller = identity,
-                                 cust_theme = microViz::theme_micro(),
+                                 cust_theme = theme_micro(),
                                  plot_titles = variables,
                                  plot_subtitles = NULL,
                                  x_lab = split_fct,
@@ -469,7 +469,7 @@
                                     y_lab = NULL,
                                     status_lab = regulation_status,
                                     plot_tag = NULL,
-                                    cust_theme = microViz::theme_micro()) {
+                                    cust_theme = theme_micro()) {
 
     ## input control for the data argument -------
 
@@ -724,7 +724,7 @@
                                  y_lab = NULL,
                                  status_lab = regulation_status,
                                  plot_tag = NULL,
-                                 cust_theme = microViz::theme_micro()) {
+                                 cust_theme = theme_micro()) {
 
     ## input control for the data argument -------
 

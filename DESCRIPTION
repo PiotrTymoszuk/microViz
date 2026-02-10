@@ -1,27 +1,29 @@
 Package: microViz
 Type: Package
 Title: Visualization of Genome-Wide Expression Data
-Version: 1.5.1
+Version: 1.6.0
 Maintainer: Piotr Tymoszuk <piotr.s.tymoszuk@gmail.com>
 Description: Provides a medley of pre-processing, testing and plotting tools: 
     heat maps, Forest plots and Volcano plots, tesing and similarity analysis 
     tools compatible with a wide range of tabular data.
-License: GPL-3
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: bzip2
 Authors@R: 
     person("Piotr", "Tymoszuk", , "piotr.s.tymoszuk@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-0398-6034"))
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE)
 Imports: 
     car,
     cowplot,
     dplyr,
+    eulerr,
     furrr,
     future,
     ggdendro,
+    ggforce,
     ggplot2,
     ggrepel,
     ggwordcloud,

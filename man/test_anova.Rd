@@ -32,23 +32,14 @@ see: \code{\link[stats]{p.adjust}}.}
 \item{...}{additional arguments passed to \code{\link[stats]{aov}}.}
 }
 \value{
-a list of data frames containing the ANOVA and linear model
-estimates.
+\code{NULL} with a warning.
 }
 \description{
-Compares expression differences between multiple groups with
-one-way ANOVA and linear modeling.
+The testing functions are not active anymore, because we offer a faster and
+more versatile tools for high-throughput statistical hypothesis testing.
+Please use functions from \code{fastTest} package instead
+(https://github.com/PiotrTymoszuk/fastTest/)
 }
 \details{
-If a confounding variable is specified it will be included in the
-model as a leading fixed term. Statistics for the confounding term are
-not shown in the output. Note: effect size statistic, Cohen's d, returned for
-the betas of linear modeling is computed as the ratio of beta to square root
-of variance means (baseline and the i-th variable level of interest):
-
-\deqn{d_i = \frac{\beta_{i}}{\sqrt{0.5 \times (Var_{i} + Var_{baseline})}}}
-
-As such, the Cohen's d values are only very coarse estimates of effect size,
-when a confounder is included in the model. The effect size of ANOVA is
-eta-squared.
+These functions are not active anymore and return \code{NULL} with a warning
 }

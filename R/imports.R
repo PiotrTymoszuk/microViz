@@ -4,6 +4,7 @@
 #' @importFrom rlang `!!`
 #' @importFrom rlang `:=`
 #' @importFrom rlang set_names
+#' @importFrom rlang list2
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -11,16 +12,22 @@
 #' @importFrom ggplot2 geom_text
 #' @importFrom ggplot2 geom_tile
 #' @importFrom ggplot2 facet_grid
+#' @importFrom ggplot2 facet_wrap
 #' @importFrom ggplot2 geom_hline
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggplot2 scale_fill_gradient
 #' @importFrom ggplot2 scale_fill_gradient2
+#' @importFrom ggplot2 scale_size_continuous
+#' @importFrom ggplot2 scale_size_area
+#' @importFrom ggplot2 scale_radius
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 geom_vline
 #' @importFrom ggplot2 theme
+#' @importFrom ggplot2 theme_classic
 #' @importFrom ggplot2 geom_bar
 #' @importFrom ggplot2 element_blank
 #' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggplot2 scale_color_gradient2
 #' @importFrom ggplot2 element_text
 #' @importFrom ggplot2 element_line
 #' @importFrom ggplot2 geom_errorbarh
@@ -30,12 +37,16 @@
 #' @importFrom ggplot2 geom_errorbar
 #' @importFrom ggplot2 geom_rect
 #' @importFrom ggplot2 geom_segment
+#' @importFrom ggplot2 geom_smooth
 #' @importFrom ggplot2 guides
 #' @importFrom ggplot2 scale_x_discrete
 #' @importFrom ggplot2 guide_axis
 #' @importFrom ggplot2 guide_legend
 #' @importFrom ggplot2 margin
 #' @importFrom ggplot2 geom_label
+#'
+#' @importFrom ggwordcloud geom_text_wordcloud
+#' @importFrom ggwordcloud geom_text_wordcloud
 #'
 #' @importFrom cowplot plot_grid
 #' @importFrom cowplot get_legend
@@ -55,6 +66,7 @@
 #' @importFrom purrr map_chr
 #' @importFrom purrr map2_chr
 #' @importFrom purrr reduce
+#' @importFrom purrr pluck
 #'
 #' @importFrom dplyr tibble
 #' @importFrom dplyr as_tibble
@@ -86,6 +98,7 @@
 #' @importFrom stats p.adjust
 #' @importFrom stats var
 #' @importFrom stats as.formula
+#' @importFrom stats dist
 #' @importFrom stats as.dist
 #' @importFrom stats confint
 #' @importFrom stats anova
@@ -99,6 +112,8 @@
 #' @importFrom stats cmdscale
 #' @importFrom stats hclust
 #' @importFrom stats na.omit
+#' @importFrom stats pt
+#' @importFrom stats qt
 #'
 #' @importFrom umap umap
 #'
@@ -120,8 +135,14 @@
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom ggrepel geom_label_repel
 #'
+#' @importFrom ggforce geom_ellipse
+#'
+#' @importFrom limma goana
+#'
 #' @importFrom GOSemSim geneSim
 #' @importFrom GOSemSim goSim
+#'
+#' @importFrom eulerr euler
 #'
 #' @importFrom ggdendro ggdendrogram
 #'

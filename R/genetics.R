@@ -5,7 +5,7 @@
 #' Binarize somatic mutation data.
 #'
 #' @description
-#' Converts a data frame with detailed mutation information
+#' Converts a data frame with detailed mutation information in a MAF/VCF-like format
 #' (e.g. nucleotide sequence, variant classification) into a simplified
 #' binarized form.
 #' In the output, presence of at least one mutation in a particular gene is

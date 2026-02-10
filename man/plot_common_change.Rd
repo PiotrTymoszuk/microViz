@@ -26,7 +26,7 @@ plot_common_change(
   txt_color = NULL,
   txt_face = "plain",
   labeller = identity,
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   plot_titles = variables,
   plot_subtitles = NULL,
   x_lab = split_fct,

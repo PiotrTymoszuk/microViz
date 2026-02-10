@@ -17,7 +17,7 @@
 #' ROC analysis. The are under the ROC curve is computed by trapezoidal
 #' integration of specificity over 1 - sensitivity. The best performing cutoffs
 #' for assignment to the subset of interest by variable value are determined by
-#' maximizing Youden's J statistic (J = sensitivity + specificty - 1).
+#' maximizing Youden's J statistic (J = sensitivity + specificity - 1).
 #'
 #' @param data a data frame.
 #' @param variables a vector of names of the variables of interest.
@@ -189,7 +189,7 @@
                               split_fct,
                               normalize = TRUE,
                               norm_center = c('mean', 'median'),
-                              dist_FUN = stats::dist, ...) {
+                              dist_FUN = dist, ...) {
 
     ## input control -------
 
@@ -303,7 +303,7 @@
 
     subset_identities <- map(split_levs, ~c(.x, .x))
 
-    subset_pairs <- utils::combn(split_levs, m = 2, simplify = FALSE)
+    subset_pairs <- combn(split_levs, m = 2, simplify = FALSE)
 
     subset_pairs <- c(subset_pairs, subset_identities)
 
@@ -321,7 +321,7 @@
 
     ## cross-distance object -------
 
-    dots <- rlang::list2(...)
+    dots <- list2(...)
 
     if(!is.null(dots$method)) {
 

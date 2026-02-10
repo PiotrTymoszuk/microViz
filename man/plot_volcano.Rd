@@ -24,7 +24,7 @@ plot_volcano(
   plot_title = NULL,
   plot_subtitle = NULL,
   plot_tag = NULL,
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   point_alpha = 0.8,
   point_hjitter = 0,
   point_wjitter = 0,

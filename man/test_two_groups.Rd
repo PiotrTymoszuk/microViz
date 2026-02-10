@@ -33,15 +33,14 @@ see: \code{\link[stats]{p.adjust}}.}
 \code{\link[stats]{wilcox.test}}.}
 }
 \value{
-a data frame with the regulation statistic, confidence intervals,
-t and p values (raw and corrected) as well as effect size measures.
+\code{NULL} with a warning.
 }
 \description{
-Compares gene expression differences between two groups with
-T tests or Wilcoxon tests.
+The testing functions are not active anymore, because we offer a faster and
+more versatile tools for high-throughput statistical hypothesis testing.
+Please use functions from \code{fastTest} package instead
+(https://github.com/PiotrTymoszuk/fastTest/)
 }
 \details{
-The function returns Cohen's d as an effect size metric for T tests and
-r as an effect size statistic for Wilcoxon tests. The later is computed
-with \code{\link[rcompanion]{wilcoxonR}}.
+These functions are not active anymore and return \code{NULL} with a warning.
 }

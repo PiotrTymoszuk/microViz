@@ -17,7 +17,7 @@ plot_bistack(
   x_lab = "events, # observations",
   y_lab = "variable",
   fill_lab = "status",
-  cust_theme = microViz::theme_micro(),
+  cust_theme = theme_micro(),
   color_scale = c("white", "steelblue"),
   color_labels = c("WT", "altered"),
   bar_rim_color = "gray60",

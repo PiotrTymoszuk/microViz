@@ -10,7 +10,8 @@ identify_significant(
   p_variable,
   regulation_variable = NULL,
   signif_level = 0.05,
-  regulation_level = 0
+  regulation_level = 0,
+  return_data = FALSE
 )
 }
 \arguments{
@@ -28,10 +29,19 @@ p value threshold.}
 \item{signif_level}{p value threshold.}
 
 \item{regulation_level}{regulation or effect size threshold.}
+
+\item{return_data}{if \code{TRUE}, the input data frame is returned with additional
+columns indicating significance and regulation sign.}
 }
 \value{
-A character vector or a list of character vectors with names of significant
-variables derived from \code{label_variable}.
+If \code{return_data = FALSE}: a character vector or a list of character vectors
+with names of significant variables derived from \code{label_variable}.
+Otherwise, the function returns the input data frame with the following
+addtional columns:
+\itemize{
+\item \code{.significant}: indicates if the effect reaches statistical significance
+\item \code{.regulation}: indicates the sign of significant regulation
+}
 }
 \description{
 Identifies significant effects with a given significance and regulation
