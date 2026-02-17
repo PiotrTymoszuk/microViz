@@ -21,6 +21,14 @@ colSD <- function(x, na_rm = TRUE) {
     .Call('_microViz_colSD', PACKAGE = 'microViz', x, na_rm)
 }
 
+colKurtosis <- function(x, na_rm = TRUE) {
+    .Call('_microViz_colKurtosis', PACKAGE = 'microViz', x, na_rm)
+}
+
+colSkewness <- function(x, na_rm = TRUE) {
+    .Call('_microViz_colSkewness', PACKAGE = 'microViz', x, na_rm)
+}
+
 colGi <- function(x, unbiased = TRUE, na_rm = TRUE) {
     .Call('_microViz_colGi', PACKAGE = 'microViz', x, unbiased, na_rm)
 }
@@ -145,6 +153,14 @@ rowSD <- function(x, na_rm = TRUE) {
     .Call('_microViz_rowSD', PACKAGE = 'microViz', x, na_rm)
 }
 
+rowKurtosis <- function(x, na_rm = TRUE) {
+    .Call('_microViz_rowKurtosis', PACKAGE = 'microViz', x, na_rm)
+}
+
+rowSkewness <- function(x, na_rm = TRUE) {
+    .Call('_microViz_rowSkewness', PACKAGE = 'microViz', x, na_rm)
+}
+
 rowGi <- function(x, unbiased = TRUE, na_rm = TRUE) {
     .Call('_microViz_rowGi', PACKAGE = 'microViz', x, unbiased, na_rm)
 }
@@ -219,6 +235,14 @@ SD <- function(x) {
 
 SEM <- function(x) {
     .Call('_microViz_SEM', PACKAGE = 'microViz', x)
+}
+
+KurtosisCpp <- function(x) {
+    .Call('_microViz_KurtosisCpp', PACKAGE = 'microViz', x)
+}
+
+SkewnessCpp <- function(x) {
+    .Call('_microViz_SkewnessCpp', PACKAGE = 'microViz', x)
 }
 
 GiniCpp <- function(x, unbiased = TRUE) {

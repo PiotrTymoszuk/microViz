@@ -70,6 +70,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// colKurtosis
+NumericVector colKurtosis(NumericMatrix x, bool na_rm);
+RcppExport SEXP _microViz_colKurtosis(SEXP xSEXP, SEXP na_rmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< bool >::type na_rm(na_rmSEXP);
+    rcpp_result_gen = Rcpp::wrap(colKurtosis(x, na_rm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// colSkewness
+NumericVector colSkewness(NumericMatrix x, bool na_rm);
+RcppExport SEXP _microViz_colSkewness(SEXP xSEXP, SEXP na_rmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< bool >::type na_rm(na_rmSEXP);
+    rcpp_result_gen = Rcpp::wrap(colSkewness(x, na_rm));
+    return rcpp_result_gen;
+END_RCPP
+}
 // colGi
 NumericVector colGi(NumericMatrix x, bool unbiased, bool na_rm);
 RcppExport SEXP _microViz_colGi(SEXP xSEXP, SEXP unbiasedSEXP, SEXP na_rmSEXP) {
@@ -448,6 +472,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rowKurtosis
+NumericVector rowKurtosis(NumericMatrix x, bool na_rm);
+RcppExport SEXP _microViz_rowKurtosis(SEXP xSEXP, SEXP na_rmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< bool >::type na_rm(na_rmSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowKurtosis(x, na_rm));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rowSkewness
+NumericVector rowSkewness(NumericMatrix x, bool na_rm);
+RcppExport SEXP _microViz_rowSkewness(SEXP xSEXP, SEXP na_rmSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< bool >::type na_rm(na_rmSEXP);
+    rcpp_result_gen = Rcpp::wrap(rowSkewness(x, na_rm));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rowGi
 NumericVector rowGi(NumericMatrix x, bool unbiased, bool na_rm);
 RcppExport SEXP _microViz_rowGi(SEXP xSEXP, SEXP unbiasedSEXP, SEXP na_rmSEXP) {
@@ -675,6 +723,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// KurtosisCpp
+double KurtosisCpp(NumericVector x);
+RcppExport SEXP _microViz_KurtosisCpp(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(KurtosisCpp(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SkewnessCpp
+double SkewnessCpp(NumericVector x);
+RcppExport SEXP _microViz_SkewnessCpp(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(SkewnessCpp(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // GiniCpp
 double GiniCpp(NumericVector x, bool unbiased);
 RcppExport SEXP _microViz_GiniCpp(SEXP xSEXP, SEXP unbiasedSEXP) {
@@ -823,6 +893,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_colHarmMean", (DL_FUNC) &_microViz_colHarmMean, 2},
     {"_microViz_colVariance", (DL_FUNC) &_microViz_colVariance, 2},
     {"_microViz_colSD", (DL_FUNC) &_microViz_colSD, 2},
+    {"_microViz_colKurtosis", (DL_FUNC) &_microViz_colKurtosis, 2},
+    {"_microViz_colSkewness", (DL_FUNC) &_microViz_colSkewness, 2},
     {"_microViz_colGi", (DL_FUNC) &_microViz_colGi, 3},
     {"_microViz_colQuant", (DL_FUNC) &_microViz_colQuant, 3},
     {"_microViz_colPerCi", (DL_FUNC) &_microViz_colPerCi, 3},
@@ -854,6 +926,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_rowHarmMean", (DL_FUNC) &_microViz_rowHarmMean, 2},
     {"_microViz_rowVariance", (DL_FUNC) &_microViz_rowVariance, 2},
     {"_microViz_rowSD", (DL_FUNC) &_microViz_rowSD, 2},
+    {"_microViz_rowKurtosis", (DL_FUNC) &_microViz_rowKurtosis, 2},
+    {"_microViz_rowSkewness", (DL_FUNC) &_microViz_rowSkewness, 2},
     {"_microViz_rowGi", (DL_FUNC) &_microViz_rowGi, 3},
     {"_microViz_rowQuant", (DL_FUNC) &_microViz_rowQuant, 3},
     {"_microViz_rowPerCi", (DL_FUNC) &_microViz_rowPerCi, 3},
@@ -873,6 +947,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_microViz_Var", (DL_FUNC) &_microViz_Var, 1},
     {"_microViz_SD", (DL_FUNC) &_microViz_SD, 1},
     {"_microViz_SEM", (DL_FUNC) &_microViz_SEM, 1},
+    {"_microViz_KurtosisCpp", (DL_FUNC) &_microViz_KurtosisCpp, 1},
+    {"_microViz_SkewnessCpp", (DL_FUNC) &_microViz_SkewnessCpp, 1},
     {"_microViz_GiniCpp", (DL_FUNC) &_microViz_GiniCpp, 2},
     {"_microViz_Quantile", (DL_FUNC) &_microViz_Quantile, 2},
     {"_microViz_perci", (DL_FUNC) &_microViz_perci, 2},

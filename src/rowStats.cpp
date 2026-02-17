@@ -151,6 +151,64 @@ NumericVector rowSD(NumericMatrix x, bool na_rm = true) {
 
 }
 
+// kurtosis statistics of the rows
+
+// [[Rcpp::export]]
+
+NumericVector rowKurtosis(NumericMatrix x, bool na_rm = true) {
+
+  int x_nrows = x.nrow();
+
+  NumericVector row_inp;
+  NumericVector res(x_nrows);
+
+  for(int i = 0; i < x_nrows; ++i) {
+
+    row_inp = x(i, _);
+
+    if(na_rm) {
+
+      row_inp = Rcpp::na_omit(row_inp);
+
+    }
+
+    res[i] = KurtosisCpp(row_inp);
+
+  }
+
+  return res;
+
+}
+
+// skewness statistics of the rows
+
+// [[Rcpp::export]]
+
+NumericVector rowSkewness(NumericMatrix x, bool na_rm = true) {
+
+  int x_nrows = x.nrow();
+
+  NumericVector row_inp;
+  NumericVector res(x_nrows);
+
+  for(int i = 0; i < x_nrows; ++i) {
+
+    row_inp = x(i, _);
+
+    if(na_rm) {
+
+      row_inp = Rcpp::na_omit(row_inp);
+
+    }
+
+    res[i] = SkewnessCpp(row_inp);
+
+  }
+
+  return res;
+
+}
+
 // Gini coefficients of the rows
 
 // [[Rcpp::export]]

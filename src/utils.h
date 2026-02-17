@@ -11,9 +11,14 @@ double Mean(NumericVector x);
 double Median(NumericVector x);
 double geoMean(NumericVector x);
 double harmMean(NumericVector x);
+
 double Var(NumericVector x);
 double SD(NumericVector x);
 double SEM(NumericVector x);
+
+double KurtosisCpp(NumericVector x);
+double SkewnessCpp(NumericVector x);
+
 double GiniCpp(NumericVector x, bool unbiased);
 double freqRatioCpp(NumericVector x);
 double percUniqueCpp(NumericVector x);

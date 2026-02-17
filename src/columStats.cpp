@@ -151,6 +151,64 @@ NumericVector colSD(NumericMatrix x, bool na_rm = true) {
 
 }
 
+// column kurtosis
+
+// [[Rcpp::export]]
+
+NumericVector colKurtosis(NumericMatrix x, bool na_rm = true) {
+
+  int x_ncols = x.ncol();
+
+  NumericVector col_inp;
+  NumericVector res(x_ncols);
+
+  for(int i = 0; i < x_ncols; ++i) {
+
+    col_inp = x(_, i);
+
+    if(na_rm) {
+
+      col_inp = Rcpp::na_omit(col_inp);
+
+    }
+
+    res[i] = KurtosisCpp(col_inp);
+
+  }
+
+  return res;
+
+}
+
+// column skewness
+
+// [[Rcpp::export]]
+
+NumericVector colSkewness(NumericMatrix x, bool na_rm = true) {
+
+  int x_ncols = x.ncol();
+
+  NumericVector col_inp;
+  NumericVector res(x_ncols);
+
+  for(int i = 0; i < x_ncols; ++i) {
+
+    col_inp = x(_, i);
+
+    if(na_rm) {
+
+      col_inp = Rcpp::na_omit(col_inp);
+
+    }
+
+    res[i] = SkewnessCpp(col_inp);
+
+  }
+
+  return res;
+
+}
+
 // column Gini coefficients
 
 // [[Rcpp::export]]

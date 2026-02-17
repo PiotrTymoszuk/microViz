@@ -22,6 +22,12 @@
 \alias{colSDs}
 \alias{colSDs.matrix}
 \alias{colSDs.data.frame}
+\alias{colKurtoses}
+\alias{colKurtoses.matrix}
+\alias{colKurtoses.data.frame}
+\alias{colSkewnesses}
+\alias{colSkewnesses.matrix}
+\alias{colSkewnesses.data.frame}
 \alias{colGini}
 \alias{colGini.matrix}
 \alias{colGini.data.frame}
@@ -84,6 +90,18 @@ colSDs(x, ...)
 \method{colSDs}{matrix}(x, na.rm = TRUE, ...)
 
 \method{colSDs}{data.frame}(x, na.rm = TRUE, ...)
+
+colKurtoses(x, ...)
+
+\method{colKurtoses}{matrix}(x, na.rm = TRUE, ...)
+
+\method{colKurtoses}{data.frame}(x, na.rm = TRUE, ...)
+
+colSkewnesses(x, ...)
+
+\method{colSkewnesses}{matrix}(x, na.rm = TRUE, ...)
+
+\method{colSkewnesses}{data.frame}(x, na.rm = TRUE, ...)
 
 colGini(x, unbiased, ...)
 
@@ -152,6 +170,8 @@ identification of near-zero variance variables.}
 \code{colSDs()}, \code{colGini()} return numeric vectors with, respectively,
 column medians, geometric means, harmonic means, variances, standard
 deviations and Gini coefficients.
+\code{colKurtoses()} ans \code{colSkewnesses()} return kurtosis and skewness statistics
+of the columns.
 \code{colQuantiles()}, and \code{colCI()} return numeric matrices with variables
 listed in rows.
 \code{colFreqRatios()} returns ratios of frequencies of the first most common
@@ -184,8 +204,8 @@ silently prior to calculation of the numeric statistics.
 }
 \description{
 The functions compute column medians, variances, standard deviations,
-Gini coefficients, quantiles and confidence intervals as well as metrics of
-unique values.
+kurtosis, skewness, Gini coefficients, quantiles and confidence intervals
+as well as metrics of unique values.
 \code{distr_stats} computes a bunch of distribution stats that
 are helpful at selection of variant features for the further analysis, e.g.
 differential gene expression.

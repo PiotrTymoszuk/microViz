@@ -114,6 +114,59 @@ double SEM(NumericVector x) {
 
 }
 
+// kurtosis
+
+// [[Rcpp::export]]
+
+double KurtosisCpp(NumericVector x) {
+
+  int n = x.size();
+  double x_mean = 0;
+
+  double upper_sum = 0;
+  double bottom_sum = 0;
+
+  x_mean = mean(x);
+
+  for(int i = 0; i < n; i++) {
+
+    upper_sum += std::pow(x[i] - x_mean, 4);
+    bottom_sum += std::pow(x[i] - x_mean, 2);
+
+  }
+
+  return n * upper_sum/std::pow(bottom_sum, 2);
+
+}
+
+// skewness
+
+// [[Rcpp::export]]
+
+double SkewnessCpp(NumericVector x) {
+
+  int n = x.size();
+  double x_mean = 0;
+
+  double upper_sum = 0;
+  double bottom_sum = 0;
+
+  double pow_base = 3/2;
+
+  x_mean = mean(x);
+
+  for(int i = 0; i < n; i++) {
+
+    upper_sum += std::pow(x[i] - x_mean, 3);
+    bottom_sum += std::pow(x[i] - x_mean, 2);
+
+  }
+
+  return (upper_sum/n)/std::pow(bottom_sum/(n - 1), pow_base);
+
+}
+
+
 // Gini coefficients
 
 // [[Rcpp::export]]

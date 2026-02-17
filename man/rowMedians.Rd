@@ -22,6 +22,12 @@
 \alias{rowSDs}
 \alias{rowSDs.matrix}
 \alias{rowSDs.data.frame}
+\alias{rowKurtoses}
+\alias{rowKurtoses.matrix}
+\alias{rowKurtoses.data.frame}
+\alias{rowSkewnesses}
+\alias{rowSkewnesses.matrix}
+\alias{rowSkewnesses.data.frame}
 \alias{rowGini}
 \alias{rowGini.matrix}
 \alias{rowGini.data.frame}
@@ -84,6 +90,18 @@ rowSDs(x, ...)
 \method{rowSDs}{matrix}(x, na.rm = TRUE, ...)
 
 \method{rowSDs}{data.frame}(x, na.rm = TRUE, ...)
+
+rowKurtoses(x, ...)
+
+\method{rowKurtoses}{matrix}(x, na.rm = TRUE, ...)
+
+\method{rowKurtoses}{data.frame}(x, na.rm = TRUE, ...)
+
+rowSkewnesses(x, ...)
+
+\method{rowSkewnesses}{matrix}(x, na.rm = TRUE, ...)
+
+\method{rowSkewnesses}{data.frame}(x, na.rm = TRUE, ...)
 
 rowGini(x, unbiased, ...)
 
@@ -152,6 +170,8 @@ identification of near-zero variance variables.}
 \code{rowHmeans()}, \code{rowVars()}, \code{rowSDs()}, \code{rowGini()} return numeric vectors
 with, respectively, row medians, row minima, row maxima, geometric means,
 harmonic means, variances, standard deviations and Gini coefficients.
+\code{rowKurtoses()} ans \code{rowSkewnesses()} return kurtosis and skewness statistics
+of the columns.
 \code{rowQuantiles()}, and \code{rowCI()} return numeric matrices of quantiles and
 confidence intervals of rows.
 \code{rowFreqRatios()} returns ratios of frequencies of the first most common
@@ -184,7 +204,8 @@ computation of the distribution statistics.
 }
 \description{
 The functions compute row medians, variances, standard deviations, Gini
-coefficients, quantiles, confidence intervals and metrics of uniqueness.
+coefficients, quantiles, kurtosis, skewness, confidence intervals and
+metrics of uniqueness.
 \code{row_stats} computes a bunch of distribution stats that
 are helpful at selection of variant features for the further analysis, e.g.
 differential gene expression.

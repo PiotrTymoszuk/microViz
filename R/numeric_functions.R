@@ -15,6 +15,7 @@
 #' @details
 #' `Gmean()`, `Hmean()` and `Gini()` compute geometric mean, harmonic mean,
 #' and Gini coefficient, respectively.
+#' `kurtosis()` and `skewness()` return kurtosis and skewness statistics.
 #' `perCI()` and `bcaCI()` return confidence intervals calculated with the
 #' percentile and BCA (bias corrected and accelerated) method.
 #' `freqRatio()` computes the ratio of frequencies of the first most frequent
@@ -67,6 +68,34 @@
 #' @rdname Gmean
 #' @export
 
+  kurtosis <- function(x, na.rm = TRUE) {
+
+    stopifnot(is.numeric(x))
+    stopifnot(is.logical(na.rm))
+
+    if(na.rm) x <- x[!is.na(x)]
+
+    KurtosisCpp(x)
+
+  }
+
+#' @rdname Gmean
+#' @export
+
+  skewness <- function(x, na.rm = TRUE) {
+
+    stopifnot(is.numeric(x))
+    stopifnot(is.logical(na.rm))
+
+    if(na.rm) x <- x[!is.na(x)]
+
+    SkewnessCpp(x)
+
+  }
+
+#' @rdname Gmean
+#' @export
+
   Gini <- function(x, unbiased = TRUE, na.rm = TRUE) {
 
     stopifnot(is.numeric(x))
@@ -78,7 +107,6 @@
     GiniCpp(x, unbiased)
 
   }
-
 
 #' @rdname Gmean
 #' @export
@@ -148,8 +176,8 @@
 #'
 #' @description
 #' The functions compute column medians, variances, standard deviations,
-#' Gini coefficients, quantiles and confidence intervals as well as metrics of
-#' unique values.
+#' kurtosis, skewness, Gini coefficients, quantiles and confidence intervals
+#' as well as metrics of unique values.
 #' `distr_stats` computes a bunch of distribution stats that
 #' are helpful at selection of variant features for the further analysis, e.g.
 #' differential gene expression.
@@ -178,6 +206,8 @@
 #' `colSDs()`, `colGini()` return numeric vectors with, respectively,
 #' column medians, geometric means, harmonic means, variances, standard
 #' deviations and Gini coefficients.
+#' `colKurtoses()` ans `colSkewnesses()` return kurtosis and skewness statistics
+#' of the columns.
 #' `colQuantiles()`, and `colCI()` return numeric matrices with variables
 #' listed in rows.
 #' `colFreqRatios()` returns ratios of frequencies of the first most common
@@ -475,6 +505,85 @@
     check_df(x)
 
     colSDs.matrix(as.matrix(x), na.rm = na.rm)
+
+  }
+
+
+#' @rdname colMedians
+#' @export
+
+  colKurtoses <- function(x, ...) UseMethod('colKurtoses')
+
+#' @rdname colMedians
+#' @export
+
+  colKurtoses.matrix <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_mtx(x)
+
+    res <- colKurtosis(x, na.rm)
+
+    if(!is.null(colnames(x))) {
+
+      res <- set_names(res, colnames(x))
+
+    }
+
+    res
+
+  }
+
+#' @rdname colMedians
+#' @export
+
+  colKurtoses.data.frame <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_df(x)
+
+    colKurtoses.matrix(as.matrix(x), na.rm = na.rm)
+
+  }
+
+#' @rdname colMedians
+#' @export
+
+  colSkewnesses <- function(x, ...) UseMethod('colSkewnesses')
+
+#' @rdname colMedians
+#' @export
+
+  colSkewnesses.matrix <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_mtx(x)
+
+    res <- colSkewness(x, na.rm)
+
+    if(!is.null(colnames(x))) {
+
+      res <- set_names(res, colnames(x))
+
+    }
+
+    res
+
+  }
+
+#' @rdname colMedians
+#' @export
+
+  colSkewnesses.data.frame <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_df(x)
+
+    colSkewnesses.matrix(as.matrix(x), na.rm = na.rm)
 
   }
 
@@ -804,7 +913,8 @@
 #'
 #' @description
 #' The functions compute row medians, variances, standard deviations, Gini
-#' coefficients, quantiles, confidence intervals and metrics of uniqueness.
+#' coefficients, quantiles, kurtosis, skewness, confidence intervals and
+#' metrics of uniqueness.
 #' `row_stats` computes a bunch of distribution stats that
 #' are helpful at selection of variant features for the further analysis, e.g.
 #' differential gene expression.
@@ -820,6 +930,8 @@
 #' `rowHmeans()`, `rowVars()`, `rowSDs()`, `rowGini()` return numeric vectors
 #' with, respectively, row medians, row minima, row maxima, geometric means,
 #' harmonic means, variances, standard deviations and Gini coefficients.
+#' `rowKurtoses()` ans `rowSkewnesses()` return kurtosis and skewness statistics
+#' of the columns.
 #' `rowQuantiles()`, and `rowCI()` return numeric matrices of quantiles and
 #' confidence intervals of rows.
 #' `rowFreqRatios()` returns ratios of frequencies of the first most common
@@ -1117,6 +1229,84 @@
     check_df(x)
 
     rowSDs.matrix(as.matrix(x), na.rm = na.rm)
+
+  }
+
+#' @rdname rowMedians
+#' @export
+
+  rowKurtoses <- function(x, ...) UseMethod('rowKurtoses')
+
+#' @rdname rowMedians
+#' @export
+
+  rowKurtoses.matrix <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_mtx(x)
+
+    res <- rowKurtosis(x, na.rm)
+
+    if(!is.null(rownames(x))) {
+
+      res <- set_names(res, rownames(x))
+
+    }
+
+    res
+
+  }
+
+#' @rdname rowMedians
+#' @export
+
+  rowKurtoses.data.frame <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_df(x)
+
+    rowKurtoses.matrix(as.matrix(x), na.rm = na.rm)
+
+  }
+
+#' @rdname rowMedians
+#' @export
+
+  rowSkewnesses <- function(x, ...) UseMethod('rowSkewnesses')
+
+#' @rdname rowMedians
+#' @export
+
+  rowSkewnesses.matrix <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_mtx(x)
+
+    res <- rowSkewness(x, na.rm)
+
+    if(!is.null(rownames(x))) {
+
+      res <- set_names(res, rownames(x))
+
+    }
+
+    res
+
+  }
+
+#' @rdname rowMedians
+#' @export
+
+  rowSkewnesses.data.frame <- function(x, na.rm = TRUE, ...) {
+
+    stopifnot(is.logical(na.rm))
+
+    check_df(x)
+
+    rowSkewnesses.matrix(as.matrix(x), na.rm = na.rm)
 
   }
 

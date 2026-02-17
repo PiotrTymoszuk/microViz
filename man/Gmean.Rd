@@ -3,6 +3,8 @@
 \name{Gmean}
 \alias{Gmean}
 \alias{Hmean}
+\alias{kurtosis}
+\alias{skewness}
 \alias{Gini}
 \alias{perCI}
 \alias{bcaCI}
@@ -13,6 +15,10 @@
 Gmean(x, na.rm = TRUE)
 
 Hmean(x, na.rm = TRUE)
+
+kurtosis(x, na.rm = TRUE)
+
+skewness(x, na.rm = TRUE)
 
 Gini(x, unbiased = TRUE, na.rm = TRUE)
 
@@ -45,6 +51,7 @@ base R such as geometric and harmonic means or BCA confidence intervals.
 \details{
 \code{Gmean()}, \code{Hmean()} and \code{Gini()} compute geometric mean, harmonic mean,
 and Gini coefficient, respectively.
+\code{kurtosis()} and \code{skewness()} return kurtosis and skewness statistics.
 \code{perCI()} and \code{bcaCI()} return confidence intervals calculated with the
 percentile and BCA (bias corrected and accelerated) method.
 \code{freqRatio()} computes the ratio of frequencies of the first most frequent
