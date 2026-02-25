@@ -10,15 +10,19 @@ and interpretation of the comparison results
 
 ## Installation
 
-You may easily fetch the package via `devtools`: 
+You may easily fetch the package and its dependencies via `devtools`: 
 
 ```r
+
+## the package itself
 
 devtools::install_github('PiotrTymoszuk/microViz')
 
 ## suggested for use of cross-disstance object OOP:
 
 devtools::install_github('PiotrTymoszuk/clustTools')
+
+
 
 ```
 
@@ -43,6 +47,7 @@ the [tidyverse evironment](https://www.tidyverse.org/), and packages
 [stringi](https://stringi.gagolewski.com/index.html), 
 [utils](https://cran.r-project.org/web/packages/R.utils/index.html), 
 [ggforce](https://ggforce.data-imaginist.com/), 
+[GOSemSim](https://bioconductor.org/packages/release/bioc/html/GOSemSim.html), 
 and [rlang](https://rlang.r-lib.org/).
 
 ## Usage
