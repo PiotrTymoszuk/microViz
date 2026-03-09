@@ -220,17 +220,17 @@
 
         desc_tbl <-
           map_dfr(desc_tbl,
-                  ~top_n(.x,
-                         n = top_significant,
-                         -.data[[p_variable]]))
+                  ~slice_max(.x,
+                             -.data[[p_variable]],
+                             n = top_significant))
 
       } else if(top_regulated > 0) {
 
         desc_tbl <-
           map_dfr(desc_tbl,
-                  ~top_n(.x,
-                         n = top_regulated,
-                         abs(.data[[regulation_variable]])))
+                  ~slice_max(.x,
+                             abs(.data[[regulation_variable]]),
+                             n = top_regulated))
 
       } else {
 
@@ -728,9 +728,9 @@
 
     plot_tbl <- group_by(plot_tbl, reg_sign)
 
-    plot_tbl <- top_n(plot_tbl,
-                      n = top_regulated,
-                      abs(.data[[regulation_variable]]))
+    plot_tbl <- slice_max(plot_tbl,
+                          abs(.data[[regulation_variable]]),
+                          n = top_regulated)
 
     plot_tbl <- ungroup(plot_tbl)
 
@@ -841,7 +841,7 @@
 
     ## plotting table -------
 
-    plot_tbl <- top_n(data, n = top_significant, -.data[[p_variable]])
+    plot_tbl <- slice_max(data, -.data[[p_variable]], n = top_significant)
 
     plot_tbl <- mutate(plot_tbl,
                        significant = ifelse(.data[[p_variable]] < signif_level,
@@ -966,9 +966,9 @@
     plot_data <- group_by(plot_data, regulation_raw)
 
     plot_data <-
-      top_n(plot_data,
-            n = top_regulated,
-            wt = abs(.data[[regulation_variable]]))
+      slice_max(plot_data,
+                abs(.data[[regulation_variable]]),
+                n = top_regulated)
 
     plot_data <- ungroup(plot_data)
 
