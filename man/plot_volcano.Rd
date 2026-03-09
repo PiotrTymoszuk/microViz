@@ -10,7 +10,7 @@ plot_volcano(
   p_variable,
   signif_level = 0.05,
   regulation_level = 1.5,
-  fill_scale = c(upregulated = "firebrick", downregulated = "steelblue", ns = "gray60"),
+  fill_scale = regulation_colors(),
   x_lab = regulation_variable,
   y_lab = expression("-log"[10] * " p"),
   top_significant = 0,

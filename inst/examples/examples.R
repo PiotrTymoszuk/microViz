@@ -230,7 +230,12 @@
     identify_significant(label_variable = 'variable',
                          p_variable = 'p_adjusted',
                          regulation_variable = 'cohen_d',
-                         regulation_level = 0.5)
+                         regulation_level = 0.5, return_data = TRUE)
+
+  er_signif_counts <- er_dge %>%
+    count_significant(p_variable = 'p_adjusted',
+                      regulation_variable = NULL,
+                      regulation_level = 0.5)
 
   ## volcano plot: effect size and significance
 

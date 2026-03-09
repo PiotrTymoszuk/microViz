@@ -113,4 +113,27 @@
 
   }
 
+# Colors --------
+
+#' Colors for regulation status.
+#'
+#' @description
+#' Default colors representing regulation and significance status.
+#'
+#' @return a named character vector with colors for up- and downregulated, and
+#' non-significant features used e.g. by Volcano and Forest plots.
+#'
+#' @export
+
+  regulation_colors <- function() {
+
+    c(upregulated = "firebrick",
+      activated = "firebrick",
+      downregulated = "steelblue",
+      inhibited = "steelblue",
+      significant = "coral3",
+      ns = "gray60")
+
+  }
+
 # END ----

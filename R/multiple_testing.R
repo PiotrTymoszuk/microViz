@@ -82,21 +82,24 @@
 
   }
 
-# Identification of significant effects ----------
+# Identification and counting of significant effects ----------
 
-#' Identify significant effects.
+#' Identify and count significant effects.
 #'
 #' @description
-#' Identifies significant effects with a given significance and regulation
-#' or effect size threshold.
+#' Functions for identification and tallying of significant effects with a given
+#' significance and regulation or effect size threshold.
 #'
 #' @return
-#' If `return_data = FALSE`: a character vector or a list of character vectors
+#' `identify_significant()`, if `return_data = FALSE`:
+#' a character vector or a list of character vectors
 #' with names of significant variables derived from `label_variable`.
 #' Otherwise, the function returns the input data frame with the following
-#' addtional columns:
+#' additional columns:
 #' * `.significant`: indicates if the effect reaches statistical significance
 #' * `.regulation`: indicates the sign of significant regulation
+#' `count_significant()`: a data frame with numbers and percentages of up- and
+#' downregulated features.
 #'
 #' @param data a data frame with the testing results.
 #' @param label_variable name of the variable storing names of the tested
@@ -105,6 +108,9 @@
 #' @param regulation_variable name of the variable storing regulation or
 #' effect size figures. If `NULL`, significance is determined solely by the
 #' p value threshold.
+#' @param status_variable name of the variable storing information on
+#' significance/regulation status. If not `NULL`, `p_variable`
+#' and `regulation_variable` are ignored.
 #' @param signif_level p value threshold.
 #' @param regulation_level regulation or effect size threshold.
 #' @param return_data if `TRUE`, the input data frame is returned with additional
@@ -113,12 +119,12 @@
 #' @export
 
   identify_significant <- function(data,
-                                   label_variable,
-                                   p_variable,
+                                   p_variable = "p_value",
                                    regulation_variable = NULL,
                                    signif_level = 0.05,
                                    regulation_level = 0,
-                                   return_data = FALSE) {
+                                   return_data = FALSE,
+                                   label_variable = NULL) {
 
     ## input control --------
 
@@ -128,29 +134,47 @@
 
     }
 
-    vars_to_check <- c(label_variable, p_variable)
+    stopifnot(is.character(p_variable))
+    if(!p_variable %in% names(data)) stop("`p_variable` is missing from `data`.", call. = FALSE)
+    if(!is.numeric(data[[p_variable]])) stop("`p_variable must be numeric.`", call. = FALSE)
 
-    if(!is.null(regulation_variable)) {
+    if(!is.null(label_variable)) {
 
-      vars_to_check <- c(vars_to_check, regulation_variable)
+      stopifnot(is.character(label_variable))
+
+      if(!label_variable %in% names(data)) {
+
+        stop("`label_variable` is missing from `data`.", call. = FALSE)
+
+      }
 
     }
 
-    err_txt <-
-      paste0('At least one of ',
-             paste(vars_to_check, collapse = ' or '),
-             ' is missing from the data.')
+    if(!is.null(regulation_variable)) {
 
-    if(!any(vars_to_check %in% names(data))) stop(err_txt, call. = FALSE)
+      stopifnot(is.character(regulation_variable))
 
-    class_check <- map_lgl(data[vars_to_check[-1]], is.numeric)
+      if(!regulation_variable %in% names(data)) {
 
-    err_txt <-
-      paste0('All of ',
-             paste(vars_to_check[-1], collapse = ' and '),
-             ' variables have to be numeric.')
+        stop("`regulation_variable` is missing from `data`.",
+             call. = FALSE)
 
-    if(any(!class_check)) stop(err_txt, call. = FALSE)
+      }
+
+      if(!is.numeric(data[[regulation_variable]])) {
+
+        stop("`regulation_variable must be numeric.`", call. = FALSE)
+
+      }
+
+    }
+
+    if(is.null(label_variable) & !return_data) {
+
+      stop("To return variables vectors (`return_data = TRUE`), please specify `label_variable`.",
+           call. = FALSE)
+
+    }
 
     stopifnot(is.numeric(signif_level))
     stopifnot(is.numeric(regulation_level))
@@ -213,6 +237,58 @@
       return(signif_vars)
 
     }
+
+  }
+
+#' @rdname identify_significant
+#' @export
+
+  count_significant <- function(data,
+                                p_variable = "p_value",
+                                regulation_variable = NULL,
+                                status_variable = NULL,
+                                signif_level = 0.05,
+                                regulation_level = 0) {
+
+    ## input control --------
+
+    if(!is.null(status_variable)) {
+
+      if(!is.data.frame(data)) stop("A data frame is required.", call. = FALSE)
+
+      if(!status_variable %in% names(data)) {
+
+        stop("`status_variable` is missing from `data`.", call. = FALSE)
+
+      }
+
+    } else {
+
+      data <- identify_significant(data,
+                                   p_variable = p_variable,
+                                   regulation_variable = regulation_variable,
+                                   signif_level = signif_level,
+                                   regulation_level = regulation_level,
+                                   return_data = TRUE)
+
+      if(is.null(regulation_variable)) {
+
+        status_variable <- ".significant"
+
+      } else {
+
+        tatus_variable <- ".regulation"
+
+      }
+
+    }
+
+    count_data <- count(data, .data[[status_variable]])
+
+    count_data[["n_total"]] <- sum(count_data[["n"]])
+    count_data[["percent"]] <- count_data[["n"]]/count_data[["n_total"]] * 100
+
+    count_data
 
   }
 

@@ -2,23 +2,30 @@
 % Please edit documentation in R/multiple_testing.R
 \name{identify_significant}
 \alias{identify_significant}
-\title{Identify significant effects.}
+\alias{count_significant}
+\title{Identify and count significant effects.}
 \usage{
 identify_significant(
   data,
-  label_variable,
-  p_variable,
+  p_variable = "p_value",
   regulation_variable = NULL,
   signif_level = 0.05,
   regulation_level = 0,
-  return_data = FALSE
+  return_data = FALSE,
+  label_variable = NULL
+)
+
+count_significant(
+  data,
+  p_variable = "p_value",
+  regulation_variable = NULL,
+  status_variable = NULL,
+  signif_level = 0.05,
+  regulation_level = 0
 )
 }
 \arguments{
 \item{data}{a data frame with the testing results.}
-
-\item{label_variable}{name of the variable storing names of the tested
-variables.}
 
 \item{p_variable}{name of the variable storing p values.}
 
@@ -32,18 +39,28 @@ p value threshold.}
 
 \item{return_data}{if \code{TRUE}, the input data frame is returned with additional
 columns indicating significance and regulation sign.}
+
+\item{label_variable}{name of the variable storing names of the tested
+variables.}
+
+\item{status_variable}{name of the variable storing information on
+significance/regulation status. If not \code{NULL}, \code{p_variable}
+and \code{regulation_variable} are ignored.}
 }
 \value{
-If \code{return_data = FALSE}: a character vector or a list of character vectors
+\code{identify_significant()}, if \code{return_data = FALSE}:
+a character vector or a list of character vectors
 with names of significant variables derived from \code{label_variable}.
 Otherwise, the function returns the input data frame with the following
-addtional columns:
+additional columns:
 \itemize{
 \item \code{.significant}: indicates if the effect reaches statistical significance
 \item \code{.regulation}: indicates the sign of significant regulation
+\code{count_significant()}: a data frame with numbers and percentages of up- and
+downregulated features.
 }
 }
 \description{
-Identifies significant effects with a given significance and regulation
-or effect size threshold.
+Functions for identification and tallying of significant effects with a given
+significance and regulation or effect size threshold.
 }
