@@ -604,7 +604,7 @@
                plot_lab = paste0(plot_lab,
                                  ' [', signif(.data[[lower_ci_variable]],
                                               signif_digits),
-                                 ' - ', signif(.data[[upper_ci_variable]],
+                                 ' to ', signif(.data[[upper_ci_variable]],
                                                signif_digits), ']'))
 
     }
