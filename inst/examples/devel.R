@@ -84,7 +84,8 @@
                          regulation_variable = 'estimate',
                          p_variable = 'p_value',
                          signif_level = 0.05,
-                         regulation_level = 1)
+                         regulation_level = 1,
+                         fill_scale = regulation_colors())
 
 # Forest plots -----
 

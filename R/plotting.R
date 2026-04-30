@@ -165,9 +165,11 @@
                  shape = 21,
                  alpha = point_alpha,
                  position = position_jitter(width = point_wjitter,
-                                            height = point_hjitter)) +
+                                            height = point_hjitter),
+                 show.legend = c(fill = TRUE)) +
       scale_fill_manual(values = fill_scale,
-                        name = fill_title) +
+                        name = fill_title,
+                        drop = FALSE) +
       cust_theme +
       labs(x = x_lab,
            y = y_lab,
@@ -304,7 +306,7 @@
                         p_variable,
                         signif_level = 0.05,
                         regulation_level = 1.5,
-                        fill_scale = regulation_colors,
+                        fill_scale = regulation_colors(),
                         fill_title = '',
                         bar_alpha = 0.75,
                         plot_title = NULL,
@@ -384,10 +386,12 @@
                   aes(x = plot_order,
                       y = .data[[regulation_variable]])) +
       geom_bar(stat = 'identity',
-                        alpha = bar_alpha,
-                        aes(fill = regulation)) +
+               alpha = bar_alpha,
+               aes(fill = regulation),
+               show.legend = c(fill = TRUE)) +
       scale_fill_manual(values = fill_scale,
-                        name = fill_title) +
+                        name = fill_title,
+                        drop = FALSE) +
       cust_theme +
       theme(axis.text.x = element_blank(),
             axis.ticks.x = element_blank()) +
@@ -560,9 +564,11 @@
                  color = regulation,
                  fill = regulation)) +
       scale_fill_manual(values = fill_scale,
-                        name = fill_title) +
+                        name = fill_title,
+                        drop = FALSE) +
       scale_color_manual(values = fill_scale,
-                         name = fill_title) +
+                         name = fill_title,
+                         drop = FALSE) +
       cust_theme +
       theme(axis.title.y = element_blank()) +
       labs(title = plot_title,
@@ -575,15 +581,17 @@
     if(!is.null(lower_ci_variable) & !is.null(upper_ci_variable)) {
 
       forest <- forest +
-        geom_errorbarh(aes(xmin = .data[[lower_ci_variable]],
+        geom_errorbar(aes(xmin = .data[[lower_ci_variable]],
                            xmax = .data[[upper_ci_variable]]),
-                       height = 0)
+                       width = 0,
+                       show.legend = c(color = TRUE))
 
     }
 
     forest <- forest +
       geom_point(size = 2,
-                          shape = 16)
+                 shape = 16,
+                 show.legend = c(color = TRUE))
 
     ## optional labeling
 
@@ -614,7 +622,8 @@
                 aes(label = plot_lab),
                 size = txt_size,
                 hjust = txt_hjust,
-                vjust = txt_vjust)
+                vjust = txt_vjust,
+                show.legend = FALSE)
 
     return(forest)
 
@@ -849,11 +858,13 @@
                            -.data[[p_variable]]),
                fill = significant)) +
       geom_bar(stat = 'identity',
-               color = 'black') +
+               color = 'black',
+               show.legend = c(fill = TRUE)) +
       geom_vline(xintercept = -log10(signif_level),
                  linetype = 'dashed') +
       scale_fill_manual(values = fill_scale,
-                        name = fill_title) +
+                        name = fill_title,
+                        drop = FALSE) +
       cust_theme +
       theme(axis.title.y = element_blank()) +
       labs(title = plot_title,
@@ -977,9 +988,11 @@
                                        .data[[regulation_variable]]),
                            fill = regulation)) +
       geom_bar(color = 'black',
-               stat = 'identity') +
+               stat = 'identity',
+               show.legend = c(fill = TRUE)) +
       scale_fill_manual(values = fill_scale,
-                        name = fill_title) +
+                        name = fill_title,
+                        drop = FALSE) +
       cust_theme +
       theme(axis.title.y = element_blank()) +
       labs(title = plot_title,

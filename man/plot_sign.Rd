@@ -10,7 +10,7 @@ plot_sign(
   p_variable,
   signif_level = 0.05,
   regulation_level = 1.5,
-  fill_scale = regulation_colors,
+  fill_scale = regulation_colors(),
   fill_title = "",
   bar_alpha = 0.75,
   plot_title = NULL,
