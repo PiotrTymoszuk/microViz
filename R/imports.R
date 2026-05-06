@@ -39,12 +39,14 @@
 #' @importFrom ggplot2 geom_rect
 #' @importFrom ggplot2 geom_segment
 #' @importFrom ggplot2 geom_smooth
+#' @importFrom ggplot2 geom_density
 #' @importFrom ggplot2 guides
 #' @importFrom ggplot2 scale_x_discrete
 #' @importFrom ggplot2 guide_axis
 #' @importFrom ggplot2 guide_legend
 #' @importFrom ggplot2 margin
 #' @importFrom ggplot2 geom_label
+#' @importFrom ggplot2 waiver
 #'
 #' @importFrom ggwordcloud geom_text_wordcloud
 #' @importFrom ggwordcloud geom_text_wordcloud_area

@@ -32,9 +32,9 @@
 #' @param label_variable variable storing the gene/object names.
 #' @param label_type type of the gene/object label: 'label' (default)
 #' or plain 'text'.
-#' @param txt_size size of the gene/object name text.
-#' @param txt_color gene/object name text color.
-#' @param txt_face face of the gene/object name text.
+#' @param txt_size size of the gene/object text.
+#' @param txt_color gene/object text color.
+#' @param txt_face face of the gene/object text.
 #' @param fill_title title of the point fill legend.
 #' @param plot_title plot title.
 #' @param plot_subtitle plot subtitle.
@@ -332,7 +332,7 @@
 
     }
 
-    if(!any(class(cust_theme) != 'theme')) {
+    if(!inherits(cust_theme, "theme")) {
 
       stop('Please provide a valid ggplot theme object.', call. = FALSE)
 
@@ -412,14 +412,17 @@
 
   }
 
-# General Forest plot ------
+# General Forest and dot plot ------
 
 #' Draw regulation statistics for selected genes.
 #'
 #' @description
-#' Draws a Forest plot with the regulation estimates and,
+#' Functions `plot_forest()` and `plot_top()` draws Forest plots
+#' with the regulation estimates and,
 #' optionally confidence intervals for all items presented in a data frame
-#' (`plot_forest`) or top up- and downregulated features (`plot_top`).
+#' (`plot_forest()`) or top up- and downregulated features (`plot_top()`).
+#' Function `plot_dot()` draws a dot plot: point size codes for negative
+#' log10-transformed p value.
 #'
 #' @param data a data frame.
 #' @param regulation_variable name of the variable storing the regulation/effect
@@ -432,9 +435,13 @@
 #' @param lower_ci_variable variable storing the lower CI values.
 #' @param upper_ci_variable variable storing the upper CI values.
 #' @param top_regulated top n regulated genes/objects to be presented in the plot.
+#' If `NULL`, all features are presented.
 #' @param fill_scale regulation colors, a vector of three elements: for
 #' upregulated, downregulated and non-significant items, respectively.
 #' @param x_lab x axis title.
+#' @param y_lab Y axis title.
+#' @param size_title title of the size scale.
+#' @param max_size maximal size of the data point.
 #' @param fill_title title of the point fill legend.
 #' @param plot_title plot title.
 #' @param plot_subtitle plot subtitle.
@@ -448,7 +455,7 @@
 #' @param txt_hjust horizontal justification of the text label.
 #' @param txt_vjust vertical justification of the text label.
 #'
-#' @return a ggplot object.
+#' @return a `ggplot` object.
 #'
 #' @export
 
@@ -491,7 +498,7 @@
 
     }
 
-    if(!any(class(cust_theme) != 'theme')) {
+    if(!inherits(cust_theme, 'theme')) {
 
       stop('Please provide a valid ggplot theme object.', call. = FALSE)
 
@@ -672,7 +679,7 @@
 
     }
 
-    if(!any(class(cust_theme) != 'theme')) {
+    if(!inherits(cust_theme, 'theme')) {
 
       stop('Please provide a valid ggplot theme object.', call. = FALSE)
 
@@ -758,6 +765,143 @@
                 txt_size = txt_size,
                 txt_hjust = txt_hjust,
                 txt_vjust = txt_vjust)
+
+  }
+
+#' @rdname plot_forest
+#' @export
+
+  plot_dot <- function(data,
+                       regulation_variable,
+                       label_variable,
+                       p_variable,
+                       signif_level = 0.05,
+                       regulation_level = 0,
+                       top_regulated = NULL,
+                       fill_scale = regulation_colors(),
+                       fill_title = "",
+                       plot_title = NULL,
+                       plot_subtitle = NULL,
+                       plot_tag = NULL,
+                       x_lab = "Regulation",
+                       y_lab = "Feature",
+                       size_title = expression("-log"[10] * "p value"),
+                       max_size = 4.5,
+                       cust_theme = theme_micro(),
+                       signif_digits = 2,
+                       show_txt = FALSE,
+                       txt_size = 2.75,
+                       txt_hjust = -0.8,
+                       txt_vjust = 0.5) {
+
+    ## entry control -------
+
+    if(!is.data.frame(data)) {
+
+      stop("Please provide a data frame as data.", call. = FALSE)
+
+    }
+
+    if(any(!c(regulation_variable,
+              label_variable,
+              p_variable) %in% names(data))) {
+
+      stop("Regulation, label, or p variable absent from the data.",
+           call. = FALSE)
+
+    }
+
+    if(!inherits(cust_theme, "theme")) {
+
+      stop("Please provide a valid ggplot theme object.", call. = FALSE)
+
+    }
+
+    stopifnot(is.logical(show_txt))
+    stopifnot(is.numeric(signif_level))
+    stopifnot(is.numeric(regulation_level))
+    stopifnot(is.numeric(txt_size))
+    stopifnot(is.numeric(txt_hjust))
+    stopifnot(is.numeric(txt_vjust))
+    stopifnot(is.numeric(max_size))
+
+    stopifnot(is.numeric(data[[regulation_variable]]))
+    stopifnot(is.numeric(data[[p_variable]]))
+
+    ## plotting data ---------
+
+    reg_sign <- NULL
+    p_transf <- NULL
+    significant <- NULL
+    regulation <- NULL
+
+    plot_tbl <-
+      mutate(data,
+             significant = ifelse(.data[[p_variable]] < signif_level,
+                                  "yes", "no"),
+             regulation = ifelse(significant == "no",
+                                 "ns",
+                                 ifelse(.data[[regulation_variable]] > regulation_level,
+                                        "upregulated",
+                                        ifelse(.data[[regulation_variable]] < -regulation_level,
+                                               "downregulated", "ns"))),
+             regulation = factor(regulation, c("upregulated",
+                                               "downregulated",
+                                               "ns")),
+             reg_sign = ifelse(.data[[regulation_variable]] > 0,
+                               "up", "down"),
+             reg_sign = factor(reg_sign, c("up", "down")),
+             p_transf = -log10(.data[[p_variable]]))
+
+    if(!is.null(top_regulated)) {
+
+      top_regulated <- as.integer(top_regulated)
+
+      plot_tbl <- group_by(plot_tbl, reg_sign)
+
+      plot_tbl <- slice_max(plot_tbl,
+                            abs(.data[[regulation_variable]]),
+                            n = top_regulated)
+
+      plot_tbl <- ungroup(plot_tbl)
+
+    }
+
+    ## the plot --------
+
+    dot_plot <-
+      ggplot(plot_tbl,
+             aes(x = .data[[regulation_variable]],
+                 y = reorder(.data[[label_variable]],
+                             .data[[regulation_variable]]),
+                 fill = regulation,
+                 size = p_transf)) +
+      geom_point(shape = 21) +
+      geom_vline(xintercept = 0,
+                 linetype = "dashed") +
+      scale_fill_manual(values = fill_scale,
+                        name = fill_title) +
+      scale_color_manual(values = fill_scale,
+                        name = fill_title) +
+      scale_size_area(max_size = max_size,
+                      labels = function(x) signif(10^-x, 2),
+                      name = size_title) +
+      cust_theme +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           tag = plot_tag,
+           x = x_lab,
+           y = y_lab)
+
+    if(!show_txt) return(dot_plot)
+
+    dot_plot +
+      geom_text(aes(color = regulation,
+                    label = signif(.data[[regulation_variable]],
+                                   signif_digits)),
+                size = txt_size,
+                hjust = txt_hjust,
+                vjust = txt_vjust)
 
   }
 
@@ -2385,6 +2529,270 @@
     }
 
     euler_plot
+
+  }
+
+# Plots of density of estimates ----------
+
+#' Draw regulation statistics for selected genes.
+#'
+#' @description
+#' Function `plot_density()` draws density of regulation estimates:
+#' in the whole data set or in groups defined by a variable.
+#'
+#' @inheritParams plot_forest
+#' @param group_variable a variable which defines groups, in which the estimate
+#' density will be plotted. If provided, the plot is faceted by levels of this
+#' variable. If `group_variable = NULL`, the density in the whole data set is
+#' plotted.
+#' @param fill_color fill color for the density shapes. Ignored if
+#' `group_variable` is provided.
+#' @param fill_scale colors for the fill scale corresponding to
+#' levels of `group_variable`.
+#' @param fill_labels labels for the fill scale.
+#' @param shape_alpha alpha/opacity of the density shapes.
+#' @param show_points logical, should data points be displayed in the plot?
+#' @param point_size size of the data points.
+#' @param point_alpha alpha/opacity of the data points.
+#' @param point_hjitter height of jittering of the data points.
+#' @param point_wjitter width of jittering of the data points.
+#' @param show_txt logical, should data points for features with the most
+#' extreme regulation be labeled?
+#' @param top_regulated top n regulated features to be presented in the plot.
+#' @param txt_size size of the text.
+#' @param txt_color color of the text. If `NULL`, the text color corresponds to
+#' levels of the grouping variable.
+#' @param txt_face font face of the text.
+#' @param ... additional arguments passed to \code{\link[ggplot2]{geom_density}}.
+#'
+#' @return a `ggplot` object.
+#'
+#' @export
+
+  plot_density <- function(data,
+                           regulation_variable,
+                           label_variable,
+                           group_variable = NULL,
+                           fill_color = "steelblue",
+                           fill_scale = NULL,
+                           fill_labels = waiver(),
+                           fill_title = "",
+                           plot_title = NULL,
+                           plot_subtitle = NULL,
+                           plot_tag = NULL,
+                           x_lab = "Regulation",
+                           y_lab = "Feature density",
+                           cust_theme = theme_micro(),
+                           shape_alpha = 1,
+                           show_points = FALSE,
+                           point_size = 2,
+                           point_alpha = 1,
+                           point_hjitter = 0.1,
+                           point_wjitter = 0.0,
+                           show_txt = FALSE,
+                           top_regulated = 5,
+                           txt_size = 2.5,
+                           txt_color = NULL,
+                           txt_face = "plain", ...) {
+
+    ## entry control -------
+
+    if(!is.data.frame(data)) {
+
+      stop("Please provide a data frame as data.", call. = FALSE)
+
+    }
+
+    if(any(!c(regulation_variable,
+              label_variable) %in% names(data))) {
+
+      stop("Regulation, label, or p variable absent from the data.",
+           call. = FALSE)
+
+    }
+
+    if(!inherits(cust_theme, "theme")) {
+
+      stop("Please provide a valid ggplot theme object.", call. = FALSE)
+
+    }
+
+    stopifnot(is.numeric(data[[regulation_variable]]))
+
+    if(!is.null(group_variable)) {
+
+      if(!group_variable %in% names(data)) {
+
+        stop("'group_variable' is absent from 'data'.", call. = FALSE)
+
+      }
+
+    }
+
+    stopifnot(is.numeric(shape_alpha))
+    stopifnot(is.logical(show_points))
+    stopifnot(is.numeric(point_size))
+    stopifnot(is.numeric(point_hjitter))
+    stopifnot(is.numeric(point_wjitter))
+    stopifnot(is.logical(show_txt))
+    stopifnot(is.numeric(top_regulated))
+
+    top_regulated <- as.integer(top_regulated[1])
+
+    stopifnot(is.numeric(txt_size))
+
+    if(is.null(txt_color) & is.null(group_variable)) txt_color <- "black"
+
+    ## the plotting data ---------
+
+    reg_sign <- NULL
+    top_label <- NULL
+    x_point <- NULL
+    y_point <- NULL
+
+    data <- mutate(data,
+                   reg_sign = ifelse(.data[[regulation_variable]] < 0,
+                                     "down", "up"))
+
+    if(is.null(group_variable)) {
+
+      data <- group_by(data, reg_sign)
+
+    } else {
+
+      data <- group_by(data, .data[[group_variable]], reg_sign)
+
+    }
+
+    top_features <- slice_max(data,
+                              abs(.data[[regulation_variable]]),
+                              n = top_regulated)
+
+    top_features <- top_features[[label_variable]]
+
+    data <- ungroup(data)
+
+    data <- mutate(data,
+                   top_label = ifelse(.data[[label_variable]] %in% top_features,
+                                      .data[[label_variable]], NA),
+                   x_point = .data[[regulation_variable]] +
+                     rnorm(nrow(data), sd = point_wjitter),
+                   y_point = rnorm(nrow(data), sd = point_hjitter))
+
+    ## the bare plot -------
+
+    if(is.null(group_variable)) {
+
+      dens_plot <- ggplot(data,
+                          aes(x = .data[[regulation_variable]])) +
+        geom_density(color = "black",
+                     fill = fill_color,
+                     alpha = shape_alpha, ...)
+
+    } else {
+
+      facet_formula <- paste0("reorder(", group_variable,
+                              ", -", regulation_variable,
+                              ", FUN = median) ~ .")
+
+      facet_formula <- as.formula(facet_formula)
+
+      dens_plot <- ggplot(data,
+                          aes(x = .data[[regulation_variable]],
+                              fill = .data[[group_variable]])) +
+        facet_grid(facet_formula,
+                   scales = "free") +
+        geom_density(color = "black",
+                     alpha = shape_alpha, ...)
+
+      if(!is.null(fill_scale)) {
+
+        dens_plot <- dens_plot +
+          scale_fill_manual(values = fill_scale,
+                            labels = fill_labels,
+                            name = fill_title)
+
+      }
+
+    }
+
+    ## optional data points and text annotations --------
+
+    if(show_points) {
+
+      dens_plot <- dens_plot +
+        geom_point(aes(y = y_point,
+                       x = x_point),
+                   shape = 21,
+                   size = point_size,
+                   alpha = point_alpha,
+                   show.legend = FALSE)
+
+      if(show_txt) {
+
+        if(is.null(group_variable)) {
+
+          dens_plot <- dens_plot +
+            geom_text_repel(aes(label = top_label,
+                                x = x_point,
+                                y = y_point),
+                            size = txt_size,
+                            color = txt_color,
+                            show.legend = FALSE)
+
+        } else {
+
+          if(is.null(txt_color)) {
+
+            dens_plot <- dens_plot +
+              geom_text_repel(aes(label = top_label,
+                                  x = x_point,
+                                  y = y_point,
+                                  color = .data[[group_variable]]),
+                              size = txt_size,
+                              show.legend = FALSE)
+
+            if(!is.null(fill_scale)) {
+
+              dens_plot <- dens_plot +
+                scale_color_manual(values = fill_scale,
+                                   labels = fill_labels,
+                                   name = fill_title)
+
+            }
+
+          } else {
+
+            dens_plot <- dens_plot +
+              geom_text_repel(aes(label = top_label,
+                                  x = x_point,
+                                  y = y_point),
+                              size = txt_size,
+                              color = txt_color,
+                              show.legend = FALSE)
+
+          }
+
+        }
+
+      }
+
+    }
+
+    ## the ouput plot ----------
+
+    dens_plot +
+      geom_vline(xintercept = 0,
+                 linetype = "dashed") +
+      guides(fill = guide_legend(override.aes = list(alpha = 1))) +
+      cust_theme  +
+      theme(strip.background.y = element_blank(),
+            strip.text.y = element_blank()) +
+      labs(title = plot_title,
+           subtitle = plot_subtitle,
+           tag = plot_tag,
+           x = x_lab,
+           y = y_lab)
 
   }
 

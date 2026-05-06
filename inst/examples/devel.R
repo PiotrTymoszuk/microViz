@@ -18,7 +18,11 @@
                                lower.tail = TRUE),
            p_value = p_value + sample(seq(0, 0.05, by = 1e-6), 500),
            lower_conf = estimate + qnorm(0.025),
-           upper_conf = estimate + qnorm(0.975))
+           upper_conf = estimate + qnorm(0.975),
+           gene_group = sample(c("A", "B", "C", "D"),
+                               size = 500,
+                               replace = TRUE),
+           gene_group = factor(gene_group))
 
   ## normal-like continuous expression data
 
@@ -117,6 +121,37 @@
                                label_variable = 'gene_name',
                                top_significant = 20,
                                signif_level = 0.05)
+
+# dot plot of regulation estimates and p values --------
+
+  test_dot <- plot_dot(data = test_data,
+                       p_variable = "p_value",
+                       label_variable = "gene_name",
+                       regulation_variable = "estimate",
+                       top_regulated = 20,
+                       plot_title = "Top regulated genes",
+                       show_txt = TRUE)
+
+# density plot of regulation estimates ------
+
+  test_density <- plot_density(data = test_data,
+                               regulation_variable = "estimate",
+                               label_variable = "gene_name",
+                               group_variable = "gene_group",
+                               fill_scale = c("darkolivegreen",
+                                              "steelblue",
+                                              "orangered3",
+                                              "purple3"),
+                               fill_labels = function(x) paste("Group", x),
+                               shape_alpha = 0.5,
+                               show_points = TRUE,
+                               point_alpha = 0.75,
+                               point_hjitter = 0.01,
+                               show_txt = TRUE,
+                               txt_size = 2.9,
+                               txt_color = "black",
+                               plot_title = "Gene regulation in the groups",
+                               kernel = "rectangular")
 
 # Euler plots -------
 

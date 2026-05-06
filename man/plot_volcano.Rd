@@ -63,11 +63,11 @@ the plot with their names. Ignored if \code{top_significant} is provided.}
 \item{label_type}{type of the gene/object label: 'label' (default)
 or plain 'text'.}
 
-\item{txt_size}{size of the gene/object name text.}
+\item{txt_size}{size of the gene/object text.}
 
-\item{txt_color}{gene/object name text color.}
+\item{txt_color}{gene/object text color.}
 
-\item{txt_face}{face of the gene/object name text.}
+\item{txt_face}{face of the gene/object text.}
 
 \item{fill_title}{title of the point fill legend.}
 

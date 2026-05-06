@@ -3,6 +3,7 @@
 \name{plot_forest}
 \alias{plot_forest}
 \alias{plot_top}
+\alias{plot_dot}
 \title{Draw regulation statistics for selected genes.}
 \usage{
 plot_forest(
@@ -53,6 +54,31 @@ plot_top(
   txt_hjust = 0.5,
   txt_vjust = -0.8
 )
+
+plot_dot(
+  data,
+  regulation_variable,
+  label_variable,
+  p_variable,
+  signif_level = 0.05,
+  regulation_level = 0,
+  top_regulated = NULL,
+  fill_scale = regulation_colors(),
+  fill_title = "",
+  plot_title = NULL,
+  plot_subtitle = NULL,
+  plot_tag = NULL,
+  x_lab = "Regulation",
+  y_lab = "Feature",
+  size_title = expression("-log"[10] * "p value"),
+  max_size = 4.5,
+  cust_theme = theme_micro(),
+  signif_digits = 2,
+  show_txt = FALSE,
+  txt_size = 2.75,
+  txt_hjust = -0.8,
+  txt_vjust = 0.5
+)
 }
 \arguments{
 \item{data}{a data frame.}
@@ -101,13 +127,23 @@ displayed numeric variables.}
 
 \item{txt_vjust}{vertical justification of the text label.}
 
-\item{top_regulated}{top n regulated genes/objects to be presented in the plot.}
+\item{top_regulated}{top n regulated genes/objects to be presented in the plot.
+If \code{NULL}, all features are presented.}
+
+\item{y_lab}{Y axis title.}
+
+\item{size_title}{title of the size scale.}
+
+\item{max_size}{maximal size of the data point.}
 }
 \value{
-a ggplot object.
+a \code{ggplot} object.
 }
 \description{
-Draws a Forest plot with the regulation estimates and,
+Functions \code{plot_forest()} and \code{plot_top()} draws Forest plots
+with the regulation estimates and,
 optionally confidence intervals for all items presented in a data frame
-(\code{plot_forest}) or top up- and downregulated features (\code{plot_top}).
+(\code{plot_forest()}) or top up- and downregulated features (\code{plot_top()}).
+Function \code{plot_dot()} draws a dot plot: point size codes for negative
+log10-transformed p value.
 }
