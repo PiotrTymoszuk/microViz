@@ -360,7 +360,7 @@
 
     if(nrow(dupl_annot) == 0) {
 
-      data <- data[annotation$probe_id, ]
+      data <- data[annotation$probe_id, , drop = FALSE]
 
       rownames(data) <- annotation$gene_symbol
 
