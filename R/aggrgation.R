@@ -366,7 +366,7 @@
 
     } else {
 
-      agg_data <- aggRows(x = data[dupl_annot$probe_id, ],
+      agg_data <- aggRows(x = data[dupl_annot$probe_id, , drop = FALSE],
                           f = dupl_annot$gene_symbol,
                           fun = fun,
                           na.rm = TRUE, ...)
@@ -377,7 +377,7 @@
 
       } else {
 
-        single_data <- data[single_annot$probe_id, ]
+        single_data <- data[single_annot$probe_id, , drop = FALSE]
 
         rownames(single_data) <- single_annot$gene_symbol
 
