@@ -27,7 +27,8 @@ plot_forest(
   show_ci_txt = FALSE,
   txt_size = 2.75,
   txt_hjust = 0.5,
-  txt_vjust = -0.8
+  txt_vjust = -0.8,
+  show_vline = TRUE
 )
 
 plot_top(
@@ -52,7 +53,8 @@ plot_top(
   show_ci_txt = FALSE,
   txt_size = 2.75,
   txt_hjust = 0.5,
-  txt_vjust = -0.8
+  txt_vjust = -0.8,
+  show_vline = TRUE
 )
 
 plot_dot(
@@ -77,7 +79,8 @@ plot_dot(
   show_txt = FALSE,
   txt_size = 2.75,
   txt_hjust = -0.8,
-  txt_vjust = 0.5
+  txt_vjust = 0.5,
+  show_vline = TRUE
 )
 }
 \arguments{
@@ -126,6 +129,9 @@ displayed numeric variables.}
 \item{txt_hjust}{horizontal justification of the text label.}
 
 \item{txt_vjust}{vertical justification of the text label.}
+
+\item{show_vline}{logical: should a dashed vertical line indicating the zero
+effect be added to the plot? Default is \code{TRUE}.}
 
 \item{top_regulated}{top n regulated genes/objects to be presented in the plot.
 If \code{NULL}, all features are presented.}

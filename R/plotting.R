@@ -454,6 +454,8 @@
 #' @param txt_size text size.
 #' @param txt_hjust horizontal justification of the text label.
 #' @param txt_vjust vertical justification of the text label.
+#' @param show_vline logical: should a dashed vertical line indicating the zero
+#' effect be added to the plot? Default is `TRUE`.
 #'
 #' @return a `ggplot` object.
 #'
@@ -479,7 +481,8 @@
                           show_ci_txt = FALSE,
                           txt_size = 2.75,
                           txt_hjust = 0.5,
-                          txt_vjust = -0.8) {
+                          txt_vjust = -0.8,
+                          show_vline = TRUE) {
 
     ## entry control -------
 
@@ -511,6 +514,7 @@
     stopifnot(is.numeric(txt_size))
     stopifnot(is.numeric(txt_hjust))
     stopifnot(is.numeric(txt_vjust))
+    stopifnot(is.logical(show_vline))
 
     if(!is.null(lower_ci_variable)) {
 
@@ -581,9 +585,15 @@
       labs(title = plot_title,
            subtitle = plot_subtitle,
            tag = plot_tag,
-           x = x_lab) +
-      geom_vline(xintercept = 0,
-                 linetype = 'dashed')
+           x = x_lab)
+
+    if(show_vline) {
+
+      forest <- forest +
+        geom_vline(xintercept = 0,
+                   linetype = 'dashed')
+
+    }
 
     if(!is.null(lower_ci_variable) & !is.null(upper_ci_variable)) {
 
@@ -660,7 +670,8 @@
                        show_ci_txt = FALSE,
                        txt_size = 2.75,
                        txt_hjust = 0.5,
-                       txt_vjust = -0.8) {
+                       txt_vjust = -0.8,
+                       show_vline = TRUE) {
 
     ## entry control -------
 
@@ -692,6 +703,7 @@
     stopifnot(is.numeric(txt_size))
     stopifnot(is.numeric(txt_hjust))
     stopifnot(is.numeric(txt_vjust))
+    stopifnot(is.logical(show_vline))
 
     if(!is.null(lower_ci_variable)) {
 
@@ -764,7 +776,8 @@
                 show_ci_txt = show_ci_txt,
                 txt_size = txt_size,
                 txt_hjust = txt_hjust,
-                txt_vjust = txt_vjust)
+                txt_vjust = txt_vjust,
+                show_vline = show_vline)
 
   }
 
@@ -792,7 +805,8 @@
                        show_txt = FALSE,
                        txt_size = 2.75,
                        txt_hjust = -0.8,
-                       txt_vjust = 0.5) {
+                       txt_vjust = 0.5,
+                       show_vline = TRUE) {
 
     ## entry control -------
 
@@ -824,6 +838,7 @@
     stopifnot(is.numeric(txt_hjust))
     stopifnot(is.numeric(txt_vjust))
     stopifnot(is.numeric(max_size))
+    stopifnot(is.logical(show_vline))
 
     stopifnot(is.numeric(data[[regulation_variable]]))
     stopifnot(is.numeric(data[[p_variable]]))
@@ -877,8 +892,6 @@
                  fill = regulation,
                  size = p_transf)) +
       geom_point(shape = 21) +
-      geom_vline(xintercept = 0,
-                 linetype = "dashed") +
       scale_fill_manual(values = fill_scale,
                         name = fill_title) +
       scale_color_manual(values = fill_scale,
@@ -892,6 +905,14 @@
            tag = plot_tag,
            x = x_lab,
            y = y_lab)
+
+    if(show_vline) {
+
+      dot_plot <- dot_plot +
+        geom_vline(xintercept = 0,
+                   linetype = "dashed")
+
+    }
 
     if(!show_txt) return(dot_plot)
 
@@ -1233,6 +1254,8 @@
 #' @param color_scale a character vector of length 3, which defines the lower,
 #' middle and upper point of the color scale.
 #' @param midpoint optional, the middle point of the fill scale.
+#' @param n_facets logical, should numbers of observations be presented in
+#' plot facets? Default is `FALSE`.
 #' @param ... additional arguments passed to
 #' \code{\link[ggplot2]{scale_fill_gradient2}} (`heat_map()`), or additional
 #' arguments passed to `heat_map()` (`common_heat_map()`).
@@ -1259,7 +1282,8 @@
                        hide_x_axis_text = FALSE,
                        cust_theme = theme_micro(),
                        color_scale = c('steelblue', 'black', 'firebrick'),
-                       midpoint = NULL, ...) {
+                       midpoint = NULL,
+                       n_facets = FALSE, ...) {
 
     ## input control ---------
 
@@ -1295,6 +1319,7 @@
     }
 
     stopifnot(is.logical(normalize))
+    stopifnot(is.logical(n_facets))
 
     norm_center <- match.arg(norm_center[1],
                              c('mean', 'median', 'geo_mean', 'harm_mean'))
@@ -1351,15 +1376,14 @@
     data <- mutate(data[c(split_fct, variables)],
                    observation = paste0('obs_', 1:nrow(data)))
 
+
+    n_numbers <- count(data, .data[[split_fct]])
+
     if(is.null(plot_subtitle)) {
 
-      n_numbers <- count(data, .data[[split_fct]])
-
-      plot_subtitle <-
-        map2_chr(n_numbers[[1]], n_numbers[[2]],
-                 paste, sep = ': n = ')
-
-      plot_subtitle <- paste(plot_subtitle, collapse = ', ')
+      plot_subtitle <- paste(map2_chr(n_numbers[[1]], n_numbers[[2]],
+                                      paste, sep = ': n = '),
+                             collapse = ', ')
 
     }
 
@@ -1410,6 +1434,23 @@
 
     }
 
+    if(!n_facets) {
+
+      cust_labeller <- "label_value"
+
+    } else {
+
+      n_labels <- map2_chr(n_numbers[[1]], n_numbers[[2]],
+                           paste, sep = '\nn = ')
+
+      n_labels <- set_names(n_labels, n_numbers[[1]])
+
+      cust_labeller <-
+        labeller(.rows = identity,
+                 .cols = n_labels)
+
+    }
+
     hm_plot <-
       ggplot(data,
              aes(x = observation,
@@ -1418,7 +1459,8 @@
       geom_tile() +
       facet_grid(facet_formula,
                  scales = 'free',
-                 space = 'free') +
+                 space = 'free',
+                 labeller = cust_labeller) +
       scale_fill_gradient2(low = color_scale[[1]],
                            mid = color_scale[[2]],
                            high = color_scale[[3]],

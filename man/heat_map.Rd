@@ -24,6 +24,7 @@ heat_map(
   cust_theme = theme_micro(),
   color_scale = c("steelblue", "black", "firebrick"),
   midpoint = NULL,
+  n_facets = FALSE,
   ...
 )
 
@@ -100,6 +101,9 @@ in the data set subsets will be displayed here.}
 middle and upper point of the color scale.}
 
 \item{midpoint}{optional, the middle point of the fill scale.}
+
+\item{n_facets}{logical, should numbers of observations be presented in
+plot facets? Default is \code{FALSE}.}
 
 \item{...}{additional arguments passed to
 \code{\link[ggplot2]{scale_fill_gradient2}} (\code{heat_map()}), or additional

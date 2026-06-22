@@ -368,7 +368,8 @@
            oob = scales::squish,
            hide_x_axis_text = TRUE,
            facet = TRUE,
-           plot_title = 'Histology-specific genes') +
+           plot_title = 'Histology-specific genes',
+           n_facets = TRUE) +
     guides(y = guide_axis(n.dodge = 2))
 
   histo_data <- histo_data %>%

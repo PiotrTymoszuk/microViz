@@ -47,6 +47,7 @@
 #' @importFrom ggplot2 margin
 #' @importFrom ggplot2 geom_label
 #' @importFrom ggplot2 waiver
+#' @importFrom ggplot2 labeller
 #'
 #' @importFrom ggwordcloud geom_text_wordcloud
 #' @importFrom ggwordcloud geom_text_wordcloud_area
