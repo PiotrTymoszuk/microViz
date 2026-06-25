@@ -29,7 +29,8 @@ plot_volcano(
   point_hjitter = 0,
   point_wjitter = 0,
   show_hline = TRUE,
-  show_vlines = c("both", "right", "left")
+  show_vlines = c("both", "right", "left"),
+  show_zero_vline = TRUE
 )
 }
 \arguments{
@@ -91,6 +92,9 @@ significance cutoff be presented in the plot?}
 
 \item{show_vlines}{specifies which vertical lines representing the regulation
 cutoffs will be plotted.}
+
+\item{show_zero_vline}{logical, should a vertical dashed line with zero
+intercept be displayed in the plot?}
 }
 \value{
 a \code{ggplot} object.

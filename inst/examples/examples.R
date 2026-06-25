@@ -249,6 +249,17 @@
                x_lab = "Effect size of regulation, Cohen's d, ER- vs ER+",
                plot_title = "Differential gene expression, ER status")
 
+  plot_volcano(data = er_dge,
+               regulation_variable = 'cohen_d',
+               p_variable = 'p_adjusted',
+               signif_level = 0.05,
+               regulation_level = 0,
+               top_regulated = 10,
+               label_variable = 'variable',
+               x_lab = "Effect size of regulation, Cohen's d, ER- vs ER+",
+               plot_title = "Differential gene expression, ER status",
+               show_zero_vline = FALSE)
+
   ## volcano plot: regulation and significance
 
   plot_volcano(data = er_dge,
