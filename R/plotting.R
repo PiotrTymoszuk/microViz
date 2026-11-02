@@ -2789,6 +2789,7 @@
                                 y = y_point),
                             size = txt_size,
                             color = txt_color,
+                            fontface = txt_face,
                             show.legend = FALSE)
 
         } else {
@@ -2801,6 +2802,7 @@
                                   y = y_point,
                                   color = .data[[group_variable]]),
                               size = txt_size,
+                              fontface = txt_face,
                               show.legend = FALSE)
 
             if(!is.null(fill_scale)) {
@@ -2820,6 +2822,7 @@
                                   y = y_point),
                               size = txt_size,
                               color = txt_color,
+                              fontface = txt_face,
                               show.legend = FALSE)
 
           }
